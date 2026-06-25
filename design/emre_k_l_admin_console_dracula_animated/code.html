@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Emre Kılıç | Admin Console</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#0f1223",
+                        "inverse-surface": "#dfe1f9",
+                        "on-tertiary-fixed": "#3c0029",
+                        "on-tertiary": "#620044",
+                        "outline-variant": "#4a4451",
+                        "secondary-container": "#008092",
+                        "inverse-on-surface": "#2c2f41",
+                        "error-container": "#93000a",
+                        "surface-container-lowest": "#0a0d1d",
+                        "surface-bright": "#35384a",
+                        "tertiary": "#ffafd7",
+                        "primary-container": "#bd93f9",
+                        "tertiary-fixed": "#ffd8e9",
+                        "secondary-fixed": "#a3eeff",
+                        "on-secondary": "#00363e",
+                        "error": "#ffb4ab",
+                        "on-background": "#dfe1f9",
+                        "surface-container-low": "#171b2b",
+                        "on-primary-container": "#4e2484",
+                        "inverse-primary": "#714aaa",
+                        "on-tertiary-container": "#770054",
+                        "on-tertiary-fixed-variant": "#860f60",
+                        "primary": "#d7baff",
+                        "on-secondary-fixed": "#001f25",
+                        "tertiary-container": "#fe78c5",
+                        "secondary": "#75d4e8",
+                        "surface-container-highest": "#313446",
+                        "outline": "#968e9c",
+                        "on-secondary-container": "#f8fdff",
+                        "on-primary": "#411478",
+                        "on-surface": "#dfe1f9",
+                        "surface-variant": "#313446",
+                        "on-surface-variant": "#ccc3d3",
+                        "on-secondary-fixed-variant": "#004e5a",
+                        "on-error": "#690005",
+                        "surface-tint": "#d7baff",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#eddcff",
+                        "tertiary-fixed-dim": "#ffafd7",
+                        "surface-container-high": "#26293b",
+                        "secondary-fixed-dim": "#75d4e8",
+                        "primary-fixed-dim": "#d7baff",
+                        "surface-container": "#1b1f30",
+                        "on-primary-fixed": "#290055",
+                        "surface-dim": "#0f1223",
+                        "surface": "#0f1223",
+                        "on-primary-fixed-variant": "#593090",
+                        "dracula-green": "#50fa7b",
+                        "dracula-orange": "#ffb86c",
+                        "dracula-pink": "#ff79c6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "32px",
+                        "max-width": "1440px",
+                        "gutter": "24px",
+                        "base": "8px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "code-md": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "label-caps": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "code-md": ["14px", {"lineHeight": "22px", "fontWeight": "450"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scanline-effect::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(189, 147, 249, 0.05), transparent);
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 15px rgba(189, 147, 249, 0.4);
+        }
+        @keyframes typing-scroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-33.33%); }
+        }
+        .console-streaming {
+            animation: typing-scroll 15s linear infinite;
+        }
+        .pulse-status {
+            animation: pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .6; transform: scale(0.98); }
+        }
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.02); filter: brightness(1.2); }
+        }
+        .breathe-effect {
+            animation: breathe 4s ease-in-out infinite;
+        }
+        @keyframes active-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(80, 250, 123, 0.2); border-color: rgba(80, 250, 123, 0.3); }
+            50% { box-shadow: 0 0 12px rgba(80, 250, 123, 0.6); border-color: rgba(80, 250, 123, 0.8); }
+        }
+        .badge-active-glow {
+            animation: active-glow 2s ease-in-out infinite;
+        }
+        .gauge-pulse {
+            animation: breathe 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary-container/30">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-desktop py-4 bg-background/80 backdrop-blur-md border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="font-code-md text-code-md font-bold text-secondary">System Monitor v1.0</span>
+<div class="flex items-center gap-2 bg-surface-container px-3 py-1 rounded-full border border-outline-variant">
+<div class="w-2 h-2 rounded-full bg-dracula-green pulse-status"></div>
+<span class="font-label-caps text-on-surface-variant">NODE_01: ONLINE</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center gap-4 bg-surface-container-low px-4 py-2 rounded-lg border border-outline-variant w-64">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">terminal</span>
+<input class="bg-transparent border-none focus:ring-0 text-code-sm font-code-md w-full placeholder:text-outline" placeholder="Execute command..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined cursor-pointer hover:text-secondary transition-colors">terminal</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-secondary transition-colors">settings</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-primary flex items-center justify-center overflow-hidden">
+<img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbaVFfk1YTLUZ7xasL2CQhhd0JLIfTSk1X9-gaM-Fc6NDnRNAd0iR8js8cdctDdWB6uRujM8AEJkLSpE4NUnQnaVgvfeuV1UAPo5s0z_VpZCf0gink_c8k0y_tW6YxeSd-TYDnh6neAvDOaYFQDqekfRIpNtXlf-AFWa15qfIGnPwfb8GuyTTBzHSMCgeDG6JbcP5j6ImFjbYPMEvULU9Tn8wnXMn1JI-P_b31VaEdcqtcSYhf5mo0fzrwsq-V1lrT1atCXrGXrUY"/>
+</div>
+</div>
+</div>
+</header>
+<!-- SideNavBar (Terminal-style) -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant pt-24 hidden md:flex flex-col">
+<div class="px-6 mb-8">
+<h2 class="font-code-md text-code-md text-primary font-bold">Root@Portfolio</h2>
+<p class="font-code-sm text-on-surface-variant opacity-70">Backend Architect</p>
+</div>
+<nav class="flex-grow flex flex-col">
+<a class="flex items-center gap-3 px-6 py-4 text-on-surface-variant hover:bg-surface-variant transition-all duration-200 border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-code-md">Home</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-4 text-on-surface-variant hover:bg-surface-variant transition-all duration-200 border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined">code</span>
+<span class="font-code-md">Tech Stack</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-4 text-on-surface-variant hover:bg-surface-variant transition-all duration-200 border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-code-md">Projects</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-4 bg-surface-container-highest text-primary font-bold border-l-4 border-primary" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-code-md">Admin Console</span>
+</a>
+</nav>
+<div class="mt-auto p-6 border-t border-outline-variant space-y-4">
+<div class="flex items-center justify-between text-xs font-code-md text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">list_alt</span>
+<span>Logs</span>
+</div>
+<span class="text-dracula-green pulse-status">Active</span>
+</div>
+<div class="flex items-center justify-between text-xs font-code-md text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">lan</span>
+<span>Network</span>
+</div>
+<span class="text-dracula-orange">124ms</span>
+</div>
+<button class="w-full py-2 bg-surface-container-highest border border-outline-variant text-secondary font-code-md text-sm rounded hover:bg-secondary hover:text-background transition-colors active:scale-95">
+            System Reboot
+        </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 pt-24 pb-48 px-6 md:px-margin-desktop max-w-max-width mx-auto">
+<!-- Dashboard Overview Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface mb-2">Admin Dashboard</h1>
+<p class="text-on-surface-variant">Real-time system health and deployment control.</p>
+</div>
+<button class="px-6 py-3 bg-gradient-to-r from-dracula-pink to-primary-container text-on-primary-container font-bold rounded-lg glow-hover transition-all active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined">rocket_launch</span>
+            Deploy Update
+        </button>
+</div>
+<!-- Metrics Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+<!-- CPU Metric Card -->
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30 scanline-effect relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-on-surface-variant">CPU UTILIZATION</span>
+<span class="material-symbols-outlined text-primary" data-icon="memory">memory</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<span class="text-4xl font-bold text-on-surface">42<span class="text-lg opacity-50">%</span></span>
+<p class="text-xs text-dracula-green mt-1">Normal Range</p>
+</div>
+<div class="relative w-20 h-20 gauge-pulse">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-highest" cx="40" cy="40" fill="transparent" r="34" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-primary drop-shadow-[0_0_8px_rgba(189,147,249,0.6)]" cx="40" cy="40" fill="transparent" r="34" stroke="currentColor" stroke-dasharray="213" stroke-dashoffset="123" stroke-width="4"></circle>
+</svg>
+</div>
+</div>
+</div>
+<!-- RAM Metric Card -->
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30 scanline-effect relative overflow-hidden">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-on-surface-variant">RAM USAGE</span>
+<span class="material-symbols-outlined text-secondary" data-icon="speed">speed</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<span class="text-4xl font-bold text-on-surface">8.4<span class="text-lg opacity-50">GB</span></span>
+<p class="text-xs text-on-surface-variant mt-1">Total: 16GB</p>
+</div>
+<div class="relative w-20 h-20 gauge-pulse" style="animation-delay: 1.5s">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-highest" cx="40" cy="40" fill="transparent" r="34" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-secondary drop-shadow-[0_0_8px_rgba(117,212,232,0.6)]" cx="40" cy="40" fill="transparent" r="34" stroke="currentColor" stroke-dasharray="213" stroke-dashoffset="100" stroke-width="4"></circle>
+</svg>
+</div>
+</div>
+</div>
+<!-- Uptime Metric Card -->
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30 scanline-effect relative overflow-hidden">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-on-surface-variant">UPTIME</span>
+<span class="material-symbols-outlined text-dracula-green" data-icon="schedule">schedule</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<span class="text-4xl font-bold text-on-surface">14d <span class="text-lg opacity-50">6h</span></span>
+<p class="text-xs text-dracula-green mt-1">SLA: 99.9%</p>
+</div>
+<div class="flex flex-col gap-1 w-20">
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-dracula-green w-[99%] shadow-[0_0_10px_#50fa7b] pulse-status"></div>
+</div>
+<span class="text-[10px] font-code-md text-right opacity-60">STABLE</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Project Registry Table -->
+<section class="bg-surface-container-low rounded-xl border border-outline-variant/30 overflow-hidden">
+<div class="px-6 py-4 border-b border-outline-variant/30 flex items-center justify-between">
+<h3 class="font-headline-md text-lg">Project Registry</h3>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-surface-variant rounded transition-colors">
+<span class="material-symbols-outlined text-sm">filter_alt</span>
+</button>
+<button class="p-2 hover:bg-surface-variant rounded transition-colors">
+<span class="material-symbols-outlined text-sm">search</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-code-md">
+<thead>
+<tr class="text-on-surface-variant border-b border-outline-variant/20">
+<th class="px-6 py-4 text-xs font-label-caps">Project Name</th>
+<th class="px-6 py-4 text-xs font-label-caps">Endpoint</th>
+<th class="px-6 py-4 text-xs font-label-caps">Last Commit</th>
+<th class="px-6 py-4 text-xs font-label-caps">Status</th>
+<th class="px-6 py-4 text-xs font-label-caps">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr class="hover:bg-surface-variant/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm">cloud</span>
+</div>
+<span class="text-on-surface font-semibold">Nexus Gateway</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm opacity-70">nexus.dev.internal</td>
+<td class="px-6 py-4 text-xs">2 hours ago</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-dracula-green/10 text-dracula-green text-[10px] font-bold rounded border border-dracula-green/30 uppercase tracking-wider badge-active-glow">Active</span>
+</td>
+<td class="px-6 py-4">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors">more_vert</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-secondary/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-sm">database</span>
+</div>
+<span class="text-on-surface font-semibold">Vault Core API</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm opacity-70">api-v2.staging.internal</td>
+<td class="px-6 py-4 text-xs">5 mins ago</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-dracula-orange/10 text-dracula-orange text-[10px] font-bold rounded border border-dracula-orange/30 uppercase tracking-wider">Staging</span>
+</td>
+<td class="px-6 py-4">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors">more_vert</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-tertiary/20 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-sm">monitoring</span>
+</div>
+<span class="text-on-surface font-semibold">Grafana Overlord</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm opacity-70">metrics.internal</td>
+<td class="px-6 py-4 text-xs">1 day ago</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-dracula-green/10 text-dracula-green text-[10px] font-bold rounded border border-dracula-green/30 uppercase tracking-wider badge-active-glow">Active</span>
+</td>
+<td class="px-6 py-4">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors">more_vert</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+<!-- Console Log Drawer -->
+<footer class="fixed bottom-0 left-0 md:left-64 right-0 h-40 bg-surface-container-lowest border-t border-outline-variant z-40">
+<div class="flex flex-col h-full">
+<div class="flex items-center justify-between px-6 py-2 bg-surface-container-low border-b border-outline-variant/30">
+<div class="flex items-center gap-4">
+<span class="text-xs font-code-md text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">terminal</span>
+                    CONSOLE_OUTPUT
+                </span>
+<span class="text-[10px] font-code-md text-on-surface-variant opacity-40">Connected: system.cluster.local</span>
+</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-sm text-on-surface-variant hover:text-on-surface cursor-pointer">expand_less</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant hover:text-on-surface cursor-pointer">close</span>
+</div>
+</div>
+<div class="flex-grow p-4 font-code-md text-[13px] overflow-hidden relative">
+<div class="console-streaming flex flex-col gap-1">
+<!-- Data set repeated 3 times to ensure smooth loop -->
+<div class="text-on-surface-variant"><span class="text-dracula-green">[OK]</span> <span class="text-outline">14:22:01</span> Service 'Nexus' heartbeat verified.</div>
+<div class="text-on-surface-variant"><span class="text-dracula-orange">[WARN]</span> <span class="text-outline">14:22:05</span> High memory pressure on Node_03 (89%).</div>
+<div class="text-on-surface-variant"><span class="text-primary">[INFO]</span> <span class="text-outline">14:22:12</span> Background job 'cleanup_task' completed in 1.4s.</div>
+<div class="text-on-surface-variant"><span class="text-dracula-pink">[SYNC]</span> <span class="text-outline">14:22:15</span> Database replication status: 100% synced.</div>
+<div class="text-on-surface-variant"><span class="text-dracula-green">[OK]</span> <span class="text-outline">14:22:20</span> Ingress traffic load balancing across 4 nodes.</div>
+<div class="text-on-surface-variant"><span class="text-primary">[INFO]</span> <span class="text-outline">14:22:25</span> New deployment detected: vault-api v2.1.0-beta.</div>
+<div class="text-on-surface-variant"><span class="text-dracula-green">[OK]</span> <span class="text-outline">14:22:30</span> User authentication successful (Admin).</div>
+<div class="text-on-surface-variant"><span class="text-dracula-green">[OK]</span> <span class="text-outline">14:22:01</span> Service 'Nexus' heartbeat verified.</div>
+<div class="text-on-surface-variant"><span class="text-dracula-orange">[WARN]</span> <span class="text-outline">14:22:05</span> High memory pressure on Node_03 (89%).</div>
+<div class="text-on-surface-variant"><span class="text-primary">[INFO]</span> <span class="text-outline">14:22:12</span> Background job 'cleanup_task' completed in 1.4s.</div>
+<div class="text-on-surface-variant"><span class="text-dracula-pink">[SYNC]</span> <span class="text-outline">14:22:15</span> Database replication status: 100% synced.</div>
+<div class="text-on-surface-variant"><span class="text-dracula-green">[OK]</span> <span class="text-outline">14:22:20</span> Ingress traffic load balancing across 4 nodes.</div>
+<div class="text-on-surface-variant"><span class="text-primary">[INFO]</span> <span class="text-outline">14:22:25</span> New deployment detected: vault-api v2.1.0-beta.</div>
+<div class="text-on-surface-variant"><span class="text-dracula-green">[OK]</span> <span class="text-outline">14:22:30</span> User authentication successful (Admin).</div>
+<div class="text-on-surface-variant"><span class="text-dracula-green">[OK]</span> <span class="text-outline">14:22:01</span> Service 'Nexus' heartbeat verified.</div>
+<div class="text-on-surface-variant"><span class="text-dracula-orange">[WARN]</span> <span class="text-outline">14:22:05</span> High memory pressure on Node_03 (89%).</div>
+<div class="text-on-surface-variant"><span class="text-primary">[INFO]</span> <span class="text-outline">14:22:12</span> Background job 'cleanup_task' completed in 1.4s.</div>
+<div class="text-on-surface-variant"><span class="text-dracula-pink">[SYNC]</span> <span class="text-outline">14:22:15</span> Database replication status: 100% synced.</div>
+<div class="text-on-surface-variant"><span class="text-dracula-green">[OK]</span> <span class="text-outline">14:22:20</span> Ingress traffic load balancing across 4 nodes.</div>
+<div class="text-on-surface-variant"><span class="text-primary">[INFO]</span> <span class="text-outline">14:22:25</span> New deployment detected: vault-api v2.1.0-beta.</div>
+<div class="text-on-surface-variant"><span class="text-dracula-green">[OK]</span> <span class="text-outline">14:22:30</span> User authentication successful (Admin).</div>
+</div>
+</div>
+</div>
+</footer>
+<script>
+    // Micro-interactions for dashboard cards
+    document.querySelectorAll('.bg-surface-container-low').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            card.classList.add('border-primary/50');
+        });
+        card.addEventListener('mouseleave', () => {
+            card.classList.remove('border-primary/50');
+        });
+    });
+
+    // Simulating metric updates
+    setInterval(() => {
+        const cpu = Math.floor(Math.random() * (60 - 30) + 30);
+        const cpuText = document.querySelector('.grid-cols-1 > div:nth-child(1) .text-4xl');
+        if(cpuText) cpuText.innerHTML = `${cpu}<span class="text-lg opacity-50">%</span>`;
+        
+        const ram = (Math.random() * (9 - 7) + 7).toFixed(1);
+        const ramText = document.querySelector('.grid-cols-1 > div:nth-child(2) .text-4xl');
+        if(ramText) ramText.innerHTML = `${ram}<span class="text-lg opacity-50">GB</span>`;
+    }, 4000);
+</script>
+</body></html>

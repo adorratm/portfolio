@@ -1,0 +1,506 @@
+<html class="dark" lang="tr"><head></head><body class="font-body-md text-on-background">```html
+
+
+
+    <meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Emre Kılıç | Backend Mimarı</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "background": "#0f1223",
+                    "inverse-surface": "#dfe1f9",
+                    "on-tertiary-fixed": "#3c0029",
+                    "on-tertiary": "#620044",
+                    "outline-variant": "#4a4451",
+                    "secondary-container": "#008092",
+                    "inverse-on-surface": "#2c2f41",
+                    "error-container": "#93000a",
+                    "surface-container-lowest": "#0a0d1d",
+                    "surface-bright": "#35384a",
+                    "tertiary": "#ffafd7",
+                    "primary-container": "#bd93f9",
+                    "tertiary-fixed": "#ffd8e9",
+                    "secondary-fixed": "#a3eeff",
+                    "on-secondary": "#00363e",
+                    "error": "#ffb4ab",
+                    "on-background": "#dfe1f9",
+                    "surface-container-low": "#171b2b",
+                    "on-primary-container": "#4e2484",
+                    "inverse-primary": "#714aaa",
+                    "on-tertiary-container": "#770054",
+                    "on-tertiary-fixed-variant": "#860f60",
+                    "primary": "#d7baff",
+                    "on-secondary-fixed": "#001f25",
+                    "tertiary-container": "#fe78c5",
+                    "secondary": "#75d4e8",
+                    "surface-container-highest": "#313446",
+                    "outline": "#968e9c",
+                    "on-secondary-container": "#f8fdff",
+                    "on-primary": "#411478",
+                    "on-surface": "#dfe1f9",
+                    "surface-variant": "#313446",
+                    "on-surface-variant": "#ccc3d3",
+                    "on-secondary-fixed-variant": "#004e5a",
+                    "on-error": "#690005",
+                    "surface-tint": "#d7baff",
+                    "on-error-container": "#ffdad6",
+                    "primary-fixed": "#eddcff",
+                    "tertiary-fixed-dim": "#ffafd7",
+                    "surface-container-high": "#26293b",
+                    "secondary-fixed-dim": "#75d4e8",
+                    "primary-fixed-dim": "#d7baff",
+                    "surface-container": "#1b1f30",
+                    "on-primary-fixed": "#290055",
+                    "surface-dim": "#0f1223",
+                    "surface": "#0f1223",
+                    "on-primary-fixed-variant": "#593090"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "32px",
+                    "max-width": "1440px",
+                    "gutter": "24px",
+                    "base": "8px",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-xl": ["Inter"],
+                    "code-md": ["JetBrains Mono"],
+                    "body-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-lg": ["Inter"],
+                    "code-sm": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "code-md": ["14px", {"lineHeight": "22px", "fontWeight": "450"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "code-sm": ["12px", {"lineHeight": "18px", "fontWeight": "450"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0f1223;
+            color: #dfe1f9;
+            overflow-x: hidden;
+        }
+
+        .synthwave-grid {
+            background-image: 
+                linear-gradient(to right, rgba(189, 147, 249, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(189, 147, 249, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+        }
+
+        .hero-glow {
+            text-shadow: 0 0 20px rgba(189, 147, 249, 0.5), 0 0 40px rgba(189, 147, 249, 0.2);
+        }
+
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .float-delayed {
+            animation: float 8s ease-in-out infinite;
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(189, 147, 249, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(189, 147, 249, 0.6); }
+        }
+
+        .pulse-animation {
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+
+        .terminal-shadow {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card {
+            background: rgba(49, 52, 70, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(98, 114, 164, 0.2);
+        }
+
+        .pink-accent { color: #ff79c6; }
+        .purple-accent { color: #bd93f9; }
+        .cyan-accent { color: #8be9fd; }
+        .green-accent { color: #50fa7b; }
+        .orange-accent { color: #ffb86c; }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -5;
+            pointer-events: none;
+        }
+    </style>
+<canvas id="particle-canvas"></canvas>
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-desktop py-4 bg-background/80 backdrop-blur-md border-b border-outline-variant">
+<div class="font-code-md text-code-md font-bold text-secondary">Sistem Monitörü v1.0</div>
+<nav class="hidden md:flex gap-8">
+<a class="font-code-md text-code-md text-primary border-b-2 border-primary cursor-pointer active:scale-95 transition-all" href="#">Ana Sayfa</a>
+<a class="font-code-md text-code-md text-on-surface-variant hover:text-secondary transition-colors cursor-pointer active:scale-95" href="#">Teknoloji Yığını</a>
+<a class="font-code-md text-code-md text-on-surface-variant hover:text-secondary transition-colors cursor-pointer active:scale-95" href="#">Projeler</a>
+<a class="font-code-md text-code-md text-on-surface-variant hover:text-secondary transition-colors cursor-pointer active:scale-95" href="#">Yönetici Konsolu</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-secondary cursor-pointer">terminal</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-secondary cursor-pointer">settings</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-secondary cursor-pointer">account_circle</span>
+</div>
+</header>
+<!-- Side Navigation -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant hidden lg:flex flex-col py-8 z-40">
+<div class="px-6 mb-12">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">developer_board</span>
+</div>
+<div>
+<h2 class="font-code-md text-code-md font-bold text-primary">Root@Portfolyo</h2>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant">Backend Mimarı</p>
+</div>
+</div>
+<button class="w-full py-2 px-4 bg-primary text-on-primary font-code-sm text-code-sm rounded-lg hover:shadow-[0_0_15px_rgba(189,147,249,0.4)] transition-all flex items-center justify-center gap-2 pulse-animation">
+<span class="material-symbols-outlined text-sm">refresh</span>
+                Sistemi Yeniden Başlat
+            </button>
+</div>
+<nav class="flex-grow">
+<ul class="space-y-1">
+<li class="px-4">
+<a class="flex items-center gap-3 py-3 px-4 rounded-lg bg-surface-container-highest text-primary font-bold border-l-4 border-primary transition-all" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-code-md">Ana Sayfa</span>
+</a>
+</li>
+<li class="px-4">
+<a class="flex items-center gap-3 py-3 px-4 rounded-lg text-on-surface-variant hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined">code</span>
+<span class="font-code-md">Teknoloji Yığını</span>
+</a>
+</li>
+<li class="px-4">
+<a class="flex items-center gap-3 py-3 px-4 rounded-lg text-on-surface-variant hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-code-md">Projeler</span>
+</a>
+</li>
+<li class="px-4">
+<a class="flex items-center gap-3 py-3 px-4 rounded-lg text-on-surface-variant hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-code-md">Yönetici Konsolu</span>
+</a>
+</li>
+</ul>
+</nav>
+<div class="px-6 border-t border-outline-variant pt-6 mt-auto">
+<div class="flex items-center justify-around text-on-surface-variant">
+<div class="flex flex-col items-center gap-1 hover:text-secondary cursor-pointer">
+<span class="material-symbols-outlined">list_alt</span>
+<span class="font-label-caps text-[10px]">Loglar</span>
+</div>
+<div class="flex flex-col items-center gap-1 hover:text-secondary cursor-pointer">
+<span class="material-symbols-outlined">lan</span>
+<span class="font-label-caps text-[10px]">Ağ</span>
+</div>
+</div>
+</div>
+</aside>
+<main class="lg:pl-64 pt-20 min-h-screen relative">
+<!-- Background Grid -->
+<div class="absolute inset-0 synthwave-grid -z-10 opacity-30"></div>
+<!-- Floating Decorative Icons -->
+<div class="absolute top-40 right-20 float-animation opacity-20 pointer-events-none" style="animation-delay: 0s;">
+<span class="material-symbols-outlined text-[80px] text-primary">database</span>
+</div>
+<div class="absolute bottom-40 right-40 float-animation opacity-20 pointer-events-none" style="animation-delay: -2s;">
+<span class="material-symbols-outlined text-[60px] text-tertiary">api</span>
+</div>
+<div class="absolute top-80 left-10 float-animation opacity-20 pointer-events-none" style="animation-delay: -4s;">
+<span class="material-symbols-outlined text-[50px] text-secondary">cloud</span>
+</div>
+<div class="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-12">
+<!-- Hero Section -->
+<section class="mb-24 flex flex-col items-center text-center">
+<div class="inline-block px-4 py-1 rounded-full bg-primary-container/10 border border-primary/20 text-primary font-code-sm mb-6 pulse-animation">
+                    Backend Mühendisi | Sistem Mimarı
+                </div>
+<h1 class="font-headline-xl text-headline-xl mb-6 hero-glow">
+                    Emre Kılıç: <span class="text-primary">Ölçeklenebilir Backend Mimarileri</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mb-12">
+                    Gözlemlenebilirlik, dayanıklılık ve teknik borç yönetimine odaklanarak yüksek performanslı dağıtık sistemler tasarlıyorum.
+                </p>
+<!-- Terminal Window -->
+<div class="w-full max-w-3xl terminal-shadow rounded-xl overflow-hidden glass-card float-animation">
+<div class="bg-surface-container-highest px-4 py-2 flex items-center gap-2">
+<div class="flex gap-1.5">
+<div class="w-3 h-3 rounded-full bg-[#ff5555]"></div>
+<div class="w-3 h-3 rounded-full bg-[#f1fa8c]"></div>
+<div class="w-3 h-3 rounded-full bg-[#50fa7b]"></div>
+</div>
+<div class="mx-auto font-code-sm text-on-surface-variant">zsh — 80x24</div>
+</div>
+<div class="p-6 text-left font-code-md text-code-md leading-relaxed whitespace-pre-wrap">
+<div class="mb-2"><span class="green-accent">➜</span> <span class="cyan-accent">~</span> neofetch</div>
+<div class="flex gap-8">
+<div class="text-primary hidden sm:block">
+<div>   .-.</div>
+<div>  oo|</div>
+<div> /` '</div>
+<div>(\_;/)</div>
+</div>
+<div class="space-y-1">
+<div><span class="purple-accent font-bold">Kullanıcı:</span> Emre Kılıç</div>
+<div><span class="purple-accent font-bold">Rol:</span> Backend Mimarı</div>
+<div><span class="purple-accent font-bold">Konum:</span> İzmir, Türkiye</div>
+<div><span class="purple-accent font-bold">GitHub:</span> <a class="cyan-accent underline" href="#">adorratm</a></div>
+<div><span class="purple-accent font-bold">Kabuk:</span> zsh 5.8.1</div>
+<div><span class="purple-accent font-bold">Teknolojiler:</span> Go, Node.js, Rust, Docker, K8s</div>
+</div>
+</div>
+<div class="mt-4"><span class="green-accent">➜</span> <span class="cyan-accent">~</span> <span class="cursor-blink border-r-2 border-primary animate-pulse"> </span></div>
+</div>
+</div>
+</section>
+<!-- Projects Grid -->
+<section class="mb-24">
+<div class="flex items-end justify-between mb-12">
+<div>
+<h2 class="font-headline-lg text-headline-lg mb-2">Canlı Sistemler</h2>
+<div class="h-1 w-20 bg-tertiary"></div>
+</div>
+<a class="font-code-md text-tertiary flex items-center gap-2 hover:translate-x-1 transition-transform" href="#">
+                        Tüm Depoları Görüntüle <span class="material-symbols-outlined">arrow_right_alt</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Project Card 1 -->
+<div class="group glass-card rounded-xl overflow-hidden hover:shadow-[0_0_20px_rgba(255,121,198,0.2)] transition-all cursor-pointer float-animation">
+<div class="h-56 relative overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A high-tech digital dashboard for an automotive AI system" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGxnpHQ-jHXSDAOA0FGW9iF9ltGMyYqJGv5_GKBnwGVka1VBsv6pSlb3oipb2Y-YEiuNDeLM7SW4wZzeChx0emG1JjcK7TOGVAN_HI1xOZpAcVfedp7w3x6jiNjbsHf_bH6H53SktN0MrXG84HRM4Bvnmp5RD4K13hs3ubOWk1FtyEgHPJ82IINtuQ_DxjdPzlIBMzB9TmnqIfB9ljxA3yxqFI60tb0ipQD6vynJTmBvwjA0r5pdY5xaYDUNHAFKFfcN5l8blib6s"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
+<div class="absolute bottom-4 left-6">
+<span class="font-label-caps bg-tertiary/20 text-tertiary px-3 py-1 rounded-full backdrop-blur-sm border border-tertiary/30 pulse-animation">AI Mimarisi</span>
+</div>
+</div>
+<div class="p-8">
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-headline-md text-headline-md group-hover:text-tertiary transition-colors">Cartech AI</h3>
+<span class="material-symbols-outlined text-on-surface-variant">open_in_new</span>
+</div>
+<p class="font-body-md text-on-surface-variant mb-6">
+                                Filo yönetimi için akıllı bir teşhis motoru. 10.000'den fazla araçtan gelen gerçek zamanlı sensör verilerini işlemek için dağıtık mikroservisler kullanır.
+                            </p>
+<div class="flex gap-3">
+<span class="font-code-sm text-code-sm px-2 py-1 bg-surface-container rounded border border-outline-variant">Go</span>
+<span class="font-code-sm text-code-sm px-2 py-1 bg-surface-container rounded border border-outline-variant">GRPC</span>
+<span class="font-code-sm text-code-sm px-2 py-1 bg-surface-container rounded border border-outline-variant">PostgreSQL</span>
+</div>
+</div>
+</div>
+<!-- Project Card 2 -->
+<div class="group glass-card rounded-xl overflow-hidden hover:shadow-[0_0_20px_rgba(255,121,198,0.2)] transition-all cursor-pointer float-delayed">
+<div class="h-56 relative overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A sophisticated data visualization interface for a logging platform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4GPz5Fl4tBKBF-v0OJerOaX3Dr7GOuefOXwJ-yQxjsiaOdG782gxRWWfi3zpYqu9bOiB39AuAeTXlmdb1fotIxaMJblybrceEPQvcl6KVPqAJd0gy0sWQmky9JP0OWJL8UgNHWI60htHpYHxSOeLWWUDKPjL1LPZewsZhYtE8oG9txetCBVYgkj_xitBQT1znVriYcxTSq8-pcJ5yj7gEYaqNDjlcs5-Kkt56T_OUlHg6t4SB-cN796v4vphSSAnSU27_IJngi_s"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
+<div class="absolute bottom-4 left-6">
+<span class="font-label-caps bg-tertiary/20 text-tertiary px-3 py-1 rounded-full backdrop-blur-sm border border-tertiary/30 pulse-animation">Altyapı</span>
+</div>
+</div>
+<div class="p-8">
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-headline-md text-headline-md group-hover:text-tertiary transition-colors">LogExpo</h3>
+<span class="material-symbols-outlined text-on-surface-variant">open_in_new</span>
+</div>
+<p class="font-body-md text-on-surface-variant mb-6">
+                                Bulut tabanlı uygulamalar için tasarlanmış merkezi loglama ve gözlemlenebilirlik hattı. Terabaytlarca log verisi için saniye altı sorgu gecikmesi sunar.
+                            </p>
+<div class="flex gap-3">
+<span class="font-code-sm text-code-sm px-2 py-1 bg-surface-container rounded border border-outline-variant">Rust</span>
+<span class="font-code-sm text-code-sm px-2 py-1 bg-surface-container rounded border border-outline-variant">ClickHouse</span>
+<span class="font-code-sm text-code-sm px-2 py-1 bg-surface-container rounded border border-outline-variant">Redis</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Stats/Tech Grid (Bento Style) -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-24">
+<div class="md:col-span-2 glass-card p-8 rounded-xl flex flex-col justify-between min-h-[300px]">
+<div>
+<h4 class="font-headline-md text-headline-md mb-2">Teknik Felsefe</h4>
+<p class="font-body-md text-on-surface-variant">
+                            "Doğru İş İçin Doğru Araç" ilkesine inanıyorum. İster Rust'ın ham hızı, ister Go'nun eşzamanlılığı, ister Node.js'in ekosistemi olsun; hedef her zaman sağlam ve sürdürülebilir bir mimaridir.
+                        </p>
+</div>
+<div class="flex flex-wrap gap-4 mt-8">
+<div class="p-4 bg-surface-container rounded-lg border border-outline-variant flex items-center gap-3 float-animation">
+<div class="w-2 h-2 rounded-full bg-green-accent animate-pulse"></div>
+<span class="font-code-md">Önce Ölçeklenebilirlik</span>
+</div>
+<div class="p-4 bg-surface-container rounded-lg border border-outline-variant flex items-center gap-3 float-delayed">
+<div class="w-2 h-2 rounded-full bg-cyan-accent animate-pulse"></div>
+<span class="font-code-md">Gözlemlenebilirlik Odaklı</span>
+</div>
+<div class="p-4 bg-surface-container rounded-lg border border-outline-variant flex items-center gap-3 float-animation" style="animation-delay: 2s;">
+<div class="w-2 h-2 rounded-full bg-purple-accent animate-pulse"></div>
+<span class="font-code-md">Sıfır Güven Güvenliği</span>
+</div>
+</div>
+</div>
+<div class="glass-card p-8 rounded-xl flex flex-col items-center justify-center text-center">
+<div class="text-headline-xl font-headline-xl text-primary mb-2">50+</div>
+<div class="font-label-caps text-on-surface-variant">Yönetilen Dağıtım</div>
+<div class="w-full h-[1px] bg-outline-variant my-6"></div>
+<div class="text-headline-xl font-headline-xl text-tertiary mb-2">99.9%</div>
+<div class="font-label-caps text-on-surface-variant">Çalışma Süresi Hedefi</div>
+</div>
+</section>
+<!-- Footer Section -->
+<footer class="border-t border-outline-variant pt-12 pb-24">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex flex-col items-center md:items-start">
+<div class="font-code-md text-code-md font-bold text-secondary mb-2">Emre Kılıç</div>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Dracula ekosistemi tutkusuyla tasarlandı.</p>
+</div>
+<div class="flex gap-6">
+<a class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center hover:text-primary transition-colors border border-outline-variant" href="#">
+<span class="material-symbols-outlined">alternate_email</span>
+</a>
+<a class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center hover:text-primary transition-colors border border-outline-variant" href="#">
+<span class="material-symbols-outlined">terminal</span>
+</a>
+<a class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center hover:text-primary transition-colors border border-outline-variant" href="#">
+<span class="material-symbols-outlined">hub</span>
+</a>
+</div>
+</div>
+</footer>
+</div>
+</main>
+<!-- FAB for Contact -->
+<div class="fixed bottom-8 right-8 z-50 group">
+<div class="absolute -top-12 right-0 bg-primary text-on-primary px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-code-sm pointer-events-none">
+            Sunucuya Ping At (İletişim)
+        </div>
+<button class="w-16 h-16 rounded-full bg-primary text-on-primary shadow-[0_0_20px_rgba(189,147,249,0.4)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all pulse-animation">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+<!-- Mobile Bottom Nav -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container-low border-t border-outline-variant flex justify-around py-3 z-50">
+<div class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-code-sm">Giriş</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">code</span>
+<span class="text-[10px] font-code-sm">Yığın</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">terminal</span>
+<span class="text-[10px] font-code-sm">Projeler</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-code-sm">Profil</span>
+</div>
+</nav>
+<script>
+        // Simple micro-interaction for the "typing" effect simulation
+        const cursor = document.querySelector('.cursor-blink');
+        if (cursor) {
+            setInterval(() => {
+                cursor.style.visibility = cursor.style.visibility === 'hidden' ? 'visible' : 'hidden';
+            }, 500);
+        }
+
+        // Particle System
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const colors = ['#bd93f9', '#ff79c6', '#8be9fd'];
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.opacity = Math.random() * 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.opacity;
+                ctx.fill();
+            }
+        }
+
+        function createParticles() {
+            const count = Math.floor((canvas.width * canvas.height) / 10000);
+            particles = [];
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        </script></body></html>

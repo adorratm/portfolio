@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #0f1223;
+  --color-on-background: #dfe1f9;
+  --color-primary: #d7baff;
+  --color-primary-container: #bd93f9;
+  --color-secondary: #75d4e8;
+  --color-tertiary: #ffafd7;
+  --color-surface-container: #1b1f30;
+  --color-surface-container-low: #171b2b;
+  --color-surface-container-highest: #313446;
+  --color-surface-variant: #313446;
+  --color-on-surface: #dfe1f9;
+  --color-on-surface-variant: #ccc3d3;
+  --color-outline-variant: #4a4451;
+  --color-dracula-green: #50fa7b;
+  --color-dracula-orange: #ffb86c;
+  --color-dracula-pink: #ff79c6;
+}
+
+body {
+  background-color: #0f1223;
+  color: #dfe1f9;
+}
+
+.scanline-effect::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(189, 147, 249, 0.05), transparent);
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.pulse-status {
+  animation: pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.98); }
+}
