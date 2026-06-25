@@ -1,8 +1,16 @@
 /**
- * Admin API istemcisi — JWT + content bundle.
+ * Admin API istemcisi — JWT + content bundle + CMS CRUD.
  */
 
-import type { AdminContentBundles, ContentBundle, Locale } from '@/lib/api/types';
+import type {
+  AdminContentBundles,
+  ContentBundle,
+  Locale,
+  ProfileContent,
+  Project,
+  SiteSettings,
+  TechStackItem,
+} from '@/lib/api/types';
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
@@ -41,9 +49,11 @@ async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   if (!response.ok) {
-    throw new Error(`API hatası: ${response.status}`);
+    const text = await response.text().catch(() => '');
+    throw new Error(text || `API hatası: ${response.status}`);
   }
 
+  if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
 }
 
@@ -58,10 +68,74 @@ async function publicFetch<T>(path: string): Promise<T> {
 export const adminApi = {
   me: () => adminFetch('/auth/me'),
 
-  /** Giriş öncesi — panel UI metinleri için public bundle */
   getPublicContent: (locale: Locale) =>
     publicFetch<ContentBundle>(`/content/public/${locale}`),
 
-  /** Giriş sonrası — TR + EN tüm CMS verisi */
   getAllContent: () => adminFetch<AdminContentBundles>('/content/admin/all'),
+
+  getProfiles: () => adminFetch<ProfileContent[]>('/profile'),
+
+  upsertProfile: (body: ProfileContent & { locale: Locale }) =>
+    adminFetch<ProfileContent>('/profile', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  getSiteSettingsAll: () => adminFetch<SiteSettings[]>('/site-settings'),
+
+  upsertSiteSettings: (body: SiteSettings & { locale: Locale }) =>
+    adminFetch<SiteSettings>('/site-settings', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  getProjects: () => adminFetch<Project[]>('/projects'),
+
+  upsertProject: (body: Partial<Project> & { locale: Locale; title: string; description: string; category: string; technologies: string[] }) =>
+    adminFetch<Project>('/projects', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  deleteProject: (id: string) =>
+    adminFetch<void>(`/projects/${id}`, { method: 'DELETE' }),
+
+  getTechStack: () => adminFetch<TechStackItem[]>('/tech-stack'),
+
+  upsertTechStack: (body: Partial<TechStackItem> & { locale: Locale; name: string; category: string }) =>
+    adminFetch<TechStackItem>('/tech-stack', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  deleteTechStack: (id: string) =>
+    adminFetch<void>(`/tech-stack/${id}`, { method: 'DELETE' }),
+
+  uploadMedia: async (file: File, folder = 'uploads') => {
+    const token = getStoredToken();
+    const form = new FormData();
+    form.append('file', file);
+    form.append('folder', folder);
+
+    const response = await fetch(`${API_BASE}/media/upload`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: form,
+    });
+
+    if (response.status === 401) {
+      clearStoredToken();
+      throw new Error('Oturum süresi doldu.');
+    }
+    if (!response.ok) {
+      throw new Error(`Yükleme hatası: ${response.status}`);
+    }
+    return response.json() as Promise<{ key: string; publicUrl: string }>;
+  },
+
+  deleteMedia: (key: string) =>
+    adminFetch<void>('/media', {
+      method: 'DELETE',
+      body: JSON.stringify({ key }),
+    }),
 };

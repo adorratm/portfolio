@@ -33,6 +33,16 @@ export class AuthController {
     // Passport otomatik yönlendirir
   }
 
+  /** OAuth ayar doğrulama — redirect_uri_mismatch debug için */
+  @Get('google/config')
+  googleConfig(): { callbackUrl: string; hint: string } {
+    const callbackUrl = this.config.getOrThrow<string>('app.google.callbackUrl');
+    return {
+      callbackUrl,
+      hint: 'Google Console → Authorized redirect URIs içine bu URL\'yi birebir ekleyin (Web application client).',
+    };
+  }
+
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleCallback(

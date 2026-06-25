@@ -33,4 +33,23 @@ export function fetchContentBundle(locale: Locale): Promise<ContentBundle> {
   return apiFetch<ContentBundle>(`/content/public/${locale}`);
 }
 
+/** Projeler sayfası — tüm yayında olan projeler */
+export function fetchAllProjects(locale: Locale) {
+  return apiFetch<ContentBundle['projects']>(`/projects/public/${locale}/all`);
+}
+
+/** Tek proje detayı */
+export function fetchProjectById(locale: Locale, id: string) {
+  return apiFetch<ContentBundle['projects'][number]>(
+    `/projects/public/${locale}/${id}`,
+  );
+}
+
+/** Tek teknoloji detayı */
+export function fetchTechStackById(locale: Locale, id: string) {
+  return apiFetch<ContentBundle['techStack'][number]>(
+    `/tech-stack/public/${locale}/${id}`,
+  );
+}
+
 export type { Locale, ContentBundle };

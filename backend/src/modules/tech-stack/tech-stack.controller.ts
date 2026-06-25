@@ -13,6 +13,14 @@ export class TechStackController {
     return this.techStackService.findPublished(locale);
   }
 
+  @Get('public/:locale/:id')
+  findOnePublic(
+    @Param('locale') locale: Locale,
+    @Param('id') id: string,
+  ) {
+    return this.techStackService.findPublicById(locale, id);
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard)
   findAll() {

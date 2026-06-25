@@ -4,6 +4,7 @@ import { EntityManager } from 'typeorm';
 import { ProfileContent } from '@modules/profile/entities/profile-content.entity';
 import { Project } from '@modules/projects/entities/project.entity';
 import { SiteSettings } from '@modules/site-settings/entities/site-settings.entity';
+import { TechStackItem } from '@modules/tech-stack/entities/tech-stack-item.entity';
 import { UiTranslation } from '@modules/ui-translations/entities/ui-translation.entity';
 
 /**
@@ -158,6 +159,15 @@ export class SeedService implements OnModuleInit {
         isFeatured: true,
       },
     ]);
+
+    await this.em.save(TechStackItem, [
+      { locale: 'tr', name: 'NestJS', category: 'Backend', proficiencyLevel: 90, sortOrder: 1 },
+      { locale: 'tr', name: 'PostgreSQL', category: 'Database', proficiencyLevel: 85, sortOrder: 2 },
+      { locale: 'tr', name: 'Redis', category: 'Cache', proficiencyLevel: 80, sortOrder: 3 },
+      { locale: 'en', name: 'NestJS', category: 'Backend', proficiencyLevel: 90, sortOrder: 1 },
+      { locale: 'en', name: 'PostgreSQL', category: 'Database', proficiencyLevel: 85, sortOrder: 2 },
+      { locale: 'en', name: 'Redis', category: 'Cache', proficiencyLevel: 80, sortOrder: 3 },
+    ]);
   }
 
   private async seedUiTranslations(): Promise<void> {
@@ -185,6 +195,13 @@ export class SeedService implements OnModuleInit {
           'metrics.sla': 'SLA: 99.9%',
           'metrics.total': 'Toplam',
           'locale.switch': 'Dil',
+          'nav.dashboard': 'Panel',
+          'nav.profile': 'Profil / Hero',
+          'nav.siteSettings': 'Site Ayarları',
+          'nav.projects': 'Projeler',
+          'nav.techStack': 'Tech Stack',
+          'nav.login': 'Giriş',
+          'nav.logout': 'Çıkış',
         },
       },
       {
@@ -210,6 +227,13 @@ export class SeedService implements OnModuleInit {
           'metrics.sla': 'SLA: 99.9%',
           'metrics.total': 'Total',
           'locale.switch': 'Language',
+          'nav.dashboard': 'Dashboard',
+          'nav.profile': 'Profile / Hero',
+          'nav.siteSettings': 'Site Settings',
+          'nav.projects': 'Projects',
+          'nav.techStack': 'Tech Stack',
+          'nav.login': 'Login',
+          'nav.logout': 'Logout',
         },
       },
     ]);

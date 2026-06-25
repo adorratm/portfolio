@@ -26,6 +26,14 @@ export class ProjectsController {
     return this.projectsService.findPublished(locale);
   }
 
+  @Get('public/:locale/:id')
+  findOnePublic(
+    @Param('locale') locale: Locale,
+    @Param('id') id: string,
+  ) {
+    return this.projectsService.findPublicById(locale, id);
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard)
   findAll() {

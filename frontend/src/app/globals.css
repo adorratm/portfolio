@@ -1,8 +1,7 @@
 @import "tailwindcss";
 
 /**
- * Nocturnal Command / Dracula tasarım token'ları.
- * Kaynak: stitch_nestjs_backend_portfolio_system/nocturnal_command/DESIGN.md
+ * Nocturnal Command / Dracula — design/ klasörü ile uyumlu animasyonlar.
  */
 @theme inline {
   --color-background: #0f1223;
@@ -20,6 +19,12 @@
   --color-on-surface: #dfe1f9;
   --color-on-surface-variant: #ccc3d3;
   --color-outline-variant: #4a4451;
+  --color-dracula-green: #50fa7b;
+  --color-dracula-orange: #ffb86c;
+  --color-dracula-pink: #ff79c6;
+  --color-dracula-cyan: #8be9fd;
+  --color-tertiary-container: #fe78c5;
+  --color-surface-container-high: #26293b;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
@@ -28,9 +33,11 @@ body {
   background-color: #0f1223;
   color: #dfe1f9;
   font-family: var(--font-sans);
+  overflow-x: hidden;
 }
 
-/* Stitch tasarımından: synthwave grid arka plan */
+/* ——— Arka plan katmanları ——— */
+
 .synthwave-grid {
   background-image:
     linear-gradient(to right, rgba(189, 147, 249, 0.1) 1px, transparent 1px),
@@ -39,14 +46,226 @@ body {
   mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
 }
 
+.dracula-gradient {
+  background: linear-gradient(-45deg, #0f1223, #1b1f30, #0a0d1d, #0f1223);
+  background-size: 400% 400%;
+  animation: gradient-move 15s ease infinite;
+}
+
+.dracula-gradient::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at top right, rgba(189, 147, 249, 0.08), transparent),
+    radial-gradient(circle at bottom left, rgba(139, 233, 253, 0.08), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes gradient-move {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.particle-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -5;
+  pointer-events: none;
+}
+
+/* ——— Kart & cam efektleri ——— */
+
 .glass-card {
   background: rgba(49, 52, 70, 0.4);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(98, 114, 164, 0.2);
 }
 
+.terminal-shadow {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
 .hero-glow {
   text-shadow:
     0 0 20px rgba(189, 147, 249, 0.5),
     0 0 40px rgba(189, 147, 249, 0.2);
+}
+
+/* ——— Hareket animasyonları ——— */
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+.float-delayed {
+  animation: float 8s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.float-slow {
+  animation: float 10s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+.pulse-animation {
+  animation: pulse-glow 3s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(189, 147, 249, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(189, 147, 249, 0.6); }
+}
+
+.pulse-effect {
+  animation: pulse-soft 3s infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.pulse-status {
+  animation: pulse-status 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-status {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.98); }
+}
+
+.cursor-blink {
+  animation: cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.hover-bounce:hover {
+  animation: bounce 0.5s ease infinite alternate;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-4px); }
+}
+
+/* ——— Scanline efektleri ——— */
+
+.scanline-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanline-effect::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(189, 147, 249, 0.05), transparent);
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+}
+
+.scanline-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanline-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.4;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* ——— Glow yardımcıları ——— */
+
+.glow-cyan {
+  box-shadow: 0 0 15px rgba(139, 233, 253, 0.3);
+}
+
+.glow-green {
+  box-shadow: 0 0 15px rgba(80, 250, 123, 0.3);
+}
+
+.glow-purple {
+  box-shadow: 0 0 15px rgba(189, 147, 249, 0.3);
+}
+
+.glow-hover {
+  transition: box-shadow 0.3s ease;
+}
+
+.glow-hover:hover {
+  box-shadow: 0 0 15px rgba(189, 147, 249, 0.4);
+}
+
+/* ——— Dracula accent renkleri ——— */
+
+.green-accent { color: #50fa7b; }
+.cyan-accent { color: #8be9fd; }
+.purple-accent { color: #bd93f9; }
+.pink-accent { color: #ff79c6; }
+.orange-accent { color: #ffb86c; }
+
+/* ——— Tech badge hover ——— */
+
+.tech-badge {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tech-badge:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 10px 20px -5px rgba(189, 147, 249, 0.3);
+  border-color: #bd93f9;
+}
+
+/* Progress bar dolma animasyonu */
+.bar-fill-animate {
+  animation: bar-grow 1.2s ease-out forwards;
+  transform-origin: left;
+}
+
+@keyframes bar-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-animation,
+  .float-delayed,
+  .float-slow,
+  .pulse-animation,
+  .pulse-effect,
+  .pulse-status,
+  .cursor-blink,
+  .scanline-effect::after,
+  .dracula-gradient {
+    animation: none !important;
+  }
+
+  .particle-canvas {
+    display: none;
+  }
 }

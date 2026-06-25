@@ -4,34 +4,31 @@ import type { Locale } from '@common/types/locale';
 
 export type ProjectStatus = 'active' | 'staging' | 'archived';
 
-/**
- * Portfolyo projeleri — ana sayfa kartları + admin registry tablosu.
- */
 @Entity('projects')
 export class Project extends BaseEntity {
   @Column({ type: 'varchar', length: 5 })
   @Index()
   locale!: Locale;
 
-  @Column()
+  @Column({ type: 'varchar' })
   title!: string;
 
   @Column({ type: 'text' })
   description!: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   category!: string;
 
-  @Column({ name: 'image_key', nullable: true })
+  @Column({ name: 'image_key', type: 'varchar', nullable: true })
   imageKey!: string | null;
 
-  @Column({ name: 'image_url', nullable: true })
+  @Column({ name: 'image_url', type: 'varchar', nullable: true })
   imageUrl!: string | null;
 
-  @Column({ name: 'external_url', nullable: true })
+  @Column({ name: 'external_url', type: 'varchar', nullable: true })
   externalUrl!: string | null;
 
-  @Column({ name: 'endpoint', nullable: true })
+  @Column({ name: 'endpoint', type: 'varchar', nullable: true })
   endpoint!: string | null;
 
   @Column({ type: 'jsonb', default: [] })
@@ -40,12 +37,12 @@ export class Project extends BaseEntity {
   @Column({ type: 'varchar', default: 'active' })
   status!: ProjectStatus;
 
-  @Column({ name: 'sort_order', default: 0 })
+  @Column({ name: 'sort_order', type: 'int', default: 0 })
   sortOrder!: number;
 
-  @Column({ name: 'is_featured', default: true })
+  @Column({ name: 'is_featured', type: 'boolean', default: true })
   isFeatured!: boolean;
 
-  @Column({ name: 'is_published', default: true })
+  @Column({ name: 'is_published', type: 'boolean', default: true })
   isPublished!: boolean;
 }

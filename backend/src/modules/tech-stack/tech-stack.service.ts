@@ -16,6 +16,14 @@ export class TechStackService {
     });
   }
 
+  async findPublicById(locale: Locale, id: string): Promise<TechStackItem> {
+    const item = await this.em.findOne(TechStackItem, {
+      where: { id, locale, isPublished: true },
+    });
+    if (!item) throw new NotFoundException('Teknoloji öğesi bulunamadı.');
+    return item;
+  }
+
   async findAll(): Promise<TechStackItem[]> {
     return this.em.find(TechStackItem, { order: { sortOrder: 'ASC' } });
   }

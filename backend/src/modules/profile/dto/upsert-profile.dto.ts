@@ -36,6 +36,14 @@ export class UpsertProfileDto {
   terminalLines!: TerminalLineDto[];
 
   @IsOptional()
+  @IsString()
+  imageKey?: string;
+
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
+  @IsOptional()
   @IsBoolean()
   isPublished?: boolean;
 }

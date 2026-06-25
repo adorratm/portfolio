@@ -8,6 +8,8 @@ export interface ProfileContent {
   headlineHighlight: string;
   bio: string;
   terminalLines: Array<{ label: string; value: string; link?: string }>;
+  imageUrl?: string | null;
+  imageKey?: string | null;
 }
 
 export interface SiteSettings {
@@ -36,9 +38,13 @@ export interface Project {
   description: string;
   category: string;
   imageUrl?: string | null;
+  imageKey?: string | null;
   technologies: string[];
   externalUrl?: string | null;
+  endpoint?: string | null;
   status?: string;
+  sortOrder?: number;
+  isFeatured?: boolean;
 }
 
 export interface TechStackItem {
@@ -46,7 +52,11 @@ export interface TechStackItem {
   name: string;
   description: string | null;
   category: string;
+  imageUrl?: string | null;
+  iconName?: string | null;
   proficiencyLevel: number;
+  yearsExperience?: number | null;
+  sortOrder?: number;
 }
 
 export interface UiLabels {

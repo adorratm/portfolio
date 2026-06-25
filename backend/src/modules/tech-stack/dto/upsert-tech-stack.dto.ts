@@ -24,6 +24,14 @@ export class UpsertTechStackDto {
   iconName?: string;
 
   @IsOptional()
+  @IsString()
+  imageKey?: string;
+
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
+  @IsOptional()
   @IsInt()
   proficiencyLevel?: number;
 

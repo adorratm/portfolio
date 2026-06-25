@@ -24,6 +24,14 @@ export class ProjectsService {
     });
   }
 
+  async findPublicById(locale: Locale, id: string): Promise<Project> {
+    const project = await this.em.findOne(Project, {
+      where: { id, locale, isPublished: true },
+    });
+    if (!project) throw new NotFoundException('Proje bulunamadı.');
+    return project;
+  }
+
   async findAll(): Promise<Project[]> {
     return this.em.find(Project, {
       order: { sortOrder: 'ASC', createdAt: 'DESC' },

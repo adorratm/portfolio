@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { adminApi } from '@/lib/api/client';
+import { adminApi, getStoredToken } from '@/lib/api/client';
 import type { ContentBundle, Locale } from '@/lib/api/types';
 import { label } from '@/lib/api/types';
 
@@ -19,6 +19,8 @@ interface LocaleContextValue {
   setLocale: (locale: Locale) => void;
   bundle: ContentBundle | null;
   loading: boolean;
+  /** CMS kaydı sonrası içeriği yeniden yükle */
+  refreshBundle: () => Promise<void>;
   /** Admin paneli UI metni — backend adminLabels */
   t: (key: string, fallback?: string) => string;
 }
@@ -44,12 +46,32 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     if (saved === 'tr' || saved === 'en') setLocaleState(saved);
   }, []);
 
+  const loadBundle = useCallback(async (targetLocale: Locale) => {
+    if (getStoredToken()) {
+      const all = await adminApi.getAllContent();
+      const match = all.locales.find((b) => b.locale === targetLocale);
+      if (match) return match;
+    }
+    return adminApi.getPublicContent(targetLocale);
+  }, []);
+
+  const refreshBundle = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await loadBundle(locale);
+      setBundle(data);
+    } catch {
+      setBundle(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [locale, loadBundle]);
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
 
-    adminApi
-      .getPublicContent(locale)
+    loadBundle(locale)
       .then((data) => {
         if (!cancelled) setBundle(data);
       })
@@ -63,7 +85,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [locale]);
+  }, [locale, loadBundle]);
 
   const t = useCallback(
     (key: string, fallback = key) =>
@@ -72,8 +94,8 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ locale, setLocale, bundle, loading, t }),
-    [locale, setLocale, bundle, loading, t],
+    () => ({ locale, setLocale, bundle, loading, refreshBundle, t }),
+    [locale, setLocale, bundle, loading, refreshBundle, t],
   );
 
   return (

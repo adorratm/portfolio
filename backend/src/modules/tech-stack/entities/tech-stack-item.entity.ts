@@ -2,34 +2,39 @@ import { Column, Entity, Index } from 'typeorm';
 import { BaseEntity } from '@database/base.entity';
 import type { Locale } from '@common/types/locale';
 
-/** Teknoloji yığını öğesi — tech stack sayfası */
 @Entity('tech_stack_items')
 export class TechStackItem extends BaseEntity {
   @Column({ type: 'varchar', length: 5 })
   @Index()
   locale!: Locale;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name!: string;
 
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
-  @Column()
+  @Column({ type: 'varchar' })
   category!: string;
 
-  @Column({ name: 'icon_name', nullable: true })
+  @Column({ name: 'icon_name', type: 'varchar', nullable: true })
   iconName!: string | null;
 
-  @Column({ name: 'proficiency_level', default: 80 })
+  @Column({ name: 'image_key', type: 'varchar', nullable: true })
+  imageKey!: string | null;
+
+  @Column({ name: 'image_url', type: 'varchar', nullable: true })
+  imageUrl!: string | null;
+
+  @Column({ name: 'proficiency_level', type: 'int', default: 80 })
   proficiencyLevel!: number;
 
-  @Column({ name: 'years_experience', nullable: true })
+  @Column({ name: 'years_experience', type: 'int', nullable: true })
   yearsExperience!: number | null;
 
-  @Column({ name: 'sort_order', default: 0 })
+  @Column({ name: 'sort_order', type: 'int', default: 0 })
   sortOrder!: number;
 
-  @Column({ name: 'is_published', default: true })
+  @Column({ name: 'is_published', type: 'boolean', default: true })
   isPublished!: boolean;
 }
