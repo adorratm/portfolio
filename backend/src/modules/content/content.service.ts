@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { ProfileService } from '@modules/profile/profile.service';
 import { ProjectsService } from '@modules/projects/projects.service';
 import { TechStackService } from '@modules/tech-stack/tech-stack.service';
+import { AboutService } from '@modules/about/about.service';
+import { ExperienceService } from '@modules/experience/experience.service';
+import { EducationService } from '@modules/education/education.service';
+import { CertificationService } from '@modules/certification/certification.service';
 import { SiteSettingsService } from '@modules/site-settings/site-settings.service';
 import { UiTranslationsService } from '@modules/ui-translations/ui-translations.service';
 import type { Locale } from '@common/types/locale';
@@ -16,19 +20,36 @@ export class ContentService {
     private readonly profileService: ProfileService,
     private readonly projectsService: ProjectsService,
     private readonly techStackService: TechStackService,
+    private readonly aboutService: AboutService,
+    private readonly experienceService: ExperienceService,
+    private readonly educationService: EducationService,
+    private readonly certificationService: CertificationService,
     private readonly siteSettingsService: SiteSettingsService,
     private readonly uiTranslationsService: UiTranslationsService,
   ) {}
 
   async getPublicBundle(locale: Locale) {
-    const [profile, siteSettings, projects, techStack, ui] =
-      await Promise.all([
-        this.profileService.findByLocale(locale),
-        this.siteSettingsService.findByLocale(locale),
-        this.projectsService.findFeatured(locale),
-        this.techStackService.findPublished(locale),
-        this.uiTranslationsService.findByLocale(locale),
-      ]);
+    const [
+      profile,
+      siteSettings,
+      projects,
+      techStack,
+      about,
+      experiences,
+      education,
+      certifications,
+      ui,
+    ] = await Promise.all([
+      this.profileService.findByLocale(locale),
+      this.siteSettingsService.findByLocale(locale),
+      this.projectsService.findFeatured(locale),
+      this.techStackService.findPublished(locale),
+      this.aboutService.findByLocale(locale),
+      this.experienceService.findPublished(locale),
+      this.educationService.findPublished(locale),
+      this.certificationService.findPublished(locale),
+      this.uiTranslationsService.findByLocale(locale),
+    ]);
 
     return {
       locale,
@@ -36,6 +57,10 @@ export class ContentService {
       siteSettings,
       projects,
       techStack,
+      about,
+      experiences,
+      education,
+      certifications,
       ui: {
         frontend: ui?.frontendLabels ?? {},
         admin: ui?.adminLabels ?? {},
@@ -48,20 +73,41 @@ export class ContentService {
     const locales: Locale[] = ['tr', 'en'];
     const bundles = await Promise.all(
       locales.map(async (locale) => {
-        const [profile, siteSettings, projects, techStack, ui] =
-          await Promise.all([
-            this.profileService.findAll().then((rows) =>
-              rows.find((r) => r.locale === locale) ?? null,
-            ),
-            this.siteSettingsService.findByLocale(locale),
-            this.projectsService.findAll().then((rows) =>
-              rows.filter((p) => p.locale === locale),
-            ),
-            this.techStackService.findAll().then((rows) =>
-              rows.filter((t) => t.locale === locale),
-            ),
-            this.uiTranslationsService.findByLocale(locale),
-          ]);
+        const [
+          profile,
+          siteSettings,
+          projects,
+          techStack,
+          about,
+          experiences,
+          education,
+          certifications,
+          ui,
+        ] = await Promise.all([
+          this.profileService.findAll().then((rows) =>
+            rows.find((r) => r.locale === locale) ?? null,
+          ),
+          this.siteSettingsService.findByLocale(locale),
+          this.projectsService.findAll().then((rows) =>
+            rows.filter((p) => p.locale === locale),
+          ),
+          this.techStackService.findAll().then((rows) =>
+            rows.filter((t) => t.locale === locale),
+          ),
+          this.aboutService.findAll().then((rows) =>
+            rows.find((r) => r.locale === locale) ?? null,
+          ),
+          this.experienceService.findAll().then((rows) =>
+            rows.filter((r) => r.locale === locale),
+          ),
+          this.educationService.findAll().then((rows) =>
+            rows.filter((r) => r.locale === locale),
+          ),
+          this.certificationService.findAll().then((rows) =>
+            rows.filter((r) => r.locale === locale),
+          ),
+          this.uiTranslationsService.findByLocale(locale),
+        ]);
 
         return {
           locale,
@@ -69,6 +115,10 @@ export class ContentService {
           siteSettings,
           projects,
           techStack,
+          about,
+          experiences,
+          education,
+          certifications,
           ui: {
             frontend: ui?.frontendLabels ?? {},
             admin: ui?.adminLabels ?? {},

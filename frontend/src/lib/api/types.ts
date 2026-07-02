@@ -59,6 +59,69 @@ export interface TechStackItem {
   sortOrder?: number;
 }
 
+export interface ExpertiseArea {
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+export interface SkillGroup {
+  category: string;
+  skills: string[];
+}
+
+export interface AboutHighlight {
+  label: string;
+  value: string;
+}
+
+export interface AboutContent {
+  headline: string;
+  subtitle: string | null;
+  summary: string;
+  expertiseAreas: ExpertiseArea[];
+  skillGroups: SkillGroup[];
+  highlights: AboutHighlight[];
+  resumeUrl: string | null;
+  resumeLabel: string | null;
+  imageUrl?: string | null;
+  imageKey?: string | null;
+}
+
+export interface Experience {
+  id: string;
+  company: string;
+  role: string;
+  employmentType: string | null;
+  location: string | null;
+  period: string;
+  description: string | null;
+  highlights: string[];
+  technologies: string[];
+  isCurrent: boolean;
+  sortOrder?: number;
+}
+
+export interface EducationItem {
+  id: string;
+  institution: string;
+  degree: string;
+  field: string | null;
+  period: string;
+  description: string | null;
+  sortOrder?: number;
+}
+
+export interface Certification {
+  id: string;
+  name: string;
+  issuer: string;
+  issueDate: string | null;
+  credentialUrl: string | null;
+  description: string | null;
+  sortOrder?: number;
+}
+
 export interface UiLabels {
   frontend: Record<string, string>;
   admin: Record<string, string>;
@@ -71,6 +134,10 @@ export interface ContentBundle {
   siteSettings: SiteSettings | null;
   projects: Project[];
   techStack: TechStackItem[];
+  about: AboutContent | null;
+  experiences: Experience[];
+  education: EducationItem[];
+  certifications: Certification[];
   ui: UiLabels;
 }
 

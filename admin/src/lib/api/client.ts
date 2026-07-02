@@ -3,8 +3,12 @@
  */
 
 import type {
+  AboutContent,
   AdminContentBundles,
+  Certification,
   ContentBundle,
+  EducationItem,
+  Experience,
   Locale,
   ProfileContent,
   Project,
@@ -110,6 +114,69 @@ export const adminApi = {
 
   deleteTechStack: (id: string) =>
     adminFetch<void>(`/tech-stack/${id}`, { method: 'DELETE' }),
+
+  getAboutAll: () => adminFetch<AboutContent[]>('/about'),
+
+  upsertAbout: (body: AboutContent & { locale: Locale }) =>
+    adminFetch<AboutContent>('/about', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  getExperiences: () => adminFetch<Experience[]>('/experience'),
+
+  upsertExperience: (
+    body: Partial<Experience> & {
+      locale: Locale;
+      company: string;
+      role: string;
+      period: string;
+      highlights: string[];
+      technologies: string[];
+    },
+  ) =>
+    adminFetch<Experience>('/experience', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  deleteExperience: (id: string) =>
+    adminFetch<void>(`/experience/${id}`, { method: 'DELETE' }),
+
+  getEducation: () => adminFetch<EducationItem[]>('/education'),
+
+  upsertEducation: (
+    body: Partial<EducationItem> & {
+      locale: Locale;
+      institution: string;
+      degree: string;
+      period: string;
+    },
+  ) =>
+    adminFetch<EducationItem>('/education', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  deleteEducation: (id: string) =>
+    adminFetch<void>(`/education/${id}`, { method: 'DELETE' }),
+
+  getCertifications: () => adminFetch<Certification[]>('/certification'),
+
+  upsertCertification: (
+    body: Partial<Certification> & {
+      locale: Locale;
+      name: string;
+      issuer: string;
+    },
+  ) =>
+    adminFetch<Certification>('/certification', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  deleteCertification: (id: string) =>
+    adminFetch<void>(`/certification/${id}`, { method: 'DELETE' }),
 
   uploadMedia: async (file: File, folder = 'uploads') => {
     const token = getStoredToken();

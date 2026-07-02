@@ -6,6 +6,10 @@ import { Project } from '@modules/projects/entities/project.entity';
 import { SiteSettings } from '@modules/site-settings/entities/site-settings.entity';
 import { TechStackItem } from '@modules/tech-stack/entities/tech-stack-item.entity';
 import { UiTranslation } from '@modules/ui-translations/entities/ui-translation.entity';
+import { AboutContent } from '@modules/about/entities/about-content.entity';
+import { Experience } from '@modules/experience/entities/experience.entity';
+import { EducationItem } from '@modules/education/entities/education-item.entity';
+import { Certification } from '@modules/certification/entities/certification.entity';
 
 /**
  * Geliştirme ortamı için örnek CMS verisi.
@@ -25,6 +29,10 @@ export class SeedService implements OnModuleInit {
     if ((await this.em.count(UiTranslation)) === 0) {
       this.logger.log('UI çevirileri ekleniyor...');
       await this.seedUiTranslations();
+    }
+    if ((await this.em.count(AboutContent)) === 0) {
+      this.logger.log('CV / özgeçmiş içeriği ekleniyor...');
+      await this.seedCv();
     }
   }
 
@@ -68,6 +76,9 @@ export class SeedService implements OnModuleInit {
         brandSubtitle: 'Backend Mimarı',
         navItems: [
           { label: 'Ana Sayfa', href: '/tr' },
+          { label: 'Hakkımda', href: '/tr/about' },
+          { label: 'Deneyim', href: '/tr/experience' },
+          { label: 'Eğitim', href: '/tr/education' },
           { label: 'Teknoloji Yığını', href: '/tr/tech-stack' },
           { label: 'Projeler', href: '/tr/projects' },
         ],
@@ -95,6 +106,9 @@ export class SeedService implements OnModuleInit {
         brandSubtitle: 'Backend Architect',
         navItems: [
           { label: 'Home', href: '/en' },
+          { label: 'About', href: '/en/about' },
+          { label: 'Experience', href: '/en/experience' },
+          { label: 'Education', href: '/en/education' },
           { label: 'Tech Stack', href: '/en/tech-stack' },
           { label: 'Projects', href: '/en/projects' },
         ],
@@ -170,6 +184,278 @@ export class SeedService implements OnModuleInit {
     ]);
   }
 
+  /**
+   * Hakkımda / deneyim / eğitim / sertifika örnek verisi.
+   * Ayrıca mevcut kurulumlarda site ayarlarındaki nav öğelerine
+   * CV linklerini idempotent şekilde ekler.
+   */
+  private async seedCv(): Promise<void> {
+    await this.em.save(AboutContent, [
+      {
+        locale: 'tr',
+        headline: 'Merhaba, ben Emre Kılıç',
+        subtitle: 'Backend Mühendisi & Sistem Mimarı',
+        summary:
+          'Sekiz yılı aşkın süredir yüksek trafikli dağıtık sistemler tasarlıyor ve ölçekliyorum. Odağım; gözlemlenebilirlik, dayanıklılık ve teknik borcu kontrol altında tutan sürdürülebilir mimariler kurmak. Karmaşık problemleri sade, test edilebilir ve bakımı kolay çözümlere indirgemekten keyif alıyorum.',
+        expertiseAreas: [
+          {
+            title: 'Dağıtık Sistemler',
+            description:
+              'Mikroservis mimarileri, olay güdümlü tasarım, mesaj kuyrukları ve yüksek erişilebilirlik desenleri.',
+            icon: '◈',
+          },
+          {
+            title: 'API & Backend',
+            description:
+              'REST/gRPC servisleri, kimlik doğrulama, hız sınırlama ve performans optimizasyonu.',
+            icon: '◉',
+          },
+          {
+            title: 'Bulut & DevOps',
+            description:
+              'Docker, Kubernetes, CI/CD hatları ve altyapının kod olarak yönetimi.',
+            icon: '☁',
+          },
+          {
+            title: 'Gözlemlenebilirlik',
+            description:
+              'Merkezi loglama, metrik toplama, dağıtık izleme ve uyarı sistemleri.',
+            icon: '◎',
+          },
+        ],
+        skillGroups: [
+          { category: 'Diller', skills: ['Go', 'TypeScript', 'Rust', 'Python', 'SQL'] },
+          { category: 'Backend', skills: ['NestJS', 'Node.js', 'gRPC', 'GraphQL'] },
+          { category: 'Veri', skills: ['PostgreSQL', 'Redis', 'ClickHouse', 'Kafka'] },
+          { category: 'Altyapı', skills: ['Docker', 'Kubernetes', 'Terraform', 'AWS'] },
+        ],
+        highlights: [
+          { label: 'Yıl Deneyim', value: '8+' },
+          { label: 'Yönetilen Servis', value: '30+' },
+          { label: 'Çalışma Süresi', value: '99.9%' },
+        ],
+        resumeLabel: 'Özgeçmişi İndir (PDF)',
+        resumeUrl: null,
+      },
+      {
+        locale: 'en',
+        headline: "Hi, I'm Emre Kılıç",
+        subtitle: 'Backend Engineer & System Architect',
+        summary:
+          'For over eight years I have designed and scaled high-traffic distributed systems. My focus is building sustainable architectures with strong observability and resilience while keeping technical debt in check. I enjoy reducing complex problems into simple, testable and maintainable solutions.',
+        expertiseAreas: [
+          {
+            title: 'Distributed Systems',
+            description:
+              'Microservice architectures, event-driven design, message queues and high-availability patterns.',
+            icon: '◈',
+          },
+          {
+            title: 'API & Backend',
+            description:
+              'REST/gRPC services, authentication, rate limiting and performance optimization.',
+            icon: '◉',
+          },
+          {
+            title: 'Cloud & DevOps',
+            description:
+              'Docker, Kubernetes, CI/CD pipelines and infrastructure as code.',
+            icon: '☁',
+          },
+          {
+            title: 'Observability',
+            description:
+              'Centralized logging, metrics collection, distributed tracing and alerting.',
+            icon: '◎',
+          },
+        ],
+        skillGroups: [
+          { category: 'Languages', skills: ['Go', 'TypeScript', 'Rust', 'Python', 'SQL'] },
+          { category: 'Backend', skills: ['NestJS', 'Node.js', 'gRPC', 'GraphQL'] },
+          { category: 'Data', skills: ['PostgreSQL', 'Redis', 'ClickHouse', 'Kafka'] },
+          { category: 'Infrastructure', skills: ['Docker', 'Kubernetes', 'Terraform', 'AWS'] },
+        ],
+        highlights: [
+          { label: 'Years of Experience', value: '8+' },
+          { label: 'Managed Services', value: '30+' },
+          { label: 'Uptime', value: '99.9%' },
+        ],
+        resumeLabel: 'Download Resume (PDF)',
+        resumeUrl: null,
+      },
+    ]);
+
+    await this.em.save(Experience, [
+      {
+        locale: 'tr',
+        company: 'Cartech',
+        role: 'Kıdemli Backend Mühendisi',
+        employmentType: 'Tam Zamanlı',
+        location: 'İzmir, Türkiye',
+        period: '2021 — Günümüz',
+        description:
+          'Filo yönetimi platformunun backend mimarisinden sorumluyum; gerçek zamanlı telemetri ve teşhis servislerini ölçekliyorum.',
+        highlights: [
+          'Gerçek zamanlı sensör verisi işleyen olay güdümlü mimariyi tasarladım (günde 2M+ olay).',
+          'API yanıt sürelerini %40 azalttım; önbellekleme ve sorgu optimizasyonu.',
+          'Gözlemlenebilirlik altyapısını kurdum; ortalama arıza tespit süresini yarıya indirdim.',
+        ],
+        technologies: ['Go', 'gRPC', 'PostgreSQL', 'Kafka', 'Kubernetes'],
+        isCurrent: true,
+        sortOrder: 1,
+      },
+      {
+        locale: 'tr',
+        company: 'LogExpo',
+        role: 'Backend Mühendisi',
+        employmentType: 'Tam Zamanlı',
+        location: 'Uzaktan',
+        period: '2018 — 2021',
+        description:
+          'Merkezi loglama ve gözlemlenebilirlik platformunun çekirdek servislerini geliştirdim.',
+        highlights: [
+          'Terabaytlarca log için saniye altı sorgu gecikmesi sağlayan hattı geliştirdim.',
+          'Çok kiracılı (multi-tenant) veri izolasyon katmanını tasarladım.',
+        ],
+        technologies: ['Rust', 'ClickHouse', 'Redis', 'Docker'],
+        isCurrent: false,
+        sortOrder: 2,
+      },
+      {
+        locale: 'en',
+        company: 'Cartech',
+        role: 'Senior Backend Engineer',
+        employmentType: 'Full-time',
+        location: 'Izmir, Turkey',
+        period: '2021 — Present',
+        description:
+          'Responsible for the backend architecture of a fleet management platform, scaling real-time telemetry and diagnostics services.',
+        highlights: [
+          'Designed the event-driven architecture processing real-time sensor data (2M+ events/day).',
+          'Reduced API response times by 40% through caching and query optimization.',
+          'Built the observability stack, cutting mean time to detection in half.',
+        ],
+        technologies: ['Go', 'gRPC', 'PostgreSQL', 'Kafka', 'Kubernetes'],
+        isCurrent: true,
+        sortOrder: 1,
+      },
+      {
+        locale: 'en',
+        company: 'LogExpo',
+        role: 'Backend Engineer',
+        employmentType: 'Full-time',
+        location: 'Remote',
+        period: '2018 — 2021',
+        description:
+          'Developed the core services of a centralized logging and observability platform.',
+        highlights: [
+          'Built the pipeline delivering sub-second query latency for terabytes of logs.',
+          'Designed the multi-tenant data isolation layer.',
+        ],
+        technologies: ['Rust', 'ClickHouse', 'Redis', 'Docker'],
+        isCurrent: false,
+        sortOrder: 2,
+      },
+    ]);
+
+    await this.em.save(EducationItem, [
+      {
+        locale: 'tr',
+        institution: 'Ege Üniversitesi',
+        degree: 'Bilgisayar Mühendisliği, Lisans',
+        field: 'Bilgisayar Mühendisliği',
+        period: '2014 — 2018',
+        description:
+          'Dağıtık sistemler ve veritabanı mimarisi üzerine yoğunlaştım. Mezuniyet projesi: dağıtık iş kuyruğu motoru.',
+        sortOrder: 1,
+      },
+      {
+        locale: 'en',
+        institution: 'Ege University',
+        degree: 'B.Sc. in Computer Engineering',
+        field: 'Computer Engineering',
+        period: '2014 — 2018',
+        description:
+          'Focused on distributed systems and database architecture. Graduation project: a distributed job queue engine.',
+        sortOrder: 1,
+      },
+    ]);
+
+    await this.em.save(Certification, [
+      {
+        locale: 'tr',
+        name: 'Certified Kubernetes Administrator (CKA)',
+        issuer: 'Cloud Native Computing Foundation',
+        issueDate: '2023',
+        description: 'Kubernetes küme yönetimi ve operasyon yetkinliği.',
+        sortOrder: 1,
+      },
+      {
+        locale: 'tr',
+        name: 'AWS Certified Solutions Architect — Associate',
+        issuer: 'Amazon Web Services',
+        issueDate: '2022',
+        description: 'Bulut mimarisi tasarımı ve en iyi uygulamalar.',
+        sortOrder: 2,
+      },
+      {
+        locale: 'en',
+        name: 'Certified Kubernetes Administrator (CKA)',
+        issuer: 'Cloud Native Computing Foundation',
+        issueDate: '2023',
+        description: 'Kubernetes cluster administration and operations.',
+        sortOrder: 1,
+      },
+      {
+        locale: 'en',
+        name: 'AWS Certified Solutions Architect — Associate',
+        issuer: 'Amazon Web Services',
+        issueDate: '2022',
+        description: 'Cloud architecture design and best practices.',
+        sortOrder: 2,
+      },
+    ]);
+
+    await this.ensureCvNavItems();
+  }
+
+  /** Mevcut site ayarlarına CV nav linklerini ekler (yoksa). */
+  private async ensureCvNavItems(): Promise<void> {
+    const cvNav: Record<'tr' | 'en', Array<{ label: string; href: string }>> = {
+      tr: [
+        { label: 'Hakkımda', href: '/tr/about' },
+        { label: 'Deneyim', href: '/tr/experience' },
+        { label: 'Eğitim', href: '/tr/education' },
+      ],
+      en: [
+        { label: 'About', href: '/en/about' },
+        { label: 'Experience', href: '/en/experience' },
+        { label: 'Education', href: '/en/education' },
+      ],
+    };
+
+    const allSettings = await this.em.find(SiteSettings);
+    for (const settings of allSettings) {
+      const locale = settings.locale as 'tr' | 'en';
+      const links = cvNav[locale];
+      if (!links) continue;
+
+      const existing = settings.navItems ?? [];
+      const existingHrefs = new Set(existing.map((i) => i.href));
+      const missing = links.filter((l) => !existingHrefs.has(l.href));
+      if (missing.length === 0) continue;
+
+      // "Ana Sayfa" linkinden hemen sonra ekle, yoksa başa koy.
+      const homeHref = `/${locale}`;
+      const homeIndex = existing.findIndex((i) => i.href === homeHref);
+      const insertAt = homeIndex >= 0 ? homeIndex + 1 : 0;
+      const next = [...existing];
+      next.splice(insertAt, 0, ...missing);
+      settings.navItems = next;
+      await this.em.save(SiteSettings, settings);
+    }
+  }
+
   private async seedUiTranslations(): Promise<void> {
     await this.em.save(UiTranslation, [
       {
@@ -200,6 +486,10 @@ export class SeedService implements OnModuleInit {
           'nav.siteSettings': 'Site Ayarları',
           'nav.projects': 'Projeler',
           'nav.techStack': 'Tech Stack',
+          'nav.about': 'Hakkımda',
+          'nav.experience': 'Deneyim',
+          'nav.education': 'Eğitim',
+          'nav.certifications': 'Sertifikalar',
           'nav.login': 'Giriş',
           'nav.logout': 'Çıkış',
         },
@@ -232,6 +522,10 @@ export class SeedService implements OnModuleInit {
           'nav.siteSettings': 'Site Settings',
           'nav.projects': 'Projects',
           'nav.techStack': 'Tech Stack',
+          'nav.about': 'About',
+          'nav.experience': 'Experience',
+          'nav.education': 'Education',
+          'nav.certifications': 'Certifications',
           'nav.login': 'Login',
           'nav.logout': 'Logout',
         },

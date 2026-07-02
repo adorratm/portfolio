@@ -6,6 +6,10 @@ import { AuthModule } from '@modules/auth/auth.module';
 import { ProfileModule } from '@modules/profile/profile.module';
 import { ProjectsModule } from '@modules/projects/projects.module';
 import { TechStackModule } from '@modules/tech-stack/tech-stack.module';
+import { AboutModule } from '@modules/about/about.module';
+import { ExperienceModule } from '@modules/experience/experience.module';
+import { EducationModule } from '@modules/education/education.module';
+import { CertificationModule } from '@modules/certification/certification.module';
 import { SiteSettingsModule } from '@modules/site-settings/site-settings.module';
 import { MediaModule } from '@modules/media/media.module';
 import { MetricsModule } from '@modules/metrics/metrics.module';
@@ -31,6 +35,10 @@ import { ContentModule } from '@modules/content/content.module';
     ProfileModule,
     ProjectsModule,
     TechStackModule,
+    AboutModule,
+    ExperienceModule,
+    EducationModule,
+    CertificationModule,
     SiteSettingsModule,
     MediaModule,
     MetricsModule,

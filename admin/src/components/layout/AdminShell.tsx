@@ -9,6 +9,10 @@ import { clearStoredToken, getStoredToken } from '@/lib/api/client';
 const CMS_NAV = [
   { href: '/dashboard', labelKey: 'nav.dashboard', fallback: 'Dashboard', icon: '◉' },
   { href: '/dashboard/cms/profile', labelKey: 'nav.profile', fallback: 'Profil / Hero', icon: '◎' },
+  { href: '/dashboard/cms/about', labelKey: 'nav.about', fallback: 'Hakkımda', icon: '☰' },
+  { href: '/dashboard/cms/experience', labelKey: 'nav.experience', fallback: 'Deneyim', icon: '▤' },
+  { href: '/dashboard/cms/education', labelKey: 'nav.education', fallback: 'Eğitim', icon: '◧' },
+  { href: '/dashboard/cms/certification', labelKey: 'nav.certifications', fallback: 'Sertifikalar', icon: '✦' },
   { href: '/dashboard/cms/site-settings', labelKey: 'nav.siteSettings', fallback: 'Site Ayarları', icon: '◇' },
   { href: '/dashboard/cms/projects', labelKey: 'nav.projects', fallback: 'Projeler', icon: '▸' },
   { href: '/dashboard/cms/tech-stack', labelKey: 'nav.techStack', fallback: 'Tech Stack', icon: '◈' },

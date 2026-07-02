@@ -69,12 +69,87 @@ export interface TechStackItem {
   isPublished: boolean;
 }
 
+export interface ExpertiseArea {
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+export interface SkillGroup {
+  category: string;
+  skills: string[];
+}
+
+export interface AboutHighlight {
+  label: string;
+  value: string;
+}
+
+export interface AboutContent {
+  locale?: Locale;
+  headline: string;
+  subtitle: string | null;
+  summary: string;
+  expertiseAreas: ExpertiseArea[];
+  skillGroups: SkillGroup[];
+  highlights: AboutHighlight[];
+  resumeUrl: string | null;
+  resumeLabel: string | null;
+  imageKey?: string | null;
+  imageUrl?: string | null;
+  isPublished?: boolean;
+}
+
+export interface Experience {
+  id: string;
+  locale: Locale;
+  company: string;
+  role: string;
+  employmentType: string | null;
+  location: string | null;
+  period: string;
+  description: string | null;
+  highlights: string[];
+  technologies: string[];
+  isCurrent: boolean;
+  sortOrder: number;
+  isPublished: boolean;
+}
+
+export interface EducationItem {
+  id: string;
+  locale: Locale;
+  institution: string;
+  degree: string;
+  field: string | null;
+  period: string;
+  description: string | null;
+  sortOrder: number;
+  isPublished: boolean;
+}
+
+export interface Certification {
+  id: string;
+  locale: Locale;
+  name: string;
+  issuer: string;
+  issueDate: string | null;
+  credentialUrl: string | null;
+  description: string | null;
+  sortOrder: number;
+  isPublished: boolean;
+}
+
 export interface ContentBundle {
   locale: Locale;
   profile: ProfileContent | null;
   siteSettings: SiteSettings | null;
   projects: Project[];
   techStack: TechStackItem[];
+  about?: AboutContent | null;
+  experiences?: Experience[];
+  education?: EducationItem[];
+  certifications?: Certification[];
   ui: {
     frontend: Record<string, string>;
     admin: Record<string, string>;
