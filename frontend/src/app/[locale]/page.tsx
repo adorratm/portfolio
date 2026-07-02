@@ -38,12 +38,12 @@ export default async function HomePage({
 
   return (
     <>
-      <SiteNav locale={locale} settings={siteSettings} />
+      <SiteNav locale={locale} settings={siteSettings} profile={profile} />
 
       <main className="relative min-h-screen pt-20 lg:pl-64">
         <AmbientBackground showFloatingDecor />
 
-        <div className="relative z-10 mx-auto max-w-[1440px] px-4 py-12 md:px-8">
+        <div className="relative z-10 mx-auto max-w-360 px-4 py-12 md:px-8">
           {profile && (
             <HeroSection
               badgeText={profile.badgeText}
@@ -65,7 +65,7 @@ export default async function HomePage({
 
           {siteSettings && (
             <section className="mb-24 grid grid-cols-1 gap-6 md:grid-cols-3">
-              <div className="glass-card scanline-container col-span-2 min-h-[300px] rounded-xl p-8">
+              <div className="glass-card scanline-container col-span-2 min-h-75 rounded-xl p-8">
                 <h4 className="mb-2 text-2xl font-semibold">
                   {siteSettings.philosophyTitle}
                 </h4>

@@ -277,7 +277,10 @@ export default function SiteSettingsCmsPage() {
               }}
             />
           </FormField>
-          <FormField label="Sosyal Linkler (JSON)">
+          <FormField
+            label="Sosyal Linkler (JSON)"
+            hint='[{ "type": "GitHub", "url": "https://...", "icon": "" }] — icon alanına emoji/simge yazabilirsiniz'
+          >
             <textarea
               className={`${textareaClass} min-h-24`}
               value={JSON.stringify(form.socialLinks, null, 2)}

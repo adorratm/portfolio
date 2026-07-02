@@ -21,7 +21,7 @@ export default async function TechStackDetailPage({
   const backLabel = locale === 'tr' ? '← Tech Stack' : '← Tech Stack';
 
   return (
-    <PageShell locale={locale} settings={content.siteSettings}>
+    <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
       <Link
         href={`/${locale}/tech-stack`}
         className="hover-bounce mb-8 inline-flex font-mono text-sm text-secondary transition-colors hover:text-primary active:scale-95"

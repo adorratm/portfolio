@@ -21,7 +21,7 @@ export default async function TechStackPage({
   }
 
   return (
-    <PageShell locale={locale} settings={content.siteSettings}>
+    <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
       <TechStackMatrix
         items={content.techStack}
         settings={content.siteSettings}

@@ -23,7 +23,7 @@ export default async function ExperiencePage({
   const experiences = content.experiences ?? [];
 
   return (
-    <PageShell locale={locale} settings={content.siteSettings}>
+    <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
       <CvHero
         badge={locale === 'tr' ? 'Kariyer Yolu' : 'Career Path'}
         title={locale === 'tr' ? 'İş Deneyimi' : 'Work Experience'}

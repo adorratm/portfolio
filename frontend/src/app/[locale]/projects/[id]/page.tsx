@@ -27,7 +27,7 @@ export default async function ProjectDetailPage({
   const backLabel = locale === 'tr' ? '← Tüm Projeler' : '← All Projects';
 
   return (
-    <PageShell locale={locale} settings={content.siteSettings}>
+    <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
       <Link
         href={`/${locale}/projects`}
         className="mb-8 inline-flex font-mono text-sm text-secondary transition-colors hover:text-primary"

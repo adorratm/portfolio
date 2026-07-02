@@ -28,7 +28,7 @@ export default async function AboutPage({
 
   if (!about) {
     return (
-      <PageShell locale={locale} settings={content.siteSettings}>
+      <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
         <CvHero badge={badge} title={title} />
         <p className="font-mono text-on-surface-variant">
           {locale === 'tr'
@@ -40,7 +40,7 @@ export default async function AboutPage({
   }
 
   return (
-    <PageShell locale={locale} settings={content.siteSettings}>
+    <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
       <CvHero badge={badge} title={title} description={about.subtitle ?? undefined} />
 
       <section className="mb-12 grid grid-cols-1 gap-6 lg:grid-cols-3">

@@ -24,7 +24,7 @@ export default async function EducationPage({
   const certifications = content.certifications ?? [];
 
   return (
-    <PageShell locale={locale} settings={content.siteSettings}>
+    <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
       <CvHero
         badge={locale === 'tr' ? 'Akademik & Sertifikalar' : 'Academic & Certifications'}
         title={locale === 'tr' ? 'Eğitim' : 'Education'}

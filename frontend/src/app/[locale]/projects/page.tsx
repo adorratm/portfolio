@@ -28,7 +28,7 @@ export default async function ProjectsPage({
     (locale === 'tr' ? 'Projeler' : 'Projects');
 
   return (
-    <PageShell locale={locale} settings={content.siteSettings}>
+    <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
       <div className="scanline-container relative mb-8 overflow-hidden rounded-xl border border-outline-variant bg-surface-container-low p-8 shadow-lg">
         <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/10 blur-[100px]" />
         <span className="pulse-effect relative z-10 mb-2 block font-mono text-[11px] font-bold uppercase tracking-widest text-secondary">
