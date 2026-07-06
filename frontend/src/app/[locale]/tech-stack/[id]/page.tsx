@@ -34,12 +34,13 @@ export default async function TechStackDetailPage({
 
         <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-start">
           {item.imageUrl && (
-            <div className="pulse-animation relative h-32 w-32 shrink-0 overflow-hidden rounded-xl border border-primary bg-surface-container shadow-[0_0_15px_rgba(189,147,249,0.3)]">
+            <div className="pulse-animation relative h-32 w-32 shrink-0 overflow-hidden rounded-xl border border-primary bg-surface-container p-3 shadow-[0_0_15px_rgba(189,147,249,0.3)]">
               <Image
                 src={item.imageUrl}
                 alt={item.name}
                 fill
-                className="object-cover"
+                sizes="128px"
+                className="object-contain p-2"
               />
             </div>
           )}

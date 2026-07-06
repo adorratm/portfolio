@@ -37,36 +37,88 @@ function sortCategories(categories: string[]): string[] {
   });
 }
 
+function TechIcon({
+  item,
+  size = 'sm',
+}: {
+  item: TechStackItem;
+  size?: 'sm' | 'md';
+}) {
+  const box = size === 'sm' ? 'h-9 w-9' : 'h-12 w-12';
+  const imageSizes = size === 'sm' ? '36px' : '48px';
+
+  if (item.imageUrl) {
+    return (
+      <span
+        className={`relative inline-flex shrink-0 ${box} items-center justify-center overflow-hidden rounded-lg border border-outline-variant/40 bg-surface-container-highest`}
+      >
+        <Image
+          src={item.imageUrl}
+          alt=""
+          fill
+          sizes={imageSizes}
+          className="object-contain p-1.5"
+        />
+      </span>
+    );
+  }
+
+  if (item.iconName) {
+    return (
+      <span
+        className={`inline-flex shrink-0 ${box} items-center justify-center rounded-lg border border-outline-variant/40 bg-surface-container-highest font-mono text-base`}
+      >
+        {item.iconName}
+      </span>
+    );
+  }
+
+  return null;
+}
+
 function ProgressBar({
   item,
   locale,
   accent = 'secondary',
+  showDescription = false,
 }: {
   item: TechStackItem;
   locale: string;
   accent?: 'secondary' | 'green';
+  showDescription?: boolean;
 }) {
   const barClass =
     accent === 'green'
       ? 'bg-dracula-green glow-green bar-fill-animate'
       : 'bg-secondary glow-cyan bar-fill-animate';
   const textClass = accent === 'green' ? 'text-dracula-green' : 'text-secondary';
+  const yearsLabel =
+    item.yearsExperience != null
+      ? locale === 'tr'
+        ? `${item.yearsExperience}+ yıl`
+        : `${item.yearsExperience}+ yrs`
+      : null;
 
   return (
     <Link
       href={`/${locale}/tech-stack/${item.id}`}
       className="group block space-y-2 rounded-lg p-2 transition-all hover:bg-surface-container-highest/50 active:scale-[0.99]"
     >
-      <div className="flex justify-between font-mono text-sm">
-        <span className="flex items-center gap-2 text-on-background transition-colors group-hover:text-primary">
-          {item.imageUrl && (
-            <span className="relative inline-block h-6 w-6 overflow-hidden rounded transition-transform group-hover:scale-110">
-              <Image src={item.imageUrl} alt="" fill className="object-cover" />
-            </span>
-          )}
-          {item.name}
+      <div className="flex items-start justify-between gap-3 font-mono text-sm">
+        <span className="flex min-w-0 flex-1 items-center gap-2.5 text-on-background transition-colors group-hover:text-primary">
+          <TechIcon item={item} />
+          <span className="min-w-0">
+            <span className="block truncate font-medium">{item.name}</span>
+            {yearsLabel && (
+              <span className="mt-0.5 block text-[11px] text-on-surface-variant">
+                {yearsLabel}
+              </span>
+            )}
+          </span>
         </span>
-        <span className={textClass}>{item.proficiencyLevel}%</span>
+        <span className={`shrink-0 pt-0.5 font-semibold ${textClass}`}>
+          {item.proficiencyLevel}%
+        </span>
       </div>
       <div className="h-3 w-full overflow-hidden rounded-full bg-surface-container-highest">
         <div
@@ -74,6 +126,11 @@ function ProgressBar({
           style={{ width: `${item.proficiencyLevel}%` }}
         />
       </div>
+      {showDescription && item.description && (
+        <p className="text-sm leading-relaxed text-on-surface-variant">
+          {item.description}
+        </p>
+      )}
     </Link>
   );
 }
@@ -115,7 +172,12 @@ export function TechStackMatrix({ items, settings, locale }: TechStackMatrixProp
             <h2 className="mb-6 text-2xl font-semibold text-secondary">{primary}</h2>
             <div className="space-y-6">
               {grouped[primary].map((item) => (
-                <ProgressBar key={item.id} item={item} locale={locale} />
+                <ProgressBar
+                  key={item.id}
+                  item={item}
+                  locale={locale}
+                  showDescription={!!item.description}
+                />
               ))}
             </div>
           </div>
@@ -133,6 +195,7 @@ export function TechStackMatrix({ items, settings, locale }: TechStackMatrixProp
                   item={item}
                   locale={locale}
                   accent="green"
+                  showDescription={!!item.description}
                 />
               ))}
             </div>
@@ -171,14 +234,12 @@ export function TechStackMatrix({ items, settings, locale }: TechStackMatrixProp
           <h2 className="mb-6 text-xl font-semibold">{cat}</h2>
           <div className="grid gap-6 md:grid-cols-2">
             {grouped[cat].map((item) => (
-              <div key={item.id}>
-                <ProgressBar item={item} locale={locale} />
-                {item.description && (
-                  <p className="mt-2 text-sm text-on-surface-variant">
-                    {item.description}
-                  </p>
-                )}
-              </div>
+              <ProgressBar
+                key={item.id}
+                item={item}
+                locale={locale}
+                showDescription={!!item.description}
+              />
             ))}
           </div>
         </div>
