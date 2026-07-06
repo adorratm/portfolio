@@ -13,9 +13,9 @@
     "lint": "eslint \"{src,test}/**/*.ts\" --fix"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1077.0",
-    "@aws-sdk/s3-request-presigner": "^3.1077.0",
-    "@bull-board/ui": "^8.0.2",
+    "@aws-sdk/client-s3": "^3.1079.0",
+    "@aws-sdk/s3-request-presigner": "^3.1079.0",
+    "@bull-board/ui": "^8.1.0",
     "@nestjs/bull-shared": "^11.0.4",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.1.27",
@@ -42,9 +42,9 @@
     "typeorm": "^1.0.0"
   },
   "devDependencies": {
-    "@bull-board/api": "^8.0.2",
-    "@bull-board/express": "^8.0.2",
-    "@bull-board/nestjs": "^8.0.2",
+    "@bull-board/api": "^8.1.0",
+    "@bull-board/express": "^8.1.0",
+    "@bull-board/nestjs": "^8.1.0",
     "@nestjs/cli": "^11.0.23",
     "@nestjs/schematics": "^11.1.0",
     "@nestjs/testing": "^11.1.27",
@@ -59,9 +59,9 @@
     "prettier": "^3.9.4",
     "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
-    "tsc-alias": "^1.8.17",
+    "tsc-alias": "^1.9.0",
     "tsconfig-paths": "^4.2.0",
-    "tsx": "^4.22.4",
+    "tsx": "^4.23.0",
     "typescript": "^6.0.3"
   },
   "volta": {
