@@ -22,16 +22,29 @@ export default async function EducationPage({
 
   const education = content.education ?? [];
   const certifications = content.certifications ?? [];
+  const hasCertifications = certifications.length > 0;
 
   return (
     <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
       <CvHero
-        badge={locale === 'tr' ? 'Akademik & Sertifikalar' : 'Academic & Certifications'}
+        badge={
+          locale === 'tr'
+            ? hasCertifications
+              ? 'Akademik & Sertifikalar'
+              : 'Akademik Geçmiş'
+            : hasCertifications
+              ? 'Academic & Certifications'
+              : 'Academic Background'
+        }
         title={locale === 'tr' ? 'Eğitim' : 'Education'}
         description={
           locale === 'tr'
-            ? 'Akademik geçmişim ve sürekli öğrenmeyi kanıtlayan sertifikalarım.'
-            : 'My academic background and certifications that reflect continuous learning.'
+            ? hasCertifications
+              ? 'Akademik geçmişim ve sürekli öğrenmeyi kanıtlayan sertifikalarım.'
+              : 'Akademik geçmişim ve eğitim yolculuğum.'
+            : hasCertifications
+              ? 'My academic background and certifications that reflect continuous learning.'
+              : 'My academic background and educational journey.'
         }
       />
 
@@ -70,16 +83,12 @@ export default async function EducationPage({
         )}
       </section>
 
-      <section>
-        <h2 className="mb-6 flex items-center gap-2 text-2xl font-semibold">
-          <span className="text-tertiary">✦</span>
-          {locale === 'tr' ? 'Sertifikalar' : 'Certifications'}
-        </h2>
-        {certifications.length === 0 ? (
-          <p className="font-mono text-on-surface-variant">
-            {locale === 'tr' ? 'Sertifika yok.' : 'No certifications.'}
-          </p>
-        ) : (
+      {hasCertifications && (
+        <section>
+          <h2 className="mb-6 flex items-center gap-2 text-2xl font-semibold">
+            <span className="text-tertiary">✦</span>
+            {locale === 'tr' ? 'Sertifikalar' : 'Certifications'}
+          </h2>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {certifications.map((cert) => (
               <article
@@ -111,8 +120,8 @@ export default async function EducationPage({
               </article>
             ))}
           </div>
-        )}
-      </section>
+        </section>
+      )}
     </PageShell>
   );
 }

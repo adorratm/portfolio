@@ -21,6 +21,12 @@ import { useLocaleContent } from '@/providers/LocaleProvider';
 
 type AboutForm = Omit<AboutContent, 'locale'>;
 
+const parseSkills = (text: string) =>
+  text
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
 const emptyAbout = (): AboutForm => ({
   headline: '',
   subtitle: '',
@@ -42,17 +48,19 @@ export default function AboutCmsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [skillInputs, setSkillInputs] = useState<string[]>([]);
 
   const load = useCallback(async () => {
     const rows = await adminApi.getAboutAll();
     const row = rows.find((r) => r.locale === locale);
     if (row) {
+      const groups = row.skillGroups ?? [];
       setForm({
         headline: row.headline,
         subtitle: row.subtitle ?? '',
         summary: row.summary,
         expertiseAreas: row.expertiseAreas ?? [],
-        skillGroups: row.skillGroups ?? [],
+        skillGroups: groups,
         highlights: row.highlights ?? [],
         resumeUrl: row.resumeUrl ?? '',
         resumeLabel: row.resumeLabel ?? '',
@@ -60,8 +68,10 @@ export default function AboutCmsPage() {
         imageUrl: row.imageUrl ?? null,
         isPublished: row.isPublished ?? true,
       });
+      setSkillInputs(groups.map((g) => (g.skills ?? []).join(', ')));
     } else {
       setForm(emptyAbout());
+      setSkillInputs([]);
     }
   }, [locale]);
 
@@ -85,19 +95,30 @@ export default function AboutCmsPage() {
   };
 
   // ——— Skill groups ———
-  const updateGroup = (i: number, field: 'category' | 'skills', value: string) => {
+  const updateGroup = (i: number, field: 'category', value: string) => {
     setForm((prev) => {
       const groups = [...prev.skillGroups];
-      groups[i] = {
-        ...groups[i],
-        [field]:
-          field === 'skills'
-            ? value.split(',').map((s) => s.trim()).filter(Boolean)
-            : value,
-      };
+      groups[i] = { ...groups[i], [field]: value };
       return { ...prev, skillGroups: groups };
     });
     setSaved(false);
+  };
+
+  const updateSkillInput = (i: number, value: string) => {
+    setSkillInputs((prev) => {
+      const next = [...prev];
+      next[i] = value;
+      return next;
+    });
+    setSaved(false);
+  };
+
+  const commitSkills = (i: number) => {
+    setForm((prev) => {
+      const groups = [...prev.skillGroups];
+      groups[i] = { ...groups[i], skills: parseSkills(skillInputs[i] ?? '') };
+      return { ...prev, skillGroups: groups };
+    });
   };
 
   // ——— Highlights ———
@@ -121,7 +142,10 @@ export default function AboutCmsPage() {
         subtitle: form.subtitle || null,
         summary: form.summary,
         expertiseAreas: form.expertiseAreas,
-        skillGroups: form.skillGroups,
+        skillGroups: form.skillGroups.map((g, i) => ({
+          ...g,
+          skills: parseSkills(skillInputs[i] ?? ''),
+        })),
         highlights: form.highlights,
         resumeUrl: form.resumeUrl || null,
         resumeLabel: form.resumeLabel || null,
@@ -309,14 +333,16 @@ export default function AboutCmsPage() {
               <input
                 className={inputClass}
                 placeholder="Yetenekler (virgülle ayır)"
-                value={(group.skills ?? []).join(', ')}
-                onChange={(e) => updateGroup(i, 'skills', e.target.value)}
+                value={skillInputs[i] ?? ''}
+                onChange={(e) => updateSkillInput(i, e.target.value)}
+                onBlur={() => commitSkills(i)}
               />
               <button
                 type="button"
-                onClick={() =>
-                  patch({ skillGroups: form.skillGroups.filter((_, x) => x !== i) })
-                }
+                onClick={() => {
+                  patch({ skillGroups: form.skillGroups.filter((_, x) => x !== i) });
+                  setSkillInputs((prev) => prev.filter((_, x) => x !== i));
+                }}
                 className="font-mono text-xs text-error hover:underline"
               >
                 Sil
@@ -325,11 +351,12 @@ export default function AboutCmsPage() {
           ))}
           <button
             type="button"
-            onClick={() =>
+            onClick={() => {
               patch({
                 skillGroups: [...form.skillGroups, { category: '', skills: [] }],
-              })
-            }
+              });
+              setSkillInputs((prev) => [...prev, '']);
+            }}
             className="rounded-lg border border-dashed border-outline-variant px-4 py-2 font-mono text-sm text-secondary hover:bg-surface-variant"
           >
             + Kategori Ekle

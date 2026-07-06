@@ -88,9 +88,9 @@ export default async function ExperiencePage({
 
                 {exp.technologies.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {exp.technologies.map((tech) => (
+                    {exp.technologies.map((tech, i) => (
                       <span
-                        key={tech}
+                        key={`${i}-${tech}`}
                         className="rounded-md border border-outline-variant/50 bg-background/50 px-2.5 py-1 font-mono text-xs text-secondary"
                       >
                         {tech}

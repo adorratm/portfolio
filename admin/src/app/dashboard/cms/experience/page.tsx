@@ -13,6 +13,12 @@ import { adminApi } from '@/lib/api/client';
 import type { Experience } from '@/lib/api/types';
 import { useLocaleContent } from '@/providers/LocaleProvider';
 
+const parseTechnologies = (text: string) =>
+  text
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
 const emptyExperience = (): Partial<Experience> => ({
   company: '',
   role: '',
@@ -35,6 +41,7 @@ export default function ExperienceCmsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [techInput, setTechInput] = useState('');
 
   const load = useCallback(async () => {
     const all = await adminApi.getExperiences();
@@ -44,6 +51,16 @@ export default function ExperienceCmsPage() {
   useEffect(() => {
     load().catch(() => setError('Deneyimler yüklenemedi.'));
   }, [load]);
+
+  const editingKey = editing ? (editing.id ?? 'new') : null;
+
+  useEffect(() => {
+    if (!editing) {
+      setTechInput('');
+      return;
+    }
+    setTechInput((editing.technologies ?? []).join(', '));
+  }, [editingKey]);
 
   const handleSave = async () => {
     if (!editing) return;
@@ -61,7 +78,7 @@ export default function ExperienceCmsPage() {
         period: editing.period ?? '',
         description: editing.description || undefined,
         highlights: editing.highlights ?? [],
-        technologies: editing.technologies ?? [],
+        technologies: parseTechnologies(techInput),
         isCurrent: editing.isCurrent ?? false,
         sortOrder: editing.sortOrder ?? 0,
         isPublished: editing.isPublished ?? true,
@@ -243,14 +260,12 @@ export default function ExperienceCmsPage() {
             <FormField label="Teknolojiler (virgülle ayır)">
               <input
                 className={inputClass}
-                value={(editing.technologies ?? []).join(', ')}
-                onChange={(e) =>
+                value={techInput}
+                onChange={(e) => setTechInput(e.target.value)}
+                onBlur={() =>
                   setEditing({
                     ...editing,
-                    technologies: e.target.value
-                      .split(',')
-                      .map((s) => s.trim())
-                      .filter(Boolean),
+                    technologies: parseTechnologies(techInput),
                   })
                 }
               />
