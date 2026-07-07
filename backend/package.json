@@ -15,7 +15,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1079.0",
     "@aws-sdk/s3-request-presigner": "^3.1079.0",
-    "@bull-board/ui": "^8.1.0",
+    "@bull-board/ui": "^8.1.1",
     "@nestjs/bull-shared": "^11.0.4",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.1.27",
@@ -42,9 +42,9 @@
     "typeorm": "^1.0.0"
   },
   "devDependencies": {
-    "@bull-board/api": "^8.1.0",
-    "@bull-board/express": "^8.1.0",
-    "@bull-board/nestjs": "^8.1.0",
+    "@bull-board/api": "^8.1.1",
+    "@bull-board/express": "^8.1.1",
+    "@bull-board/nestjs": "^8.1.1",
     "@nestjs/cli": "^11.0.23",
     "@nestjs/schematics": "^11.1.0",
     "@nestjs/testing": "^11.1.27",

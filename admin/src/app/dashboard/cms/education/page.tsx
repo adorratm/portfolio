@@ -8,6 +8,7 @@ import {
   inputClass,
   textareaClass,
 } from '@/components/cms/CmsForm';
+import { ConfirmDialog } from '@/components/cms/ConfirmDialog';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { adminApi } from '@/lib/api/client';
 import type { EducationItem } from '@/lib/api/types';
@@ -31,6 +32,8 @@ export default function EducationCmsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<EducationItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     const all = await adminApi.getEducation();
@@ -69,15 +72,20 @@ export default function EducationCmsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Bu eğitim kaydını silmek istediğinize emin misiniz?')) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setError(null);
     try {
-      await adminApi.deleteEducation(id);
+      await adminApi.deleteEducation(deleteTarget.id);
       await refreshBundle();
       await load();
-      if (editing?.id === id) setEditing(null);
+      if (editing?.id === deleteTarget.id) setEditing(null);
+      setDeleteTarget(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Silme başarısız.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -132,7 +140,7 @@ export default function EducationCmsPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDelete(r.id)}
+                        onClick={() => setDeleteTarget(r)}
                         className="text-error hover:underline"
                       >
                         Sil
@@ -242,6 +250,19 @@ export default function EducationCmsPage() {
         <p className="mt-4 font-mono text-sm text-dracula-green">✓ Kaydedildi</p>
       )}
       {error && <p className="mt-4 font-mono text-sm text-error">{error}</p>}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Eğitim Kaydını Sil"
+        message={
+          deleteTarget
+            ? `"${deleteTarget.degree}" kaydını kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`
+            : ''
+        }
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </CmsPageLayout>
   );
 }

@@ -25,11 +25,20 @@ export default async function AboutPage({
   const about = content.about;
   const badge = locale === 'tr' ? 'Profil' : 'Profile';
   const title = about?.headline ?? (locale === 'tr' ? 'Hakkımda' : 'About Me');
+  const profileImage =
+    about?.imageUrl ?? content.profile?.imageUrl ?? null;
+  const profileImageAlt =
+    content.profile?.headlineHighlight ?? title;
 
   if (!about) {
     return (
       <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
-        <CvHero badge={badge} title={title} />
+        <CvHero
+          badge={badge}
+          title={title}
+          imageUrl={profileImage}
+          imageAlt={profileImageAlt}
+        />
         <p className="font-mono text-on-surface-variant">
           {locale === 'tr'
             ? 'Hakkımda içeriği henüz eklenmedi.'
@@ -41,7 +50,13 @@ export default async function AboutPage({
 
   return (
     <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
-      <CvHero badge={badge} title={title} description={about.subtitle ?? undefined} />
+      <CvHero
+        badge={badge}
+        title={title}
+        description={about.subtitle ?? undefined}
+        imageUrl={profileImage}
+        imageAlt={profileImageAlt}
+      />
 
       <section className="mb-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="glass-card scanline-container col-span-1 rounded-xl p-8 lg:col-span-2">

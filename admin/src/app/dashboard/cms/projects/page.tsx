@@ -10,6 +10,7 @@ import {
   inputClass,
   textareaClass,
 } from '@/components/cms/CmsForm';
+import { ConfirmDialog } from '@/components/cms/ConfirmDialog';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { adminApi } from '@/lib/api/client';
 import type { Project, ProjectStatus } from '@/lib/api/types';
@@ -44,6 +45,8 @@ export default function ProjectsCmsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     const rows = await adminApi.getProjects();
@@ -87,15 +90,20 @@ export default function ProjectsCmsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Bu projeyi silmek istediğinize emin misiniz?')) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setError(null);
     try {
-      await adminApi.deleteProject(id);
+      await adminApi.deleteProject(deleteTarget.id);
       await refreshBundle();
       await load();
-      if (editing?.id === id) setEditing(null);
+      if (editing?.id === deleteTarget.id) setEditing(null);
+      setDeleteTarget(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Silme başarısız.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -170,7 +178,7 @@ export default function ProjectsCmsPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDelete(p.id)}
+                        onClick={() => setDeleteTarget(p)}
                         className="text-error hover:underline"
                       >
                         Sil
@@ -348,6 +356,19 @@ export default function ProjectsCmsPage() {
       {error && (
         <p className="mt-4 font-mono text-sm text-error">{error}</p>
       )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Projeyi Sil"
+        message={
+          deleteTarget
+            ? `"${deleteTarget.title}" projesini kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`
+            : ''
+        }
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </CmsPageLayout>
   );
 }

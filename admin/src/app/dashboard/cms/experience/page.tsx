@@ -8,6 +8,7 @@ import {
   inputClass,
   textareaClass,
 } from '@/components/cms/CmsForm';
+import { ConfirmDialog } from '@/components/cms/ConfirmDialog';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { adminApi } from '@/lib/api/client';
 import type { Experience } from '@/lib/api/types';
@@ -42,6 +43,8 @@ export default function ExperienceCmsPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [techInput, setTechInput] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<Experience | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     const all = await adminApi.getExperiences();
@@ -94,15 +97,20 @@ export default function ExperienceCmsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Bu deneyim kaydını silmek istediğinize emin misiniz?')) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setError(null);
     try {
-      await adminApi.deleteExperience(id);
+      await adminApi.deleteExperience(deleteTarget.id);
       await refreshBundle();
       await load();
-      if (editing?.id === id) setEditing(null);
+      if (editing?.id === deleteTarget.id) setEditing(null);
+      setDeleteTarget(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Silme başarısız.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -159,7 +167,7 @@ export default function ExperienceCmsPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDelete(r.id)}
+                        onClick={() => setDeleteTarget(r)}
                         className="text-error hover:underline"
                       >
                         Sil
@@ -317,6 +325,19 @@ export default function ExperienceCmsPage() {
         <p className="mt-4 font-mono text-sm text-dracula-green">✓ Kaydedildi</p>
       )}
       {error && <p className="mt-4 font-mono text-sm text-error">{error}</p>}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Deneyim Kaydını Sil"
+        message={
+          deleteTarget
+            ? `"${deleteTarget.role}" — ${deleteTarget.company} kaydını kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`
+            : ''
+        }
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </CmsPageLayout>
   );
 }

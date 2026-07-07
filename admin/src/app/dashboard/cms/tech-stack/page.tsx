@@ -9,6 +9,7 @@ import {
   inputClass,
   textareaClass,
 } from '@/components/cms/CmsForm';
+import { ConfirmDialog } from '@/components/cms/ConfirmDialog';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { adminApi } from '@/lib/api/client';
 import type { TechStackItem } from '@/lib/api/types';
@@ -33,6 +34,8 @@ export default function TechStackCmsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<TechStackItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     const rows = await adminApi.getTechStack();
@@ -74,15 +77,20 @@ export default function TechStackCmsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Bu öğeyi silmek istediğinize emin misiniz?')) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setError(null);
     try {
-      await adminApi.deleteTechStack(id);
+      await adminApi.deleteTechStack(deleteTarget.id);
       await refreshBundle();
       await load();
-      if (editing?.id === id) setEditing(null);
+      if (editing?.id === deleteTarget.id) setEditing(null);
+      setDeleteTarget(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Silme başarısız.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -150,7 +158,7 @@ export default function TechStackCmsPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDelete(item.id)}
+                      onClick={() => setDeleteTarget(item)}
                       className="text-error hover:underline"
                     >
                       Sil
@@ -294,6 +302,19 @@ export default function TechStackCmsPage() {
         <p className="mt-4 font-mono text-sm text-dracula-green">✓ Kaydedildi</p>
       )}
       {error && <p className="mt-4 font-mono text-sm text-error">{error}</p>}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Teknolojiyi Sil"
+        message={
+          deleteTarget
+            ? `"${deleteTarget.name}" öğesini kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`
+            : ''
+        }
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </CmsPageLayout>
   );
 }

@@ -737,49 +737,49 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bull-board/api@npm:8.1.0, @bull-board/api@npm:^8.1.0":
-  version: 8.1.0
-  resolution: "@bull-board/api@npm:8.1.0"
+"@bull-board/api@npm:8.1.1, @bull-board/api@npm:^8.1.1":
+  version: 8.1.1
+  resolution: "@bull-board/api@npm:8.1.1"
   dependencies:
     redis-info: "npm:^3.1.0"
   peerDependencies:
-    "@bull-board/ui": 8.1.0
-  checksum: 10c0/e8c852176c5585c9ccf164f79e27f374256abb7c71eecb3f08db38ace61c912858fc0a360d3f51e13c6f131776e58a9d61d3146be9676f20b1cdcf383f878bb1
+    "@bull-board/ui": 8.1.1
+  checksum: 10c0/569f9938bea7c1cea9bb3297805a7d3690097ad368514ca0ffaf024bc6302e72df9301d5659287596a13bd241e99c381058f4675807672b9f0514a10bf5f82a6
   languageName: node
   linkType: hard
 
-"@bull-board/express@npm:^8.1.0":
-  version: 8.1.0
-  resolution: "@bull-board/express@npm:8.1.0"
+"@bull-board/express@npm:^8.1.1":
+  version: 8.1.1
+  resolution: "@bull-board/express@npm:8.1.1"
   dependencies:
-    "@bull-board/api": "npm:8.1.0"
-    "@bull-board/ui": "npm:8.1.0"
+    "@bull-board/api": "npm:8.1.1"
+    "@bull-board/ui": "npm:8.1.1"
     ejs: "npm:^6.0.1"
     express: "npm:^5.2.1"
-  checksum: 10c0/559b490e580349f80e2b5eceed7ec2072cc995bd0773ba3d74bc96e4c7e3a2b36bf3a99c9bd87415d7ac4d950eb7fff1208e9e8851dfc4161d19c11bc1f55ce4
+  checksum: 10c0/8ce06a59be2c3ea3e50091ca6c63697171a9ff8f685d8f5f58debe539c3318469474fb5f8aee8423da766b5fc145b7b3cd2b1792447326d8179afee8cd75f257
   languageName: node
   linkType: hard
 
-"@bull-board/nestjs@npm:^8.1.0":
-  version: 8.1.0
-  resolution: "@bull-board/nestjs@npm:8.1.0"
+"@bull-board/nestjs@npm:^8.1.1":
+  version: 8.1.1
+  resolution: "@bull-board/nestjs@npm:8.1.1"
   peerDependencies:
-    "@bull-board/api": ^8.1.0
+    "@bull-board/api": ^8.1.1
     "@nestjs/bull-shared": ^10.0.0 || ^11.0.0
     "@nestjs/common": ^9.0.0 || ^10.0.0 || ^11.0.0
     "@nestjs/core": ^9.0.0 || ^10.0.0 || ^11.0.0
     reflect-metadata: ^0.1.13 || ^0.2.0
     rxjs: ^7.8.1
-  checksum: 10c0/4e6b1a2a39abd0d073a644ecd831bce793e5f559bfa79cebdb4c8697b441763fc1613efe41ee881a7919802539c7a42b6232b0f2c57f5f7de9a1ca11b2e0593d
+  checksum: 10c0/03e70bba7a8b1eef15f50db19b576a968972aafd49ec3cc37c1ce65bce8f16f2755be8ac189885df97fffaa29ac7ef6a655a513f9825f3539c177ff6d4a716da
   languageName: node
   linkType: hard
 
-"@bull-board/ui@npm:8.1.0, @bull-board/ui@npm:^8.1.0":
-  version: 8.1.0
-  resolution: "@bull-board/ui@npm:8.1.0"
+"@bull-board/ui@npm:8.1.1, @bull-board/ui@npm:^8.1.1":
+  version: 8.1.1
+  resolution: "@bull-board/ui@npm:8.1.1"
   dependencies:
-    "@bull-board/api": "npm:8.1.0"
-  checksum: 10c0/89c6d4a47aaf22b574db7d2cb86912b20b0c76388cdb1c3f61aa41c2e6cfa84f1ab9b0428d3ed6d6bdd362d4b7888846cd68ebe99e76d43ab8bbc8fcea91933f
+    "@bull-board/api": "npm:8.1.1"
+  checksum: 10c0/fe85fddeb558b66dfa1d7fe2c894342ce2b5985ec329a5bc51f7e372f63b385c7d6855a8507a2108af394b34f62a38b28cb492b2d56d17351dd81ef12063bc49
   languageName: node
   linkType: hard
 
@@ -3322,10 +3322,10 @@ __metadata:
   dependencies:
     "@aws-sdk/client-s3": "npm:^3.1079.0"
     "@aws-sdk/s3-request-presigner": "npm:^3.1079.0"
-    "@bull-board/api": "npm:^8.1.0"
-    "@bull-board/express": "npm:^8.1.0"
-    "@bull-board/nestjs": "npm:^8.1.0"
-    "@bull-board/ui": "npm:^8.1.0"
+    "@bull-board/api": "npm:^8.1.1"
+    "@bull-board/express": "npm:^8.1.1"
+    "@bull-board/nestjs": "npm:^8.1.1"
+    "@bull-board/ui": "npm:^8.1.1"
     "@nestjs/bull-shared": "npm:^11.0.4"
     "@nestjs/bullmq": "npm:^11.0.4"
     "@nestjs/cli": "npm:^11.0.23"
