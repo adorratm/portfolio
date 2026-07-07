@@ -36,9 +36,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen">
       <header className="fixed top-0 z-50 flex w-full items-center justify-between border-b border-outline-variant bg-background/80 px-6 py-4 backdrop-blur-md md:px-8">
         <div className="flex items-center gap-4">
-          <span className="font-mono text-sm font-bold text-secondary">
+          <Link
+            href="/dashboard"
+            className="font-mono text-sm font-bold text-secondary transition-colors hover:text-primary"
+          >
             System Monitor v1.0
-          </span>
+          </Link>
           <div className="hidden items-center gap-2 rounded-full border border-outline-variant bg-surface-container px-3 py-1 md:flex">
             <div className="pulse-status h-2 w-2 rounded-full bg-dracula-green" />
             <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">

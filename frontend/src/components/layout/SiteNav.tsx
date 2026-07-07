@@ -126,7 +126,12 @@ export function SiteNav({ locale, settings, profile }: SiteNavProps) {
     <>
       {/* ——— Üst header (tüm ekranlar, sabit h-16) ——— */}
       <header className="fixed inset-x-0 top-0 z-50 flex h-16 items-center justify-between border-b border-outline-variant bg-background/80 px-4 backdrop-blur-md md:px-8">
-        <div className="font-mono text-sm font-bold text-secondary">{brandName}</div>
+        <Link
+          href={`/${locale}`}
+          className="font-mono text-sm font-bold text-secondary transition-colors hover:text-primary"
+        >
+          {brandName}
+        </Link>
 
         <nav className="hidden gap-6 md:flex lg:gap-8">
           {navItems.map((item) => (
