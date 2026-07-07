@@ -10,7 +10,8 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"{src,test}/**/*.ts\" --fix"
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix",
+    "translate:en": "tsx --env-file=.env -r tsconfig-paths/register src/scripts/translate-tr-to-en.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1079.0",
