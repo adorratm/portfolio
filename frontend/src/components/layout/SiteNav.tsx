@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { AppLocale } from '@/i18n/routing';
+import { SocialLinks } from '@/components/layout/SocialLinks';
 import type { ProfileContent, SiteSettings } from '@/lib/api/types';
 
 interface SiteNavProps {
@@ -14,7 +15,6 @@ interface SiteNavProps {
 }
 
 type NavItem = { label: string; href: string; icon?: string };
-type SocialLink = { type: string; url: string; icon: string };
 
 function navIsActive(pathname: string, href: string): boolean {
   const normalized = pathname.replace(/\/$/, '');
@@ -63,46 +63,37 @@ function ProfileBadge({
   );
 }
 
-function SocialRow({ links }: { links: SocialLink[] }) {
-  if (links.length === 0) return null;
-  return (
-    <div className="flex flex-wrap justify-center gap-2">
-      {links.map((social) => (
-        <a
-          key={`${social.type}-${social.url}`}
-          href={social.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          title={social.type}
-          aria-label={social.type}
-          className="glow-hover flex h-9 w-9 items-center justify-center rounded-lg border border-outline-variant bg-surface-container text-sm text-on-surface-variant transition-all hover:border-primary hover:text-primary active:scale-95"
-        >
-          {social.icon?.trim() ? social.icon : social.type.slice(0, 1).toUpperCase()}
-        </a>
-      ))}
-    </div>
-  );
-}
-
 /**
  * Navigasyon — navItems tamamen backend siteSettings'den gelir.
- * Header sabit yükseklik (h-16); sidebar (lg+) ve mobil açılır menü (< lg).
+ * < lg: hamburger + sol çekmece; lg+: sabit sidebar.
  */
 export function SiteNav({ locale, settings, profile }: SiteNavProps) {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const brandName = settings?.brandName ?? 'Root@Portfolio';
   const navItems: NavItem[] = settings?.navItems ?? [
     { label: locale === 'tr' ? 'Ana Sayfa' : 'Home', href: `/${locale}` },
   ];
-  const socialLinks = (settings?.socialLinks ?? []) as SocialLink[];
+  const socialLinks = settings?.socialLinks ?? [];
   const profileImage = profile?.imageUrl ?? null;
 
-  // Rota değişince mobil menüyü kapat
   useEffect(() => {
-    setMobileOpen(false);
+    setDrawerOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDrawerOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [drawerOpen]);
 
   const sideLinkClass = (href: string) => {
     const active = navIsActive(pathname, href);
@@ -113,106 +104,80 @@ export function SiteNav({ locale, settings, profile }: SiteNavProps) {
     }`;
   };
 
-  const topLinkClass = (href: string) => {
-    const active = navIsActive(pathname, href);
-    return `font-mono text-sm transition-all active:scale-95 ${
-      active
-        ? 'border-b-2 border-primary text-primary'
-        : 'text-on-surface-variant hover:text-secondary'
-    }`;
-  };
+  const navList = (
+    <ul className="space-y-1">
+      {navItems.map((item) => (
+        <li key={item.href}>
+          <Link href={item.href} className={sideLinkClass(item.href)}>
+            {item.label}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
 
   return (
     <>
-      {/* ——— Üst header (tüm ekranlar, sabit h-16) ——— */}
-      <header className="fixed inset-x-0 top-0 z-50 flex h-16 items-center justify-between border-b border-outline-variant bg-background/80 px-4 backdrop-blur-md md:px-8">
+      {/* ——— Üst header ——— */}
+      <header className="fixed inset-x-0 top-0 z-50 flex h-16 items-center justify-between gap-4 border-b border-outline-variant bg-background/80 px-4 backdrop-blur-md md:px-6 lg:px-8">
         <Link
           href={`/${locale}`}
-          className="font-mono text-sm font-bold text-secondary transition-colors hover:text-primary"
+          className="min-w-0 truncate font-mono text-sm font-bold text-secondary transition-colors hover:text-primary"
         >
           {brandName}
         </Link>
 
-        <nav className="hidden gap-6 md:flex lg:gap-8">
-          {navItems.map((item) => (
-            <Link key={item.href} href={item.href} className={topLinkClass(item.href)}>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <LocaleSwitcher current={locale} />
           <button
             type="button"
-            onClick={() => setMobileOpen((o) => !o)}
-            aria-label={mobileOpen ? 'Menüyü kapat' : 'Menüyü aç'}
-            aria-expanded={mobileOpen}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant transition-colors hover:border-primary hover:text-primary md:hidden"
+            onClick={() => setDrawerOpen((o) => !o)}
+            aria-label={drawerOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+            aria-expanded={drawerOpen}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant transition-colors hover:border-primary hover:text-primary lg:hidden"
           >
-            <span className="text-lg leading-none">{mobileOpen ? '✕' : '☰'}</span>
+            <span className="text-lg leading-none">{drawerOpen ? '✕' : '☰'}</span>
           </button>
         </div>
       </header>
 
-      {/* ——— Mobil açılır menü (< md) ——— */}
-      {mobileOpen && (
+      {/* ——— Mobil / tablet çekmece (< lg) ——— */}
+      {drawerOpen && (
         <button
           type="button"
           aria-label="Menüyü kapat"
-          onClick={() => setMobileOpen(false)}
-          className="fixed inset-0 top-16 z-30 bg-background/40 backdrop-blur-sm md:hidden"
+          onClick={() => setDrawerOpen(false)}
+          className="fixed inset-0 top-16 z-30 bg-background/50 backdrop-blur-sm lg:hidden"
         />
       )}
-      <div
-        className={`fixed inset-x-0 top-16 z-40 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-outline-variant bg-surface-container-low/95 backdrop-blur-md transition-all duration-200 md:hidden ${
-          mobileOpen
-            ? 'pointer-events-auto translate-y-0 opacity-100'
-            : 'pointer-events-none -translate-y-3 opacity-0'
+      <aside
+        aria-hidden={!drawerOpen}
+        className={`fixed top-16 left-0 z-40 flex h-[calc(100dvh-4rem)] w-72 max-w-[min(85vw,20rem)] flex-col border-r border-outline-variant bg-surface-container-low/95 shadow-xl backdrop-blur-md transition-transform duration-300 ease-in-out lg:hidden ${
+          drawerOpen ? 'translate-x-0' : 'pointer-events-none -translate-x-full'
         }`}
       >
-        <div className="space-y-6 px-6 py-6">
+        <div className="space-y-5 border-b border-outline-variant/40 px-5 py-6">
           <ProfileBadge
             profileImage={profileImage}
             brandName={brandName}
             subtitle={settings?.brandSubtitle}
           />
-          <SocialRow links={socialLinks} />
-          <nav>
-            <ul className="space-y-1">
-              {navItems.map((item) => (
-                <li key={item.href}>
-                  <Link href={item.href} className={sideLinkClass(item.href)}>
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <SocialLinks links={socialLinks} />
         </div>
-      </div>
+        <nav className="flex-1 overflow-y-auto px-3 py-4">{navList}</nav>
+      </aside>
 
-      {/* ——— Masaüstü sidebar (lg+) — header yüksekliği kadar aşağıdan başlar ——— */}
-      <aside className="fixed left-0 top-16 z-40 hidden h-[calc(100dvh-4rem)] w-64 flex-col border-r border-outline-variant bg-surface-container-low py-8 lg:flex">
+      {/* ——— Masaüstü sidebar (lg+) ——— */}
+      <aside className="fixed top-16 left-0 z-40 hidden h-[calc(100dvh-4rem)] w-64 flex-col border-r border-outline-variant bg-surface-container-low py-8 lg:flex">
         <div className="mb-10 space-y-4 px-6">
           <ProfileBadge
             profileImage={profileImage}
             brandName={brandName}
             subtitle={settings?.brandSubtitle}
           />
-          <SocialRow links={socialLinks} />
+          <SocialLinks links={socialLinks} />
         </div>
-        <nav className="grow overflow-y-auto px-3">
-          <ul className="space-y-1">
-            {navItems.map((item) => (
-              <li key={item.href}>
-                <Link href={item.href} className={sideLinkClass(item.href)}>
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <nav className="grow overflow-y-auto px-3">{navList}</nav>
       </aside>
     </>
   );

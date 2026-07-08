@@ -9,6 +9,7 @@ import {
   inputClass,
   textareaClass,
 } from '@/components/cms/CmsForm';
+import { SocialLinksEditor } from '@/components/cms/SocialLinksEditor';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { adminApi } from '@/lib/api/client';
 import type { SiteSettings } from '@/lib/api/types';
@@ -278,19 +279,14 @@ export default function SiteSettingsCmsPage() {
             />
           </FormField>
           <FormField
-            label="Sosyal Linkler (JSON)"
-            hint='[{ "type": "GitHub", "url": "https://...", "icon": "" }] — icon alanına emoji/simge yazabilirsiniz'
+            label="Sosyal Linkler"
+            hint="Platform seçin, ad ve URL girin. İkonlar otomatik atanır."
           >
-            <textarea
-              className={`${textareaClass} min-h-24`}
-              value={JSON.stringify(form.socialLinks, null, 2)}
-              onChange={(e) => {
-                try {
-                  setForm({ ...form, socialLinks: JSON.parse(e.target.value) });
-                  setSaved(false);
-                } catch {
-                  /* */
-                }
+            <SocialLinksEditor
+              value={form.socialLinks}
+              onChange={(socialLinks) => {
+                setForm({ ...form, socialLinks });
+                setSaved(false);
               }}
             />
           </FormField>

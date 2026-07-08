@@ -1,5 +1,6 @@
 import { SiteNav } from '@/components/layout/SiteNav';
 import { ContactFab } from '@/components/layout/ContactFab';
+import { SocialLinks } from '@/components/layout/SocialLinks';
 import { AmbientBackground } from '@/components/effects/AmbientBackground';
 import { HeroSection } from '@/components/home/HeroSection';
 import { ProjectsGrid } from '@/components/home/ProjectsGrid';
@@ -104,11 +105,19 @@ export default async function HomePage({
             </section>
           )}
 
-          {siteSettings?.footerTagline && (
+          {(siteSettings?.footerTagline || (siteSettings?.socialLinks?.length ?? 0) > 0) && (
             <footer className="border-t border-outline-variant pt-12 pb-24 text-center">
-              <p className="font-mono text-sm text-on-surface-variant">
-                {siteSettings.footerTagline}
-              </p>
+              {(siteSettings?.socialLinks?.length ?? 0) > 0 && (
+                <SocialLinks
+                  links={siteSettings?.socialLinks ?? []}
+                  className="mb-6 justify-center"
+                />
+              )}
+              {siteSettings?.footerTagline && (
+                <p className="font-mono text-sm text-on-surface-variant">
+                  {siteSettings.footerTagline}
+                </p>
+              )}
             </footer>
           )}
         </div>
