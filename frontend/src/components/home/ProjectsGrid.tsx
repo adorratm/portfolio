@@ -1,5 +1,6 @@
-import Image from 'next/image';
 import Link from 'next/link';
+import { ProjectCardImage } from '@/components/projects/ProjectCardImage';
+import { resolveProjectImageUrl } from '@/lib/media';
 
 export interface ProjectCardData {
   id: string;
@@ -7,6 +8,7 @@ export interface ProjectCardData {
   description: string;
   category: string;
   imageUrl?: string | null;
+  imageKey?: string | null;
   technologies: string[];
   externalUrl?: string | null;
 }
@@ -51,27 +53,23 @@ export function ProjectsGrid({
       )}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {projects.map((project, index) => (
+        {projects.map((project, index) => {
+          const imageSrc = resolveProjectImageUrl(project);
+
+          return (
           <Link
             key={project.id}
             href={`/${locale}/projects/${project.id}`}
             className={`glass-card group block cursor-pointer overflow-hidden rounded-xl transition-all hover:shadow-[0_0_20px_rgba(255,121,198,0.2)] active:scale-[0.99] ${floatClasses[index % 2]}`}
           >
-            {project.imageUrl ? (
-              <div className="relative h-56 overflow-hidden">
-                <Image
-                  src={project.imageUrl}
-                  alt={project.title}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-linear-to-t from-background to-transparent" />
-                <span className="pulse-animation absolute bottom-4 left-6 rounded-full border border-tertiary/30 bg-tertiary/20 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-tertiary backdrop-blur-sm">
-                  {project.category}
-                </span>
-              </div>
+            {imageSrc ? (
+              <ProjectCardImage
+                src={imageSrc}
+                alt={project.title}
+                category={project.category}
+              />
             ) : (
-              <div className="flex h-32 items-center justify-center bg-surface-container">
+              <div className="flex h-56 items-center justify-center bg-surface-container">
                 <span className="pulse-animation rounded-full border border-tertiary/30 bg-tertiary/20 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-tertiary">
                   {project.category}
                 </span>
@@ -101,7 +99,8 @@ export function ProjectsGrid({
               </div>
             </div>
           </Link>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

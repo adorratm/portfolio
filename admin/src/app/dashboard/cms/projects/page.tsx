@@ -11,9 +11,14 @@ import {
   textareaClass,
 } from '@/components/cms/CmsForm';
 import { ConfirmDialog } from '@/components/cms/ConfirmDialog';
+import { ExternalUrlPreview } from '@/components/cms/ExternalUrlPreview';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { adminApi } from '@/lib/api/client';
 import type { Project, ProjectStatus } from '@/lib/api/types';
+import {
+  normalizeExternalUrl,
+  parseTechnologies,
+} from '@/lib/parseTechnologies';
 import { useLocaleContent } from '@/providers/LocaleProvider';
 
 const emptyProject = (): Partial<Project> => ({
@@ -47,6 +52,17 @@ export default function ProjectsCmsPage() {
   const [error, setError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [techInput, setTechInput] = useState('');
+
+  const editingKey = editing ? (editing.id ?? 'new') : null;
+
+  useEffect(() => {
+    if (!editing) {
+      setTechInput('');
+      return;
+    }
+    setTechInput((editing.technologies ?? []).join(', '));
+  }, [editingKey]);
 
   const load = useCallback(async () => {
     const rows = await adminApi.getProjects();
@@ -69,10 +85,10 @@ export default function ProjectsCmsPage() {
         title: editing.title ?? '',
         description: editing.description ?? '',
         category: editing.category ?? '',
-        technologies: editing.technologies ?? [],
+        technologies: parseTechnologies(techInput),
         imageUrl: editing.imageUrl || undefined,
         imageKey: editing.imageKey || undefined,
-        externalUrl: editing.externalUrl || undefined,
+        externalUrl: normalizeExternalUrl(editing.externalUrl ?? ''),
         endpoint: editing.endpoint || undefined,
         status: editing.status ?? 'active',
         sortOrder: editing.sortOrder ?? 0,
@@ -234,17 +250,28 @@ export default function ProjectsCmsPage() {
             <FormField label="Teknolojiler (virgülle ayır)">
               <input
                 className={inputClass}
-                value={(editing.technologies ?? []).join(', ')}
-                onChange={(e) =>
+                placeholder="Go, Rust, PostgreSQL"
+                value={techInput}
+                onChange={(e) => setTechInput(e.target.value)}
+                onBlur={() =>
                   setEditing({
                     ...editing,
-                    technologies: e.target.value
-                      .split(',')
-                      .map((s) => s.trim())
-                      .filter(Boolean),
+                    technologies: parseTechnologies(techInput),
                   })
                 }
               />
+              {parseTechnologies(techInput).length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {parseTechnologies(techInput).map((tech) => (
+                    <span
+                      key={tech}
+                      className="rounded border border-outline-variant/40 bg-surface-container px-2 py-0.5 font-mono text-xs text-on-surface-variant"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              )}
             </FormField>
             <ImageUploader
               label="Proje Görseli"
@@ -259,14 +286,20 @@ export default function ProjectsCmsPage() {
               }
             />
             <div className="grid gap-5 md:grid-cols-2">
-              <FormField label="Harici URL">
+              <FormField label="Harici URL (canlı / staging site)">
                 <input
                   className={inputClass}
+                  placeholder="https://proje.vercel.app"
                   value={editing.externalUrl ?? ''}
                   onChange={(e) =>
                     setEditing({ ...editing, externalUrl: e.target.value })
                   }
                 />
+                <p className="mt-1.5 font-mono text-[11px] leading-relaxed text-on-surface-variant">
+                  Proje sitesini Vercel, Netlify veya benzeri bir serviste deploy
+                  edin; adresi buraya yazın. Yayında olmasa bile admin panelinden
+                  önizleyebilirsiniz.
+                </p>
               </FormField>
               <FormField label="Endpoint (admin tablo)">
                 <input
@@ -307,6 +340,21 @@ export default function ProjectsCmsPage() {
                 />
               </FormField>
             </div>
+            {normalizeExternalUrl(editing.externalUrl ?? '') && (
+              <ExternalUrlPreview
+                url={normalizeExternalUrl(editing.externalUrl ?? '')!}
+                title={editing.title ?? 'Proje önizlemesi'}
+              />
+            )}
+
+            {!(editing.isPublished ?? true) && (
+              <p className="rounded-lg border border-dracula-orange/30 bg-dracula-orange/10 px-4 py-3 font-mono text-xs leading-relaxed text-dracula-orange">
+                Bu proje yayında değil — portfolyoda görünmez. Staging adresini
+                Harici URL alanına yazarak siteyi buradan test edin; hazır olunca
+                &quot;Yayında&quot; kutusunu işaretleyin.
+              </p>
+            )}
+
             <div className="flex flex-wrap gap-6">
               <label className="flex items-center gap-2 font-mono text-sm">
                 <input

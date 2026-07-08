@@ -2,7 +2,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PageShell } from '@/components/layout/PageShell';
+import { ProjectLiveEmbed } from '@/components/projects/ProjectLiveEmbed';
 import { fetchContentBundle, fetchProjectById } from '@/lib/api/client';
+import { resolveProjectImageUrl } from '@/lib/media';
 import type { AppLocale } from '@/i18n/routing';
 
 const statusStyles: Record<string, string> = {
@@ -25,6 +27,7 @@ export default async function ProjectDetailPage({
   if (!content || !project) notFound();
 
   const backLabel = locale === 'tr' ? '← Tüm Projeler' : '← All Projects';
+  const heroImage = resolveProjectImageUrl(project);
 
   return (
     <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
@@ -36,12 +39,13 @@ export default async function ProjectDetailPage({
       </Link>
 
       <article className="scanline-container relative overflow-hidden rounded-xl border border-outline-variant bg-surface-container-low">
-        {project.imageUrl && (
+        {heroImage && (
           <div className="group relative h-72 overflow-hidden md:h-96">
             <Image
-              src={project.imageUrl}
+              src={heroImage}
               alt={project.title}
               fill
+              unoptimized
               className="object-cover transition-transform duration-700 group-hover:scale-105"
               priority
             />
@@ -104,6 +108,14 @@ export default async function ProjectDetailPage({
               ))}
             </div>
           </div>
+
+          {project.externalUrl && (
+            <ProjectLiveEmbed
+              url={project.externalUrl}
+              title={project.title}
+              locale={locale}
+            />
+          )}
         </div>
       </article>
     </PageShell>
