@@ -3346,7 +3346,7 @@ __metadata:
     "@types/node": "npm:^26.1.0"
     "@types/passport-google-oauth20": "npm:^2.0.17"
     "@types/passport-jwt": "npm:^4.0.1"
-    bullmq: "npm:^5.79.2"
+    bullmq: "npm:^5.79.3"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:^0.15.1"
     cookie-parser: "npm:^1.4.7"
@@ -3551,9 +3551,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bullmq@npm:^5.79.2":
-  version: 5.79.2
-  resolution: "bullmq@npm:5.79.2"
+"bullmq@npm:^5.79.3":
+  version: 5.79.3
+  resolution: "bullmq@npm:5.79.3"
   dependencies:
     cron-parser: "npm:4.9.0"
     ioredis: "npm:5.10.1"
@@ -3566,7 +3566,7 @@ __metadata:
   peerDependenciesMeta:
     redis:
       optional: true
-  checksum: 10c0/212c0e2e2b2accac139a7fa8c5ac1658305b7b9b30b551f6de654ab4e9ada572523f70df365cd1b9bd9c4843763a989db3dac6557ac7efb3758abfbb8a9b6301
+  checksum: 10c0/a8a29fc45fa2e410f5c2ffb61fa41df0dc613f8902d6be146707e6647b423128d270195b5975a128b60dab0516c9efd3a2e574dd1d9da787caca03a30d3078e5
   languageName: node
   linkType: hard
 
