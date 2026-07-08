@@ -289,14 +289,14 @@ async function upsertSiteSettings(
   row.philosophyBody = tr.philosophyBody
     ? await translateText(tr.philosophyBody)
     : null;
-  row.philosophyPillars = tr.philosophyPillars
+  row.philosophyPillars = tr.philosophyPillars?.length ?? 0
     ? await Promise.all(
-        tr.philosophyPillars.map(async (pillar) => ({
-          ...pillar,
-          label: await translateText(pillar.label),
-        })),
-      )
-    : null;
+          tr.philosophyPillars.map(async (pillar) => ({
+            ...pillar,
+            label: await translateText(pillar.label),
+          })),
+        )
+      : [];
   row.statDeployments = tr.statDeployments;
   row.statUptime = tr.statUptime;
   row.statDeploymentsLabel = tr.statDeploymentsLabel
@@ -455,7 +455,7 @@ async function main(): Promise<void> {
         locale: 'en',
         institution: await translateText(item.institution),
         degree: await translateText(item.degree),
-        field: await translateText(item.field),
+        field: await translateText(item.field ?? ''),
         period: item.period,
         description: item.description
           ? await translateText(item.description)
