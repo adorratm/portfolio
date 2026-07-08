@@ -9,6 +9,8 @@ import {
   inputClass,
   textareaClass,
 } from '@/components/cms/CmsForm';
+import { NavItemsEditor } from '@/components/cms/NavItemsEditor';
+import { PhilosophyPillarsEditor } from '@/components/cms/PhilosophyPillarsEditor';
 import { SocialLinksEditor } from '@/components/cms/SocialLinksEditor';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { adminApi } from '@/lib/api/client';
@@ -127,17 +129,12 @@ export default function SiteSettingsCmsPage() {
               }}
             />
           </FormField>
-          <FormField label="Navigasyon (JSON)" hint="[{ label, href }]">
-            <textarea
-              className={`${textareaClass} min-h-32`}
-              value={JSON.stringify(form.navItems, null, 2)}
-              onChange={(e) => {
-                try {
-                  setForm({ ...form, navItems: JSON.parse(e.target.value) });
-                  setSaved(false);
-                } catch {
-                  /* geçersiz JSON — kullanıcı yazmaya devam edebilir */
-                }
+          <FormField label="Navigasyon" hint="Menü öğelerini ekleyin, düzenleyin veya sıralayın.">
+            <NavItemsEditor
+              value={form.navItems}
+              onChange={(navItems) => {
+                setForm({ ...form, navItems });
+                setSaved(false);
               }}
             />
           </FormField>
@@ -231,17 +228,12 @@ export default function SiteSettingsCmsPage() {
               }}
             />
           </FormField>
-          <FormField label="Sütunlar (JSON)" hint='[{ "label": "...", "color": "green" }]'>
-            <textarea
-              className={`${textareaClass} min-h-24`}
-              value={JSON.stringify(form.philosophyPillars, null, 2)}
-              onChange={(e) => {
-                try {
-                  setForm({ ...form, philosophyPillars: JSON.parse(e.target.value) });
-                  setSaved(false);
-                } catch {
-                  /* */
-                }
+          <FormField label="Sütunlar" hint="Felsefe kartları — etiket ve renk seçin.">
+            <PhilosophyPillarsEditor
+              value={form.philosophyPillars}
+              onChange={(philosophyPillars) => {
+                setForm({ ...form, philosophyPillars });
+                setSaved(false);
               }}
             />
           </FormField>
