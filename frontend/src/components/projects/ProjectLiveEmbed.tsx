@@ -40,7 +40,7 @@ export function ProjectLiveEmbed({ url, title, locale }: ProjectLiveEmbedProps) 
 
       <div className="scanline-container overflow-hidden rounded-xl border border-outline-variant/40 bg-surface-container">
         {blocked ? (
-          <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 p-8 text-center md:min-h-[480px]">
+          <div className="flex min-h-80 flex-col items-center justify-center gap-4 p-8 text-center md:min-h-120">
             <p className="max-w-md text-on-surface-variant">{blockedMessage}</p>
             <a
               href={url}
@@ -55,7 +55,7 @@ export function ProjectLiveEmbed({ url, title, locale }: ProjectLiveEmbedProps) 
           <iframe
             src={url}
             title={title}
-            className="h-[320px] w-full border-0 bg-white md:h-[560px]"
+            className="h-80 w-full border-0 bg-white md:h-140"
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
             loading="lazy"
             onError={() => setBlocked(true)}
