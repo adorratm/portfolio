@@ -310,7 +310,7 @@ merge_portfolio_into_nginx() {
     sleep 2
   done
 
-  merge_portfolio_with_recovery "${NGINX_CONTAINER}"
+  apply_portfolio_nginx_config "${NGINX_CONTAINER}"
 }
 
 remove_stale_portfolio_include() {
@@ -329,9 +329,9 @@ remove_stale_portfolio_include() {
   fi
 }
 
-ensure_portfolio_include() {
-  local marker="portfolio-merge-v5"
-  local merge_block='if [ -f /etc/nginx/templates/portfolio.conf ] && [ -f /etc/nginx/conf.d/default.conf ]; then line=$(grep -n "^# portfolio-merge-boundary" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); if [ -z "$line" ]; then line=$(grep -n "^map \$http_upgrade \$portfolio_connection_upgrade" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); fi; if [ -z "$line" ]; then line=$(grep -n "^# Portfolio — emrekilic" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); fi; if [ -n "$line" ]; then head -n $((line-1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean; else cp /etc/nginx/conf.d/default.conf /tmp/default.clean; fi; cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean; mv /tmp/default.clean /etc/nginx/conf.d/default.conf; fi'
+ensure_portfolio_entrypoint_hook() {
+  local marker="portfolio-conf-d-v6"
+  local hook_block='if [ -f /etc/nginx/conf.d/default.conf ]; then line=$(grep -n "^# portfolio-merge-boundary" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); if [ -z "$line" ]; then line=$(grep -n "^map \$http_upgrade \$portfolio_connection_upgrade" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); fi; if [ -z "$line" ]; then line=$(grep -n "^# Portfolio — emrekilic" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); fi; if [ -n "$line" ]; then head -n $((line-1)) /etc/nginx/conf.d/default.conf > /tmp/default.strip && mv /tmp/default.strip /etc/nginx/conf.d/default.conf; fi; sed -i "/include \/etc\/nginx\/templates\/portfolio.conf/d" /etc/nginx/conf.d/default.conf 2>/dev/null || true; fi; if [ -f /etc/nginx/templates/portfolio.conf ]; then cp /etc/nginx/templates/portfolio.conf /etc/nginx/conf.d/portfolio-emrekilic.conf; fi'
 
   remove_stale_portfolio_include
 
@@ -342,20 +342,24 @@ ensure_portfolio_include() {
     exit 1
   fi
 
-  if grep -qF "${marker}" "${TTEN_ENTRYPOINT}"; then
-    echo "==> entrypoint.sh merge hook OK (${marker})"
+  if grep -qF "${marker}" "${TTEN_ENTRYPOINT}" && grep -qF "portfolio-emrekilic.conf" "${TTEN_ENTRYPOINT}"; then
+    echo "==> entrypoint.sh portfolio hook OK (${marker})"
     return 0
   fi
 
-  echo "==> entrypoint.sh → portfolio merge hook ekleniyor (${marker})..."
+  echo "==> entrypoint.sh → portfolio conf.d hook (${marker})..."
   cp "${TTEN_ENTRYPOINT}" "${TTEN_ENTRYPOINT}.bak.portfolio"
 
-  sed -i '/portfolio-merge-v[0-9]/d' "${TTEN_ENTRYPOINT}" 2>/dev/null || \
-    sed '/portfolio-merge-v[0-9]/d' "${TTEN_ENTRYPOINT}" > "${TTEN_ENTRYPOINT}.strip" && \
-    mv "${TTEN_ENTRYPOINT}.strip" "${TTEN_ENTRYPOINT}"
+  awk '
+    /^# portfolio-merge-v[0-9]/ { getline; next }
+    /^# portfolio-conf-d-v[0-9]/ { getline; next }
+    /portfolio\.conf >> \/tmp\/default\.clean/ { next }
+    /portfolio-emrekilic\.conf; fi$/ { next }
+    { print }
+  ' "${TTEN_ENTRYPOINT}" > "${TTEN_ENTRYPOINT}.strip" && mv "${TTEN_ENTRYPOINT}.strip" "${TTEN_ENTRYPOINT}"
 
   if grep -qE 'exec (\$@|nginx)' "${TTEN_ENTRYPOINT}"; then
-    awk -v marker="${marker}" -v block="${merge_block}" '
+    awk -v marker="${marker}" -v block="${hook_block}" '
       /exec (\$@|nginx)/ && !done {
         print "# " marker
         print block
@@ -369,7 +373,7 @@ ensure_portfolio_include() {
     cat >> "${TTEN_ENTRYPOINT}" << EOF
 
 # ${marker}
-${merge_block}
+${hook_block}
 EOF
   fi
 }
@@ -394,7 +398,7 @@ install_portfolio_conf() {
     -e 's/\$\${/$/g' \
     "${src}" > "${dest}"
   echo "  + ${dest} (${ssl_mode})"
-  ensure_portfolio_include
+  ensure_portfolio_entrypoint_hook
 }
 
 verify_nginx_config() {
@@ -404,7 +408,7 @@ verify_nginx_config() {
     | grep -E "server_name (emrekilic|admin\.emrekilic|api\.emrekilic|ttengamesstudio)" || true
 
   if ! docker exec "${NGINX_CONTAINER}" nginx -T 2>/dev/null | grep -q "server_name emrekilic.web.tr"; then
-    echo "UYARI: portfolio henüz yüklenmemiş, default.conf'a birleştiriliyor..."
+    echo "UYARI: portfolio conf.d yükleniyor..."
     merge_portfolio_into_nginx
   fi
 

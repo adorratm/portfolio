@@ -102,8 +102,8 @@ verify_tten_frontend_dns || exit 1
 echo "==> portfolio.conf güncelleniyor (repo template)..."
 bash "${ROOT_DIR}/deploy/render-portfolio-conf.sh" https
 
-echo "==> Nginx portfolio merge + reload..."
-merge_portfolio_with_recovery "${NGINX_CONTAINER}"
+echo "==> Nginx portfolio conf.d + default.conf temizliği..."
+apply_portfolio_nginx_config "${NGINX_CONTAINER}"
 
 echo "==> Nginx → portfolio upstream testi..."
 if ! wait_for_nginx_upstream; then

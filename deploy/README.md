@@ -158,24 +158,33 @@ sed -i 's/\r$//' deploy/setup-nginx.sh deploy/setup-shared-nginx.sh deploy/tteng
 chmod +x deploy/setup-nginx.sh deploy/setup-shared-nginx.sh deploy/ttengames/install-nginx.sh
 ```
 
-### nginx `map directive is not allowed here` / merge başarısız
+### nginx `map` / `server directive is not allowed here`
 
-**Sebep:** Eski merge `server_name emrekilic` satırında kesiyordu → açık `server` bloğu + `map` server içinde kalıyordu.
+**Sebep:** Portfolio `default.conf` içine merge ediliyordu → TTEN bloğu bozuluyordu.
 
-**Çözüm:**
+**Çözüm:** Portfolio artık ayrı dosyada: `/etc/nginx/conf.d/portfolio-emrekilic.conf`
 
 ```bash
 cd /opt/portfolio
 git fetch origin
 git checkout origin/main -- deploy/lib/nginx-merge-portfolio.sh deploy/sync-tten-nginx.sh \
-  deploy/ttengames/install-nginx.sh deploy/ttengames/https/portfolio.conf.template \
-  deploy/ttengames/http/portfolio.conf.template deploy/fix-tten-dns.sh
+  deploy/ttengames/install-nginx.sh deploy/fix-tten-dns.sh
 chmod +x deploy/lib/nginx-merge-portfolio.sh deploy/sync-tten-nginx.sh deploy/fix-tten-dns.sh
 sudo bash deploy/ttengames/install-nginx.sh https
+docker restart ttengamesstudio-nginx
 bash deploy/sync-tten-nginx.sh
 ```
 
-`listen ... http2` uyarıları TTEN şablonundan gelir (zararsız). Portfolio artık `listen 443 ssl;` kullanır.
+Doğrulama:
+
+```bash
+docker exec ttengamesstudio-nginx nginx -t
+docker exec ttengamesstudio-nginx ls -la /etc/nginx/conf.d/portfolio-emrekilic.conf
+docker exec ttengamesstudio-nginx nginx -T 2>/dev/null | grep -c 'server_name emrekilic.web.tr'
+# 2 olmalı (http redirect + https)
+```
+
+`listen ... http2` uyarıları TTEN şablonundan gelir, deploy'u durdurmaz.
 
 ### ttengamesstudio.com.tr `/_nuxt` 404 / MIME text/html
 
