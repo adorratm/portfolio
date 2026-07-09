@@ -2,14 +2,15 @@
 
 FROM node:22-alpine AS deps
 WORKDIR /app
-RUN corepack enable
-COPY package.json yarn.lock ./
+RUN corepack enable && corepack prepare yarn@4.17.1 --activate
+COPY package.json yarn.lock .yarnrc.yml ./
 RUN yarn install --immutable
 
 FROM node:22-alpine AS builder
 WORKDIR /app
-RUN corepack enable
+RUN corepack enable && corepack prepare yarn@4.17.1 --activate
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/.yarnrc.yml ./.yarnrc.yml
 COPY . .
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_WS_URL
