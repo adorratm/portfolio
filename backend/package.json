@@ -14,20 +14,20 @@
     "translate:en": "tsx --env-file=.env -r tsconfig-paths/register src/scripts/translate-tr-to-en.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1080.0",
-    "@aws-sdk/s3-request-presigner": "^3.1080.0",
+    "@aws-sdk/client-s3": "^3.1081.0",
+    "@aws-sdk/s3-request-presigner": "^3.1081.0",
     "@bull-board/ui": "^8.1.2",
     "@nestjs/bull-shared": "^11.0.4",
     "@nestjs/bullmq": "^11.0.4",
-    "@nestjs/common": "^11.1.27",
+    "@nestjs/common": "^11.1.28",
     "@nestjs/config": "^4.0.4",
-    "@nestjs/core": "^11.1.27",
+    "@nestjs/core": "^11.1.28",
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/passport": "^11.0.5",
-    "@nestjs/platform-express": "^11.1.27",
-    "@nestjs/platform-socket.io": "^11.1.27",
+    "@nestjs/platform-express": "^11.1.28",
+    "@nestjs/platform-socket.io": "^11.1.28",
     "@nestjs/typeorm": "^11.0.3",
-    "@nestjs/websockets": "^11.1.27",
+    "@nestjs/websockets": "^11.1.28",
     "bullmq": "^5.79.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
@@ -48,11 +48,11 @@
     "@bull-board/nestjs": "^8.1.2",
     "@nestjs/cli": "^11.0.23",
     "@nestjs/schematics": "^11.1.0",
-    "@nestjs/testing": "^11.1.27",
+    "@nestjs/testing": "^11.1.28",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^26.1.0",
+    "@types/node": "^26.1.1",
     "@types/passport-google-oauth20": "^2.0.17",
     "@types/passport-jwt": "^4.0.1",
     "eslint": "^10.6.0",
@@ -66,7 +66,7 @@
     "typescript": "^6.0.3"
   },
   "volta": {
-    "node": "26.4.0",
-    "yarn": "4.17.0"
+    "node": "26.5.0",
+    "yarn": "4.17.1"
   }
 }
