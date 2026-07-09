@@ -27,10 +27,17 @@ fi
 
 detect_portfolio_host() {
   local candidate
-  local gw
-  gw="$(docker exec "${NGINX_CONTAINER}" ip route 2>/dev/null | awk '/default/ {print $3; exit}')"
+  local gw host_ip
 
-  for candidate in host.docker.internal "${gw}" 172.17.0.1; do
+  gw="$(docker exec "${NGINX_CONTAINER}" ip route 2>/dev/null | awk '/default/ {print $3; exit}')"
+  host_ip="$(hostname -I 2>/dev/null | awk '{print $1}')"
+
+  for candidate in \
+    host.docker.internal \
+    "${gw}" \
+    "${host_ip}" \
+    172.17.0.1 \
+    172.18.0.1; do
     [[ -z "${candidate}" ]] && continue
     if docker exec "${NGINX_CONTAINER}" wget -qO- --timeout=4 "http://${candidate}:3100/tr" 2>/dev/null | head -1 | grep -q .; then
       echo "${candidate}"
@@ -130,12 +137,22 @@ else
     echo ""
     echo "HATA: Nginx container'ından portfolio'ya (3100) erişilemiyor."
     echo ""
-    echo "TTEN docker-compose.yml içinde nginx servisine ekleyin:"
+    echo "Teşhis:"
+    echo "  docker ps | grep portfolio-prod-frontend"
+    echo "  curl -s http://127.0.0.1:3100/tr | head -1"
+    echo "  docker exec ${NGINX_CONTAINER} getent hosts host.docker.internal || echo 'extra_hosts YOK'"
+    echo "  GW=\$(docker exec ${NGINX_CONTAINER} ip route | awk '/default/ {print \$3}')"
+    echo "  docker exec ${NGINX_CONTAINER} wget -qO- --timeout=3 http://\$GW:3100/tr | head -1"
+    echo ""
+    echo "Çözüm A — TTEN docker-compose.yml → nginx servisi:"
     echo "  extra_hosts:"
     echo "    - \"host.docker.internal:host-gateway\""
     echo ""
-    echo "Sonra: cd /opt/ttengamesstudio && docker compose up -d nginx"
+    echo "Sonra: cd /opt/ttengamesstudio && docker compose up -d --force-recreate nginx"
     echo "Tekrar: sudo bash $0 ${MODE}"
+    echo ""
+    echo "Çözüm B — Gateway IP elle verin (yukarıdaki GW testi çalışıyorsa):"
+    echo "  sudo PORTFOLIO_HOST=<GW_IP> bash $0 ${MODE}"
     exit 1
   fi
   echo "    Otomatik: ${PORTFOLIO_HOST}"
