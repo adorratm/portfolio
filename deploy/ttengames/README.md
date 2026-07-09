@@ -14,27 +14,13 @@ Nginx domain'e göre yönlendirir — DNS ikisini de aynı IP'ye gidebilir.
 ```
 İstek → ttengamesstudio-nginx (:80/:443)
           ├─ Host: ttengamesstudio.com.tr → ttengamesstudio-frontend
-          └─ Host: emrekilic.web.tr      → host.docker.internal:3100 (portfolio)
+          └─ Host: emrekilic.web.tr      → portfolio-prod-frontend:3000
+                                             (TTEN Docker ağı üzerinden)
 ```
 
 ## Kurulum (sunucuda bir kez)
 
-### 1. TTEN docker-compose — nginx servisine ekle
-
-`/opt/ttengamesstudio/docker-compose.yml`:
-
-```yaml
-  nginx:
-    # ... mevcut ayarlar ...
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-```
-
-```bash
-cd /opt/ttengamesstudio && docker compose up -d nginx
-```
-
-### 2. Portfolio container'ları
+### 1. Portfolio container'ları
 
 ```bash
 cd /opt/portfolio
@@ -42,7 +28,9 @@ cp deploy/.env.production.example deploy/.env   # düzenle
 ./deploy/deploy.sh
 ```
 
-### 3. Nginx domain ayrımı (portfolio tarafı)
+### 2. Nginx domain ayrımı
+
+Script önce host gateway dener; olmazsa **docker ağ moduna** geçer (extra_hosts gerekmez):
 
 ```bash
 cd /opt/portfolio
@@ -50,13 +38,19 @@ sed -i 's/\r$//' deploy/ttengames/install-nginx.sh
 sudo bash deploy/ttengames/install-nginx.sh
 ```
 
+Docker modunu doğrudan zorlamak için:
+
+```bash
+sudo PORTFOLIO_UPSTREAM_MODE=docker bash deploy/ttengames/install-nginx.sh
+```
+
 Script otomatik olarak:
-- Portfolio Docker ağından nginx'i ayırır (TTEN `frontend` DNS çakışmasını önler)
-- `host.docker.internal:3100` üzerinden portfolio'ya bağlar
-- `portfolio.conf.template` → TTEN templates dizinine yükler
+- Nginx'i portfolio ağından ayırır (TTEN `frontend` DNS çakışmasını önler)
+- Portfolio container'larını TTEN ağına bağlar (`portfolio-prod-frontend:3000`)
+- `portfolio.conf.template` yükler (`server_name emrekilic.web.tr` …)
 - Her iki siteyi test eder
 
-### 4. SSL (emrekilic)
+### 3. SSL (emrekilic)
 
 ```bash
 sudo certbot certonly --webroot -w /var/www/certbot \
@@ -69,8 +63,8 @@ sudo bash deploy/ttengames/install-nginx.sh https
 ## Önemli kurallar
 
 1. **Host nginx başlatmayın** — 80/443 zaten `ttengamesstudio-nginx`'te.
-2. **`PORTFOLIO_MODE=network` kullanmayın** — `frontend` DNS adı çakışır, TTEN bozulur.
-3. **Portfolio upstream = host portları** (3100, 3101, 3102), container adları değil.
+2. **Nginx'i portfolio ağına bağlamayın** — `frontend` DNS çakışır.
+3. **Portfolio container'ları TTEN ağına bağlanır** — upstream: `portfolio-prod-frontend:3000`.
 
 ## Sorun giderme
 
