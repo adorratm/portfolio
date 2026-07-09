@@ -1,145 +1,173 @@
 #!/usr/bin/env bash
-# Portfolio nginx → ttengamesstudio-nginx (Docker templates)
+# İki site, tek nginx (ttengamesstudio-nginx):
+#   ttengamesstudio.com.tr  → TTEN repo (ttengamesstudio-frontend)
+#   emrekilic.web.tr        → Portfolio repo (host:3100-3102)
 #
 # Kullanım:
-#   sudo ./deploy/ttengames/install-nginx.sh http
-#   sudo ./deploy/ttengames/install-nginx.sh https
+#   sudo bash deploy/ttengames/install-nginx.sh
+#   sudo bash deploy/ttengames/install-nginx.sh http
+#   sudo bash deploy/ttengames/install-nginx.sh https
 #
-# Önerilen (host gateway — TTEN DNS çakışması yapmaz):
-#   TTEN docker-compose'da: extra_hosts: ["host.docker.internal:host-gateway"]
-#   sudo PORTFOLIO_MODE=host PORTFOLIO_HOST=host.docker.internal ./deploy/ttengames/install-nginx.sh http
-#
-# DİKKAT — network modu:
-#   nginx'i portfolio ağına bağlamak TTEN'deki `frontend` DNS adını bozabilir
-#   (her iki stack'te service adı `frontend`). TTEN upstream'leri tam container
-#   adı kullanmıyorsa (ttengamesstudio-frontend) network modunu KULLANMAYIN.
-#   PORTFOLIO_HOST=172.17.0.1     (host modunda)
-#   PORTFOLIO_NETWORK=portfolio-prod_portfolio
+# Önkoşul (TTEN docker-compose.yml → nginx servisi):
+#   extra_hosts:
+#     - "host.docker.internal:host-gateway"
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TTEN_TEMPLATES="${TTEN_TEMPLATES:-/opt/ttengamesstudio/docker/nginx/templates}"
 NGINX_CONTAINER="${NGINX_CONTAINER:-ttengamesstudio-nginx}"
-PORTFOLIO_MODE="${PORTFOLIO_MODE:-host}"
-PORTFOLIO_HOST="${PORTFOLIO_HOST:-host.docker.internal}"
 PORTFOLIO_NETWORK="${PORTFOLIO_NETWORK:-portfolio-prod_portfolio}"
-MODE="${1:-}"
-
-FRONTEND_UPSTREAM=""
-ADMIN_UPSTREAM=""
-API_UPSTREAM=""
-TEST_URL=""
+CERT_PATH="/etc/letsencrypt/live/emrekilic.web.tr/fullchain.pem"
+MODE="${1:-auto}"
 
 if [[ "${EUID}" -ne 0 ]]; then
-  echo "Root gerekli: sudo $0 http|https"
+  echo "Root gerekli: sudo bash $0"
   exit 1
 fi
 
-if [[ "${MODE}" != "http" && "${MODE}" != "https" ]]; then
-  echo "Kullanım: sudo $0 http|https"
-  exit 1
-fi
+detect_portfolio_host() {
+  local candidate
+  local gw
+  gw="$(docker exec "${NGINX_CONTAINER}" ip route 2>/dev/null | awk '/default/ {print $3; exit}')"
 
-if [[ ! -d "${TTEN_TEMPLATES}" ]]; then
-  echo "Hata: ${TTEN_TEMPLATES} bulunamadı."
-  exit 1
-fi
-
-setup_upstream_targets() {
-  if [[ "${PORTFOLIO_MODE}" == "network" ]]; then
-    FRONTEND_UPSTREAM="portfolio-prod-frontend:3000"
-    ADMIN_UPSTREAM="portfolio-prod-admin:3000"
-    API_UPSTREAM="portfolio-prod-backend:3001"
-    TEST_URL="http://${FRONTEND_UPSTREAM}/tr"
-
-    if ! docker network inspect "${PORTFOLIO_NETWORK}" >/dev/null 2>&1; then
-      echo "Hata: Docker network '${PORTFOLIO_NETWORK}' bulunamadı."
-      echo "  docker network ls | grep portfolio"
-      exit 1
+  for candidate in host.docker.internal "${gw}" 172.17.0.1; do
+    [[ -z "${candidate}" ]] && continue
+    if docker exec "${NGINX_CONTAINER}" wget -qO- --timeout=4 "http://${candidate}:3100/tr" 2>/dev/null | head -1 | grep -q .; then
+      echo "${candidate}"
+      return 0
     fi
-
-    if ! docker network inspect "${PORTFOLIO_NETWORK}" --format '{{range .Containers}}{{.Name}} {{end}}' | grep -q "${NGINX_CONTAINER}"; then
-      echo "==> UYARI: network modu TTEN'deki 'frontend' DNS adını bozabilir."
-      echo "    TTEN upstream'leri 'ttengamesstudio-frontend' gibi tam ad kullanmıyorsa"
-      echo "    PORTFOLIO_MODE=host ile devam edin."
-      echo "==> ${NGINX_CONTAINER} → ${PORTFOLIO_NETWORK} ağına bağlanıyor..."
-      docker network connect "${PORTFOLIO_NETWORK}" "${NGINX_CONTAINER}"
-    fi
-    return
-  fi
-
-  if [[ "${PORTFOLIO_MODE}" == "host" ]]; then
-    FRONTEND_UPSTREAM="${PORTFOLIO_HOST}:3100"
-    ADMIN_UPSTREAM="${PORTFOLIO_HOST}:3101"
-    API_UPSTREAM="${PORTFOLIO_HOST}:3102"
-    TEST_URL="http://${FRONTEND_UPSTREAM}/tr"
-    return
-  fi
-
-  echo "Hata: PORTFOLIO_MODE 'network' veya 'host' olmalı."
-  exit 1
+  done
+  return 1
 }
 
-render_template() {
-  local src="$1"
-  local dest="$2"
+resolve_mode() {
+  if [[ "${MODE}" == "auto" ]]; then
+    if [[ -f "${CERT_PATH}" ]]; then
+      echo "https"
+    else
+      echo "http"
+    fi
+    return
+  fi
+  if [[ "${MODE}" != "http" && "${MODE}" != "https" ]]; then
+    echo "Kullanım: sudo bash $0 [auto|http|https]" >&2
+    exit 1
+  fi
+  echo "${MODE}"
+}
+
+cleanup_old_templates() {
+  rm -f "${TTEN_TEMPLATES}"/portfolio-*.conf.template
+}
+
+install_portfolio_template() {
+  local ssl_mode="$1"
+  local portfolio_host="$2"
+  local src="${ROOT_DIR}/deploy/ttengames/${ssl_mode}/portfolio.conf.template"
+  local dest="${TTEN_TEMPLATES}/portfolio.conf.template"
+
+  if [[ ! -f "${src}" ]]; then
+    echo "Hata: ${src} bulunamadı."
+    exit 1
+  fi
+
   sed \
-    -e "s/@FRONTEND_UPSTREAM@/${FRONTEND_UPSTREAM}/g" \
-    -e "s/@ADMIN_UPSTREAM@/${ADMIN_UPSTREAM}/g" \
-    -e "s/@API_UPSTREAM@/${API_UPSTREAM}/g" \
+    -e "s/@FRONTEND_UPSTREAM@/${portfolio_host}:3100/g" \
+    -e "s/@ADMIN_UPSTREAM@/${portfolio_host}:3101/g" \
+    -e "s/@API_UPSTREAM@/${portfolio_host}:3102/g" \
     "${src}" > "${dest}"
+  echo "  + ${dest} (${ssl_mode}, upstream host: ${portfolio_host})"
 }
 
-setup_upstream_targets
+verify_nginx_config() {
+  echo ""
+  echo "==> Nginx server_name kontrolü..."
+  docker exec "${NGINX_CONTAINER}" nginx -T 2>/dev/null | grep -E "server_name (emrekilic|admin\.emrekilic|api\.emrekilic|ttengamesstudio)" || true
 
-SRC_DIR="${ROOT_DIR}/deploy/ttengames/${MODE}"
-FILES=(emrekilic.web.tr admin.emrekilic.web.tr api.emrekilic.web.tr)
-
-echo "==> Upstream modu: ${PORTFOLIO_MODE}"
-echo "    frontend → ${FRONTEND_UPSTREAM}"
-echo "    admin    → ${ADMIN_UPSTREAM}"
-echo "    api      → ${API_UPSTREAM}"
-echo "==> Hedef: ${TTEN_TEMPLATES}"
-echo "==> SSL modu: ${MODE}"
-
-for name in "${FILES[@]}"; do
-  dest="${TTEN_TEMPLATES}/portfolio-${name}.conf.template"
-  render_template "${SRC_DIR}/${name}.conf.template" "${dest}"
-  echo "  + ${dest}"
-done
-
-echo ""
-echo "==> Erişim testi (nginx container içinden)..."
-if docker exec "${NGINX_CONTAINER}" wget -qO- --timeout=5 "${TEST_URL}" 2>/dev/null | head -1 | grep -q .; then
-  echo "    OK: ${TEST_URL}"
-else
-  echo "    UYARI: ${TEST_URL} erişilemedi."
-  if [[ "${PORTFOLIO_MODE}" == "network" ]]; then
-    echo "    Kontrol: docker exec ${NGINX_CONTAINER} wget -qO- ${TEST_URL} | head"
-    echo "    Portfolio ayakta mı: docker ps | grep portfolio-prod"
-  else
-    echo "    Deneyin: sudo PORTFOLIO_MODE=network $0 ${MODE}"
-    echo "    veya: sudo PORTFOLIO_HOST=host.docker.internal PORTFOLIO_MODE=host $0 ${MODE}"
+  if ! docker exec "${NGINX_CONTAINER}" nginx -T 2>/dev/null | grep -q "server_name emrekilic.web.tr"; then
+    echo "HATA: portfolio.conf nginx'e yüklenmemiş."
+    echo "  docker exec ${NGINX_CONTAINER} ls -la /etc/nginx/conf.d/"
+    exit 1
   fi
+}
+
+test_sites() {
+  echo ""
+  echo "==> Site ayrımı testi..."
+
+  local tten_body portfolio_body
+  tten_body="$(curl -sL -H 'Host: ttengamesstudio.com.tr' http://127.0.0.1/ | head -c 500)"
+  portfolio_body="$(curl -sL -H 'Host: emrekilic.web.tr' http://127.0.0.1/tr | head -c 500)"
+
+  if echo "${tten_body}" | grep -qiE 'TTENGAMES|ttengames'; then
+    echo "  OK  ttengamesstudio.com.tr → TTEN"
+  else
+    echo "  HATA ttengamesstudio.com.tr TTEN içeriği dönmüyor"
+    echo "       İpucu: docker network disconnect ${PORTFOLIO_NETWORK} ${NGINX_CONTAINER}"
+  fi
+
+  if echo "${portfolio_body}" | grep -qiE 'Emre|portfolio|yüklenemedi'; then
+    echo "  OK  emrekilic.web.tr → Portfolio"
+  else
+    echo "  HATA emrekilic.web.tr portfolio içeriği dönmüyor"
+    echo "       upstream erişim: docker exec ${NGINX_CONTAINER} wget -qO- http://${PORTFOLIO_HOST}:3100/tr | head"
+  fi
+}
+
+SSL_MODE="$(resolve_mode)"
+
+echo "==> İki site kurulumu (mod: ${SSL_MODE})"
+echo ""
+
+echo "==> 1/5 Portfolio ağından ayırılıyor (TTEN DNS koruması)..."
+docker network disconnect "${PORTFOLIO_NETWORK}" "${NGINX_CONTAINER}" 2>/dev/null || true
+
+echo "==> 2/5 Portfolio upstream host tespit ediliyor..."
+if [[ -n "${PORTFOLIO_HOST:-}" ]]; then
+  echo "    Manuel: ${PORTFOLIO_HOST}"
+else
+  if ! PORTFOLIO_HOST="$(detect_portfolio_host)"; then
+    echo ""
+    echo "HATA: Nginx container'ından portfolio'ya (3100) erişilemiyor."
+    echo ""
+    echo "TTEN docker-compose.yml içinde nginx servisine ekleyin:"
+    echo "  extra_hosts:"
+    echo "    - \"host.docker.internal:host-gateway\""
+    echo ""
+    echo "Sonra: cd /opt/ttengamesstudio && docker compose up -d nginx"
+    echo "Tekrar: sudo bash $0 ${MODE}"
+    exit 1
+  fi
+  echo "    Otomatik: ${PORTFOLIO_HOST}"
 fi
 
+echo "==> 3/5 Eski portfolio template'leri temizleniyor..."
+cleanup_old_templates
+
+echo "==> 4/5 Yeni portfolio.conf.template yükleniyor..."
+install_portfolio_template "${SSL_MODE}" "${PORTFOLIO_HOST}"
+
 echo ""
-echo "==> Nginx container yeniden başlatılıyor (template'ler startup'ta işlenir)..."
+echo "==> 5/5 Nginx yeniden başlatılıyor..."
 docker restart "${NGINX_CONTAINER}"
-sleep 3
+sleep 4
 docker exec "${NGINX_CONTAINER}" nginx -t
 
+verify_nginx_config
+test_sites
+
 echo ""
-if [[ "${MODE}" == "http" ]]; then
-  echo "Test:"
-  echo "  curl -I -H 'Host: emrekilic.web.tr' http://127.0.0.1/tr"
-  echo ""
-  echo "Sonraki adım (sertifika yoksa):"
+if [[ "${SSL_MODE}" == "http" ]]; then
+  echo "Sertifika almak için (Cloudflare hata verirse DNS only yapın):"
   echo "  sudo certbot certonly --webroot -w /var/www/certbot \\"
   echo "    -d emrekilic.web.tr -d admin.emrekilic.web.tr -d api.emrekilic.web.tr \\"
-  echo "    -m senin@email.com --agree-tos --non-interactive"
-  echo "  sudo PORTFOLIO_MODE=${PORTFOLIO_MODE} $0 https"
+  echo "    -m admin@emrekilic.web.tr --agree-tos --non-interactive"
+  echo "  sudo bash $0 https"
 else
-  echo "Test:"
+  echo "HTTPS test:"
   echo "  curl -I https://emrekilic.web.tr/tr"
+  echo "  curl -I https://ttengamesstudio.com.tr/"
 fi
+
+echo ""
+echo "Kurulum tamam."

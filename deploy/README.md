@@ -25,17 +25,10 @@ nano deploy/.env   # JWT_SECRET, DATABASE_PASSWORD, Google OAuth vb.
 chmod +x deploy/deploy.sh
 ./deploy/deploy.sh
 
-# 4. Nginx — ZORUNLU (yoksa emrekilic.web.tr TTEN sitesini gösterir!)
-sudo chmod +x deploy/setup-nginx.sh
-sudo CERTBOT_EMAIL=senin@email.com ./deploy/setup-nginx.sh
-
-# Manuel kurulum istersen:
-# sudo cp deploy/nginx/*.conf /etc/nginx/sites-available/
-# sudo ln -sf /etc/nginx/sites-available/emrekilic.web.tr.conf /etc/nginx/sites-enabled/
-# sudo ln -sf /etc/nginx/sites-available/admin.emrekilic.web.tr.conf /etc/nginx/sites-enabled/
-# sudo ln -sf /etc/nginx/sites-available/api.emrekilic.web.tr.conf /etc/nginx/sites-enabled/
-# sudo certbot certonly --nginx -d emrekilic.web.tr -d admin.emrekilic.web.tr -d api.emrekilic.web.tr
-# sudo nginx -t && sudo systemctl reload nginx
+# 4. Nginx — TTEN ile aynı sunucudaysa (Hetzner)
+#    80/443 ttengamesstudio-nginx container'ında; host nginx KULLANMAYIN.
+sudo bash deploy/ttengames/install-nginx.sh
+# Detay: deploy/ttengames/README.md
 ```
 
 ## GitHub Actions secrets
