@@ -165,6 +165,43 @@ sed -i 's/\r$//' deploy/setup-nginx.sh deploy/setup-shared-nginx.sh deploy/tteng
 chmod +x deploy/setup-nginx.sh deploy/setup-shared-nginx.sh deploy/ttengames/install-nginx.sh
 ```
 
+### ttengamesstudio.com.tr portfolio gösteriyorsa
+
+**Sebep:** `ttengamesstudio-nginx` portfolio Docker ağına bağlandığında her iki projede de service adı `frontend` olduğu için TTEN'in `frontend:3000` upstream'i yanlışlıkla `portfolio-prod-frontend`'e gider.
+
+**Acil düzeltme:**
+
+```bash
+# 1) Portfolio ağından ayır (TTEN hemen düzelir)
+docker network disconnect portfolio-prod_portfolio ttengamesstudio-nginx
+docker restart ttengamesstudio-nginx
+
+# 2) TTEN geri geldi mi?
+curl -s -H 'Host: ttengamesstudio.com.tr' http://127.0.0.1/ | head -5
+```
+
+**Portfolio için güvenli yol** — network modu yerine host gateway:
+
+TTEN `docker-compose.yml` → nginx servisine ekle:
+
+```yaml
+extra_hosts:
+  - "host.docker.internal:host-gateway"
+```
+
+Sonra:
+
+```bash
+cd /opt/portfolio
+sudo PORTFOLIO_MODE=host PORTFOLIO_HOST=host.docker.internal ./deploy/ttengames/install-nginx.sh http
+
+docker exec ttengamesstudio-nginx wget -qO- http://host.docker.internal:3100/tr | head -3
+curl -I -H 'Host: emrekilic.web.tr' http://127.0.0.1/tr
+curl -s -H 'Host: ttengamesstudio.com.tr' http://127.0.0.1/ | head -3
+```
+
+`host.docker.internal` çalışmazsa TTEN nginx upstream'lerini tam container adına çevirin (`ttengamesstudio-frontend:3000`), ardından `PORTFOLIO_MODE=network` kullanılabilir.
+
 ### TTEN Games ile aynı sunucu (`ttengamesstudio-nginx`)
 
 80/443 `ttengamesstudio-nginx` container'ında. Mount'lar:
@@ -177,16 +214,17 @@ chmod +x deploy/setup-nginx.sh deploy/setup-shared-nginx.sh deploy/ttengames/ins
 
 Portfolio config'leri **templates** dizinine `.conf.template` olarak eklenir.
 
-**Önerilen:** Docker network modu (host IP gerekmez):
+**Önerilen:** Host gateway modu (TTEN DNS'ini bozmaz). Önce TTEN compose'a `extra_hosts` ekleyin:
 
 ```bash
 cd /opt/portfolio
 chmod +x deploy/ttengames/install-nginx.sh
 
-# 1) HTTP — nginx'i portfolio ağına bağlar, container adlarıyla proxy yapar
-sudo PORTFOLIO_MODE=network ./deploy/ttengames/install-nginx.sh http
+# 1) HTTP
+sudo PORTFOLIO_MODE=host PORTFOLIO_HOST=host.docker.internal ./deploy/ttengames/install-nginx.sh http
 
 curl -I -H 'Host: emrekilic.web.tr' http://127.0.0.1/tr
+curl -s -H 'Host: ttengamesstudio.com.tr' http://127.0.0.1/ | head -3
 
 # 2) Let's Encrypt (Cloudflare hata verirse DNS only yapın)
 sudo certbot certonly --webroot -w /var/www/certbot \
@@ -194,7 +232,7 @@ sudo certbot certonly --webroot -w /var/www/certbot \
   -m senin@email.com --agree-tos --non-interactive
 
 # 3) HTTPS
-sudo PORTFOLIO_MODE=network ./deploy/ttengames/install-nginx.sh https
+sudo PORTFOLIO_MODE=host PORTFOLIO_HOST=host.docker.internal ./deploy/ttengames/install-nginx.sh https
 
 curl -I https://emrekilic.web.tr/tr
 ```

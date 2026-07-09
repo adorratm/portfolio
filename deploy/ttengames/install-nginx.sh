@@ -5,11 +5,14 @@
 #   sudo ./deploy/ttengames/install-nginx.sh http
 #   sudo ./deploy/ttengames/install-nginx.sh https
 #
-# Önerilen (Docker network — host IP gerekmez):
-#   sudo PORTFOLIO_MODE=network ./deploy/ttengames/install-nginx.sh http
+# Önerilen (host gateway — TTEN DNS çakışması yapmaz):
+#   TTEN docker-compose'da: extra_hosts: ["host.docker.internal:host-gateway"]
+#   sudo PORTFOLIO_MODE=host PORTFOLIO_HOST=host.docker.internal ./deploy/ttengames/install-nginx.sh http
 #
-# Opsiyonel:
-#   PORTFOLIO_MODE=host|network   (varsayılan: network)
+# DİKKAT — network modu:
+#   nginx'i portfolio ağına bağlamak TTEN'deki `frontend` DNS adını bozabilir
+#   (her iki stack'te service adı `frontend`). TTEN upstream'leri tam container
+#   adı kullanmıyorsa (ttengamesstudio-frontend) network modunu KULLANMAYIN.
 #   PORTFOLIO_HOST=172.17.0.1     (host modunda)
 #   PORTFOLIO_NETWORK=portfolio-prod_portfolio
 set -euo pipefail
@@ -17,8 +20,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TTEN_TEMPLATES="${TTEN_TEMPLATES:-/opt/ttengamesstudio/docker/nginx/templates}"
 NGINX_CONTAINER="${NGINX_CONTAINER:-ttengamesstudio-nginx}"
-PORTFOLIO_MODE="${PORTFOLIO_MODE:-network}"
-PORTFOLIO_HOST="${PORTFOLIO_HOST:-172.17.0.1}"
+PORTFOLIO_MODE="${PORTFOLIO_MODE:-host}"
+PORTFOLIO_HOST="${PORTFOLIO_HOST:-host.docker.internal}"
 PORTFOLIO_NETWORK="${PORTFOLIO_NETWORK:-portfolio-prod_portfolio}"
 MODE="${1:-}"
 
@@ -56,6 +59,9 @@ setup_upstream_targets() {
     fi
 
     if ! docker network inspect "${PORTFOLIO_NETWORK}" --format '{{range .Containers}}{{.Name}} {{end}}' | grep -q "${NGINX_CONTAINER}"; then
+      echo "==> UYARI: network modu TTEN'deki 'frontend' DNS adını bozabilir."
+      echo "    TTEN upstream'leri 'ttengamesstudio-frontend' gibi tam ad kullanmıyorsa"
+      echo "    PORTFOLIO_MODE=host ile devam edin."
       echo "==> ${NGINX_CONTAINER} → ${PORTFOLIO_NETWORK} ağına bağlanıyor..."
       docker network connect "${PORTFOLIO_NETWORK}" "${NGINX_CONTAINER}"
     fi
