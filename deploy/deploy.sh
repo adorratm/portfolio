@@ -83,6 +83,26 @@ if docker network inspect "${TTEN_NET}" >/dev/null 2>&1; then
       docker network connect "${TTEN_NET}" "${container}" 2>/dev/null || true
     fi
   done
+
+  NGINX_CONTAINER="${NGINX_CONTAINER:-ttengamesstudio-nginx}"
+  TTEN_TPL="${TTEN_TEMPLATES:-/opt/ttengamesstudio/docker/nginx/templates}"
+  if docker ps --format '{{.Names}}' | grep -qx "${NGINX_CONTAINER}" \
+    && [[ -f "${TTEN_TPL}/portfolio.conf" ]]; then
+    echo "==> Nginx portfolio merge + reload..."
+    docker exec "${NGINX_CONTAINER}" sh -c '
+      line=$(grep -n -E "^upstream portfolio_|^# Portfolio|server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" \
+        /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1)
+      if [ -n "$line" ]; then
+        head -n $((line - 1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean
+      else
+        cp /etc/nginx/conf.d/default.conf /tmp/default.clean
+      fi
+      cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean
+      mv /tmp/default.clean /etc/nginx/conf.d/default.conf
+    '
+    docker exec "${NGINX_CONTAINER}" nginx -t
+    docker exec "${NGINX_CONTAINER}" nginx -s reload
+  fi
 fi
 
 echo "Deploy tamamlandı: $(date -Is)"
