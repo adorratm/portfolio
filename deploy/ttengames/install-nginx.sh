@@ -261,11 +261,19 @@ find_tten_main_template() {
 
 merge_portfolio_into_nginx() {
   docker exec "${NGINX_CONTAINER}" sh -c '
-    if [ -f /etc/nginx/templates/portfolio.conf ]; then
-      if ! grep -q "server_name emrekilic.web.tr" /etc/nginx/conf.d/default.conf 2>/dev/null; then
-        cat /etc/nginx/templates/portfolio.conf >> /etc/nginx/conf.d/default.conf
-      fi
+    if [ ! -f /etc/nginx/templates/portfolio.conf ]; then
+      echo "portfolio.conf yok" >&2
+      exit 1
     fi
+    if [ ! -f /etc/nginx/conf.d/default.conf ]; then
+      echo "default.conf yok" >&2
+      exit 1
+    fi
+    # Eski portfolio bloklarını kaldır, tek sefer ekle (çift merge önlenir)
+    awk "/^upstream portfolio_frontend/ { skip=1 } !skip { print }" \
+      /etc/nginx/conf.d/default.conf > /tmp/default.clean
+    cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean
+    mv /tmp/default.clean /etc/nginx/conf.d/default.conf
   '
   docker exec "${NGINX_CONTAINER}" nginx -t
   docker exec "${NGINX_CONTAINER}" nginx -s reload
