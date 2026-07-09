@@ -233,13 +233,32 @@ setup_upstream() {
 }
 
 cleanup_old_templates() {
-  rm -f "${TTEN_TEMPLATES}"/portfolio-*.conf.template
+  rm -f "${TTEN_TEMPLATES}"/portfolio-*.conf.template "${TTEN_TEMPLATES}"/portfolio.conf.template
 }
 
-install_portfolio_template() {
+ensure_portfolio_include() {
+  local default_template="${TTEN_TEMPLATES}/default.conf.template"
+  local marker="include /etc/nginx/templates/portfolio.conf"
+
+  if [[ ! -f "${default_template}" ]]; then
+    echo "Hata: ${default_template} bulunamadı."
+    exit 1
+  fi
+
+  if ! grep -qF "${marker}" "${default_template}"; then
+    echo "==> default.conf.template → portfolio include ekleniyor..."
+    {
+      echo ""
+      echo "# Portfolio (emrekilic.web.tr) — deploy/ttengames/install-nginx.sh"
+      echo "${marker};"
+    } >> "${default_template}"
+  fi
+}
+
+install_portfolio_conf() {
   local ssl_mode="$1"
   local src="${ROOT_DIR}/deploy/ttengames/${ssl_mode}/portfolio.conf.template"
-  local dest="${TTEN_TEMPLATES}/portfolio.conf.template"
+  local dest="${TTEN_TEMPLATES}/portfolio.conf"
 
   if [[ ! -f "${src}" ]]; then
     echo "Hata: ${src} bulunamadı."
@@ -250,8 +269,10 @@ install_portfolio_template() {
     -e "s|@FRONTEND_UPSTREAM@|${UPSTREAM_FRONTEND}|g" \
     -e "s|@ADMIN_UPSTREAM@|${UPSTREAM_ADMIN}|g" \
     -e "s|@API_UPSTREAM@|${UPSTREAM_API}|g" \
+    -e 's/\$\${/$/g' \
     "${src}" > "${dest}"
   echo "  + ${dest} (${ssl_mode})"
+  ensure_portfolio_include
 }
 
 verify_nginx_config() {
@@ -300,11 +321,11 @@ docker network disconnect "${PORTFOLIO_NETWORK}" "${NGINX_CONTAINER}" 2>/dev/nul
 
 setup_upstream
 
-echo "==> 3/5 Eski portfolio template'leri temizleniyor..."
+echo "==> 3/5 Eski portfolio dosyaları temizleniyor..."
 cleanup_old_templates
 
-echo "==> 4/5 portfolio.conf.template yükleniyor..."
-install_portfolio_template "${SSL_MODE}"
+echo "==> 4/5 portfolio.conf yükleniyor (default.conf include)..."
+install_portfolio_conf "${SSL_MODE}"
 
 echo ""
 echo "==> 5/5 Nginx yeniden başlatılıyor..."
