@@ -103,6 +103,7 @@ services:
       - portfolio_uploads:/app/uploads
     networks:
       - portfolio
+      - ttengames
 
   frontend:
     build:
@@ -124,6 +125,7 @@ services:
       - "${FRONTEND_HOST_PORT:-3100}:3000"
     networks:
       - portfolio
+      - ttengames
 
   admin:
     build:
@@ -143,6 +145,7 @@ services:
       - "${ADMIN_HOST_PORT:-3101}:3000"
     networks:
       - portfolio
+      - ttengames
 
 volumes:
   portfolio_postgres_data:
@@ -152,3 +155,7 @@ volumes:
 networks:
   portfolio:
     driver: bridge
+  # TTEN nginx ile Docker DNS (deploy sonrası kopmayı önler)
+  ttengames:
+    external: true
+    name: ${PORTFOLIO_TTEN_NETWORK:-ttengamesstudio_ttengamesstudio-network}

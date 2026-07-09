@@ -134,35 +134,15 @@ API_PORT="${API_PORT:-3102}"
 echo "==> Backend health check..."
 wait_for_health "${API_PORT}" "/api/v1/health" 40
 
-# TTEN nginx ile paylaşılan sunucuda portfolio container'larını TTEN ağına bağla
-TTEN_NET="${PORTFOLIO_TTEN_NETWORK:-ttengamesstudio_ttengamesstudio-network}"
-if docker network inspect "${TTEN_NET}" >/dev/null 2>&1; then
-  echo "==> Portfolio → ${TTEN_NET} ağına bağlanıyor..."
-  for container in portfolio-prod-frontend portfolio-prod-admin portfolio-prod-backend; do
-    if docker ps --format '{{.Names}}' | grep -qx "${container}"; then
-      docker network connect "${TTEN_NET}" "${container}" 2>/dev/null || true
-    fi
-  done
-
-  NGINX_CONTAINER="${NGINX_CONTAINER:-ttengamesstudio-nginx}"
-  TTEN_TPL="${TTEN_TEMPLATES:-/opt/ttengamesstudio/docker/nginx/templates}"
-  if docker ps --format '{{.Names}}' | grep -qx "${NGINX_CONTAINER}" \
-    && [[ -f "${TTEN_TPL}/portfolio.conf" ]]; then
-    echo "==> Nginx portfolio merge + reload..."
-    docker exec "${NGINX_CONTAINER}" sh -c '
-      line=$(grep -n -E "^upstream portfolio_|^# Portfolio|^map \\$http_upgrade|server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" \
-        /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1)
-      if [ -n "$line" ]; then
-        head -n $((line - 1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean
-      else
-        cp /etc/nginx/conf.d/default.conf /tmp/default.clean
-      fi
-      cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean
-      mv /tmp/default.clean /etc/nginx/conf.d/default.conf
-    '
-    docker exec "${NGINX_CONTAINER}" nginx -t
-    docker exec "${NGINX_CONTAINER}" nginx -s reload
-  fi
+# TTEN nginx — portfolio routing (compose ttengames ağı + merge/reload)
+if docker network inspect "${PORTFOLIO_TTEN_NETWORK:-ttengamesstudio_ttengamesstudio-network}" >/dev/null 2>&1; then
+  bash "${ROOT_DIR}/deploy/sync-tten-nginx.sh" || {
+    echo "Nginx sync başarısız — manuel:"
+    echo "  bash deploy/sync-tten-nginx.sh"
+    exit 1
+  }
+else
+  echo "UYARI: TTEN ağı yok — nginx sync atlandı."
 fi
 
 echo "Deploy tamamlandı: $(date -Is)"

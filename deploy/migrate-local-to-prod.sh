@@ -320,6 +320,10 @@ cmd_import() {
   echo "==> Uygulama container'ları başlatılıyor..."
   docker compose -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" up -d backend frontend admin
 
+  if docker network inspect "${PORTFOLIO_TTEN_NETWORK:-ttengamesstudio_ttengamesstudio-network}" >/dev/null 2>&1; then
+    bash "${ROOT_DIR}/deploy/sync-tten-nginx.sh" || true
+  fi
+
   echo ""
   echo "Import tamamlandı."
   echo "Medya dosyaları yerel uploads/ kullanıyorsa:"
