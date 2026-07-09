@@ -298,7 +298,7 @@ merge_portfolio_into_nginx() {
       echo "default.conf yok" >&2
       exit 1
     fi
-    line=$(grep -n -E "^upstream portfolio_|^# Portfolio|server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" \
+    line=$(grep -n -E "^upstream portfolio_|^# Portfolio|^map \\$http_upgrade|server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" \
       /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1)
     if [ -n "$line" ]; then
       head -n $((line - 1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean
@@ -315,7 +315,7 @@ merge_portfolio_into_nginx() {
 ensure_portfolio_include() {
   local marker="portfolio-merge-v4"
   local main_template
-  local merge_block='if [ -f /etc/nginx/templates/portfolio.conf ] && [ -f /etc/nginx/conf.d/default.conf ]; then line=$(grep -n -E "^upstream portfolio_|^# Portfolio|server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); if [ -n "$line" ]; then head -n $((line-1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean; else cp /etc/nginx/conf.d/default.conf /tmp/default.clean; fi; cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean; mv /tmp/default.clean /etc/nginx/conf.d/default.conf; fi'
+  local merge_block='if [ -f /etc/nginx/templates/portfolio.conf ] && [ -f /etc/nginx/conf.d/default.conf ]; then line=$(grep -n -E "^upstream portfolio_|^# Portfolio|^map \\$http_upgrade|server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); if [ -n "$line" ]; then head -n $((line-1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean; else cp /etc/nginx/conf.d/default.conf /tmp/default.clean; fi; cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean; mv /tmp/default.clean /etc/nginx/conf.d/default.conf; fi'
 
   if main_template="$(find_tten_main_template)"; then
     if ! grep -qF "server_name emrekilic.web.tr" "${main_template}" 2>/dev/null; then

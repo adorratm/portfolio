@@ -307,6 +307,94 @@ https://api.emrekilic.web.tr/api/v1/auth/google/callback
 cd backend && yarn translate:en
 ```
 
+## Yerel veritabanını production'a taşıma
+
+Admin panelinde düzenlediğiniz CMS/CV verileri yerel Postgres'te kalır. Canlıya aktarmak için:
+
+### 1. Yerel makine — Windows PostgreSQL (sizin kurulum)
+
+`backend/.env` dosyanızdaki bağlantı bilgileri otomatik okunur:
+
+```env
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=...
+DATABASE_NAME=portfolio
+```
+
+**Git Bash** (proje klasöründe):
+
+```bash
+# Docker postgres çalışmıyorsa otomatik native mod kullanılır
+LOCAL_PG_MODE=native bash deploy/migrate-local-to-prod.sh export
+```
+
+`pg_dump` PATH'te değilse önce ekleyin:
+
+```bash
+export PATH="/c/Program Files/PostgreSQL/16/bin:$PATH"
+LOCAL_PG_MODE=native bash deploy/migrate-local-to-prod.sh export
+```
+
+**PowerShell** alternatifi:
+
+```powershell
+cd C:\Users\adorr\Downloads\portfolio
+$env:PGPASSWORD = "SIFRENIZ"
+& "C:\Program Files\PostgreSQL\16\bin\pg_dump.exe" `
+  -h localhost -p 5432 -U postgres -d portfolio `
+  -Fc --no-owner --no-acl `
+  -f deploy\artifacts\portfolio-local.dump
+```
+
+> **Not:** `6432` portu PgBouncer içindir; yedek için doğrudan Postgres **`5432`** kullanın.
+
+Oluşan dosyalar:
+- `deploy/artifacts/portfolio-local.dump` — veritabanı yedeği
+- `deploy/artifacts/portfolio-uploads.tar.gz` — `backend/uploads/` varsa medya dosyaları
+
+### 1b. Yerel makine — Docker Postgres
+
+```bash
+docker compose up -d
+LOCAL_PG_MODE=docker bash deploy/migrate-local-to-prod.sh export
+```
+
+### 2. Sunucuya kopyala
+
+```bash
+scp deploy/artifacts/portfolio-local.dump \
+    deploy/artifacts/portfolio-uploads.tar.gz \
+    root@SUNUCU_IP:/opt/portfolio/deploy/artifacts/
+```
+
+(`portfolio-uploads.tar.gz` yoksa yalnızca dump yeterli.)
+
+### 3. Sunucuda import
+
+```bash
+cd /opt/portfolio
+bash deploy/migrate-local-to-prod.sh import
+bash deploy/migrate-local-to-prod.sh sync-uploads   # medya arşivi varsa
+```
+
+Import işlemi:
+- Mevcut production veritabanını **siler ve yerel dump ile değiştirir**
+- `http://localhost:3001/...` medya URL'lerini `https://api.emrekilic.web.tr/...` olarak günceller
+- Backend / frontend / admin'i yeniden başlatır
+
+**Uyarı:** Production'daki mevcut verilerin üzerine yazılır. Önce yedek alın:
+
+```bash
+docker exec portfolio-prod-postgres pg_dump -U portfolio -d portfolio -Fc -f /tmp/backup.dump
+docker cp portfolio-prod-postgres:/tmp/backup.dump ./prod-backup-$(date +%F).dump
+```
+
+### S3 kullanıyorsanız
+
+AWS anahtarları `deploy/.env` içinde doluysa medya zaten S3'te olabilir; yalnızca DB import yeterli. Yerel `uploads/` kullanıyorsanız `sync-uploads` adımını atlamayın.
+
 ## SEO kontrol listesi
 
 - [ ] `NEXT_PUBLIC_SITE_URL=https://emrekilic.web.tr` production'da ayarlı

@@ -31,6 +31,10 @@ export default registerAs('app', () => {
       callbackUrl: env('GOOGLE_CALLBACK_URL', defaultCallback),
     },
     allowedAdminEmail: env('ALLOWED_ADMIN_EMAIL'),
+    publicApiUrl: env(
+      'API_PUBLIC_URL',
+      `http://localhost:${port}/${apiPrefix}`,
+    ),
     database: {
       host: env('DATABASE_HOST', 'localhost'),
       port: parseInt(env('DATABASE_PORT', '6432'), 10),

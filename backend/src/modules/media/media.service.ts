@@ -38,13 +38,11 @@ export class MediaService {
 
   constructor(private readonly config: ConfigService) {
     const aws = config.get('app.aws');
-    const port = config.get<number>('app.port', 3001);
-    const apiPrefix = config.get<string>('app.apiPrefix', 'api/v1');
 
     this.bucket = aws.bucket;
     this.region = aws.region;
     this.uploadsDir = join(process.cwd(), 'uploads');
-    this.publicBaseUrl = `http://localhost:${port}/${apiPrefix}/media/files`;
+    this.publicBaseUrl = `${config.get<string>('app.publicApiUrl')}/media/files`;
 
     if (aws.accessKeyId && aws.secretAccessKey) {
       this.s3 = new S3Client({

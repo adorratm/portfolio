@@ -90,7 +90,7 @@ if docker network inspect "${TTEN_NET}" >/dev/null 2>&1; then
     && [[ -f "${TTEN_TPL}/portfolio.conf" ]]; then
     echo "==> Nginx portfolio merge + reload..."
     docker exec "${NGINX_CONTAINER}" sh -c '
-      line=$(grep -n -E "^upstream portfolio_|^# Portfolio|server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" \
+      line=$(grep -n -E "^upstream portfolio_|^# Portfolio|^map \\$http_upgrade|server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" \
         /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1)
       if [ -n "$line" ]; then
         head -n $((line - 1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean

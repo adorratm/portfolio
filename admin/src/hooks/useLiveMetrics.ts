@@ -23,7 +23,8 @@ export function useLiveMetrics(): SystemMetrics | null {
 
   useEffect(() => {
     const socket: Socket = io(`${WS_BASE}/metrics`, {
-      transports: ['websocket'],
+      transports: ['websocket', 'polling'],
+      path: '/socket.io',
     });
 
     socket.on('metrics', (data: SystemMetrics) => {
