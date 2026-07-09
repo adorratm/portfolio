@@ -70,18 +70,18 @@ fetch_url_from_nginx() {
   local url="$1"
   docker exec "${NGINX_CONTAINER}" sh -c "
     if command -v wget >/dev/null 2>&1; then
-      wget -qO- --timeout=5 '${url}'
+      wget -qO- --timeout=5 '${url}' || true
     elif command -v curl >/dev/null 2>&1; then
-      curl -fsS --max-time 5 '${url}'
-    else
-      exit 127
+      curl -fsS --max-time 5 '${url}' || true
     fi
-  " 2>/dev/null
+  " 2>/dev/null || true
 }
 
 test_upstream() {
   local url="$1"
-  fetch_url_from_nginx "${url}" | head -1 | grep -q .
+  local body
+  body="$(fetch_url_from_nginx "${url}")"
+  [[ ${#body} -gt 0 ]]
 }
 
 detect_host_upstream() {
@@ -139,7 +139,13 @@ diagnose_docker_upstream_failure() {
   echo "  DNS (nginx içinden):"
   docker exec "${NGINX_CONTAINER}" getent hosts portfolio-prod-frontend 2>/dev/null || echo "    portfolio-prod-frontend çözülemedi"
   echo "  HTTP test:"
-  fetch_url_from_nginx "http://portfolio-prod-frontend:3000/tr" | head -1 || echo "    erişim yok"
+  local body
+  body="$(fetch_url_from_nginx "http://portfolio-prod-frontend:3000/tr")"
+  if [[ ${#body} -gt 0 ]]; then
+    echo "    OK (${#body} byte)"
+  else
+    echo "    erişim yok"
+  fi
   echo ""
   echo "Manuel:"
   echo "  docker network ls"

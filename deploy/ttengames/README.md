@@ -38,10 +38,15 @@ sed -i 's/\r$//' deploy/ttengames/install-nginx.sh
 sudo bash deploy/ttengames/install-nginx.sh
 ```
 
-Docker modunu doğrudan zorlamak için:
+Docker modunu doğrudan zorlamak için (ağ adını kendiniz bulun):
 
 ```bash
-sudo PORTFOLIO_UPSTREAM_MODE=docker bash deploy/ttengames/install-nginx.sh
+# nginx ile ttengamesstudio-frontend ortak ağ adı:
+docker inspect ttengamesstudio-nginx --format '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}'
+
+sudo PORTFOLIO_TTEN_NETWORK=ttengamesstudio_ttengamesstudio-network \
+     PORTFOLIO_UPSTREAM_MODE=docker \
+     bash deploy/ttengames/install-nginx.sh
 ```
 
 Script otomatik olarak:
