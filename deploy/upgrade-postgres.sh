@@ -20,12 +20,14 @@ COMPOSE_FILE="${ROOT_DIR}/docker-compose.prod.yml"
 ARTIFACTS="${ROOT_DIR}/deploy/artifacts"
 BACKUP="${ARTIFACTS}/prod-pre-upgrade-$(date +%Y%m%d-%H%M%S).sql"
 SKIP_RESTORE=0
+POSTGRES_ONLY=0
 
 for arg in "$@"; do
   case "${arg}" in
     --skip-restore) SKIP_RESTORE=1 ;;
+    --postgres-only) POSTGRES_ONLY=1 ;;
     -h|--help)
-      echo "Kullanım: bash deploy/upgrade-postgres.sh [--skip-restore]"
+      echo "Kullanım: bash deploy/upgrade-postgres.sh [--skip-restore] [--postgres-only]"
       exit 0
       ;;
   esac
@@ -53,16 +55,63 @@ echo "    Veritabanı: ${DATABASE_NAME}"
 echo ""
 
 if docker ps --format '{{.Names}}' | grep -qx portfolio-prod-postgres; then
-  echo "==> 1/5 Mevcut veritabanı yedekleniyor..."
-  "${COMPOSE[@]}" exec -T postgres pg_dump \
-    -U "${DATABASE_USER}" \
-    -d "${DATABASE_NAME}" \
-    --format=plain \
-    --clean \
-    --if-exists \
-    --no-owner \
-    --no-acl > "${BACKUP}"
-  echo "  + ${BACKUP} ($(du -h "${BACKUP}" | awk '{print $1}'))"
+  if "${COMPOSE[@]}" exec -T postgres pg_isready -U "${DATABASE_USER}" -d "${DATABASE_NAME}" >/dev/null 2>&1; then
+    echo "==> 1/5 Mevcut veritabanı yedekleniyor..."
+    "${COMPOSE[@]}" exec -T postgres pg_dump \
+      -U "${DATABASE_USER}" \
+      -d "${DATABASE_NAME}" \
+      --format=plain \
+      --clean \
+      --if-exists \
+      --no-owner \
+      --no-acl > "${BACKUP}"
+    echo "  + ${BACKUP} ($(du -h "${BACKUP}" | awk '{print $1}'))"
+  else
+    echo "==> 1/5 Postgres yanıt vermiyor — geçici PG16 container ile yedek deneniyor..."
+    VOLUME="$(docker volume ls --format '{{.Name}}' | grep portfolio_postgres_data | head -1)"
+    if [[ -n "${VOLUME}" ]]; then
+      docker rm -f portfolio-pg16-backup 2>/dev/null || true
+      if docker run -d --name portfolio-pg16-backup \
+        -v "${VOLUME}:/var/lib/postgresql/data" \
+        -e POSTGRES_HOST_AUTH_METHOD=trust \
+        postgres:16-alpine >/dev/null; then
+        for i in $(seq 1 20); do
+          if docker exec portfolio-pg16-backup pg_isready -U "${DATABASE_USER}" -d "${DATABASE_NAME}" >/dev/null 2>&1 \
+            || docker exec portfolio-pg16-backup pg_isready -U postgres >/dev/null 2>&1; then
+            break
+          fi
+          sleep 2
+        done
+        if docker exec portfolio-pg16-backup pg_dump \
+          -U "${DATABASE_USER}" \
+          -d "${DATABASE_NAME}" \
+          --format=plain \
+          --clean \
+          --if-exists \
+          --no-owner \
+          --no-acl > "${BACKUP}" 2>/dev/null \
+          || docker exec portfolio-pg16-backup pg_dump \
+            -U postgres \
+            -d "${DATABASE_NAME}" \
+            --format=plain \
+            --clean \
+            --if-exists \
+            --no-owner \
+            --no-acl > "${BACKUP}" 2>/dev/null; then
+          echo "  + ${BACKUP} ($(du -h "${BACKUP}" | awk '{print $1}'))"
+        else
+          echo "  UYARI: Yedek alınamadı — volume sıfırlanacak."
+          BACKUP=""
+        fi
+        docker rm -f portfolio-pg16-backup 2>/dev/null || true
+      else
+        echo "  UYARI: Geçici PG16 başlatılamadı — volume sıfırlanacak."
+        BACKUP=""
+      fi
+    else
+      BACKUP=""
+    fi
+  fi
 else
   echo "==> 1/5 Postgres container yok — yedek atlandı."
   BACKUP=""
@@ -113,9 +162,12 @@ else
 fi
 
 echo ""
-echo "==> Kalan servisler başlatılıyor..."
-"${COMPOSE[@]}" up -d
-
-echo ""
-echo "PostgreSQL yükseltmesi tamamlandı."
+if [[ "${POSTGRES_ONLY}" -eq 1 ]]; then
+  echo "PostgreSQL yükseltmesi tamamlandı (yalnızca postgres)."
+else
+  echo "==> Kalan servisler başlatılıyor..."
+  "${COMPOSE[@]}" up -d
+  echo ""
+  echo "PostgreSQL yükseltmesi tamamlandı."
+fi
 docker exec portfolio-prod-postgres psql -U "${DATABASE_USER}" -d "${DATABASE_NAME}" -tAc 'SELECT version();'
