@@ -56,30 +56,47 @@ jobs:
     name: Deploy to Hetzner
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v5
 
-      - name: Ensure deploy directory exists
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
-          script: mkdir -p ${{ secrets.DEPLOY_PATH }}
+      - name: Upload project archive to server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
 
-      - name: Copy project files to server
-        uses: appleboy/scp-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
-          source: "backend,frontend,admin,deploy,docker-compose.prod.yml"
-          target: ${{ secrets.DEPLOY_PATH }}
-          strip_components: 0
-          overwrite: true
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+          tar czf /tmp/portfolio-deploy.tar.gz \
+            --exclude='**/node_modules' \
+            --exclude='**/.next' \
+            backend frontend admin deploy docker-compose.prod.yml
+
+          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" \
+            -o StrictHostKeyChecking=accept-new \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=10 \
+            "${SSH_USER}@${SSH_HOST}" "mkdir -p '${DEPLOY_PATH}'"
+
+          scp -i ~/.ssh/deploy_key -P "$SSH_PORT" \
+            -o StrictHostKeyChecking=accept-new \
+            -o ServerAliveInterval=30 \
+            /tmp/portfolio-deploy.tar.gz \
+            "${SSH_USER}@${SSH_HOST}:/tmp/portfolio-deploy.tar.gz"
+
+          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" \
+            -o StrictHostKeyChecking=accept-new \
+            "${SSH_USER}@${SSH_HOST}" \
+            "cd '${DEPLOY_PATH}' && tar xzf /tmp/portfolio-deploy.tar.gz && rm -f /tmp/portfolio-deploy.tar.gz"
 
       - name: Run deploy script
         uses: appleboy/ssh-action@v1.2.0

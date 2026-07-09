@@ -49,6 +49,10 @@ Deploy artık sunucuda `git pull` yapmaz — dosyalar GitHub Actions runner'dan 
 
 ## Sorun giderme
 
+### `ssh: unexpected packet in response to channel open` (drone-scp)
+
+`appleboy/scp-action` bazı sunucularda SSH kanal hatası verir. Workflow artık runner üzerinde `tar` + yerel `scp` kullanır.
+
 ### `Could not resolve host: github.com` (sunucuda git fetch)
 
 Eski workflow sunucuda `git fetch` yapıyordu. Güncel workflow SCP kullanır. Hâlâ manuel git kullanıyorsan sunucuda DNS ayarla:
