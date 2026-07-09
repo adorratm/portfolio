@@ -259,17 +259,30 @@ find_tten_main_template() {
   return 1
 }
 
+merge_portfolio_into_nginx() {
+  docker exec "${NGINX_CONTAINER}" sh -c '
+    if [ -f /etc/nginx/templates/portfolio.conf ]; then
+      if ! grep -q "server_name emrekilic.web.tr" /etc/nginx/conf.d/default.conf 2>/dev/null; then
+        cat /etc/nginx/templates/portfolio.conf >> /etc/nginx/conf.d/default.conf
+      fi
+    fi
+  '
+  docker exec "${NGINX_CONTAINER}" nginx -t
+  docker exec "${NGINX_CONTAINER}" nginx -s reload
+}
+
 ensure_portfolio_include() {
-  local marker="include /etc/nginx/templates/portfolio.conf"
+  local marker="portfolio-merge-v2"
   local main_template
+  local merge_block='if [ -f /etc/nginx/templates/portfolio.conf ]; then if ! grep -q "server_name emrekilic.web.tr" /etc/nginx/conf.d/default.conf 2>/dev/null; then cat /etc/nginx/templates/portfolio.conf >> /etc/nginx/conf.d/default.conf; fi; fi'
 
   if main_template="$(find_tten_main_template)"; then
-    if ! grep -qF "${marker}" "${main_template}"; then
-      echo "==> ${main_template} → portfolio include ekleniyor..."
+    if ! grep -qF "server_name emrekilic.web.tr" "${main_template}" 2>/dev/null; then
+      echo "==> ${main_template} sonuna portfolio.conf include ekleniyor..."
       {
         echo ""
-        echo "# Portfolio (emrekilic.web.tr) — deploy/ttengames/install-nginx.sh"
-        echo "${marker};"
+        echo "# Portfolio (emrekilic.web.tr)"
+        echo "include /etc/nginx/templates/portfolio.conf;"
       } >> "${main_template}"
     fi
     return 0
@@ -282,21 +295,32 @@ ensure_portfolio_include() {
     exit 1
   fi
 
-  if grep -qF "install-nginx.sh portfolio include" "${TTEN_ENTRYPOINT}"; then
-    echo "==> entrypoint.sh zaten portfolio include içeriyor"
+  if grep -qF "${marker}" "${TTEN_ENTRYPOINT}"; then
+    echo "==> entrypoint.sh merge hook OK (${marker})"
     return 0
   fi
 
-  echo "==> entrypoint.sh → portfolio include ekleniyor..."
-  cat >> "${TTEN_ENTRYPOINT}" << 'EOF'
+  echo "==> entrypoint.sh → portfolio merge hook ekleniyor (${marker})..."
+  cp "${TTEN_ENTRYPOINT}" "${TTEN_ENTRYPOINT}.bak.portfolio"
 
-# install-nginx.sh portfolio include
-if [ -f /etc/nginx/templates/portfolio.conf ]; then
-  if ! grep -qF 'include /etc/nginx/templates/portfolio.conf' /etc/nginx/conf.d/default.conf 2>/dev/null; then
-    echo 'include /etc/nginx/templates/portfolio.conf;' >> /etc/nginx/conf.d/default.conf
-  fi
-fi
+  if grep -qE 'exec (\$@|nginx)' "${TTEN_ENTRYPOINT}"; then
+    awk -v marker="${marker}" -v block="${merge_block}" '
+      /exec (\$@|nginx)/ && !done {
+        print "# " marker
+        print block
+        done=1
+      }
+      { print }
+    ' "${TTEN_ENTRYPOINT}" > "${TTEN_ENTRYPOINT}.new"
+    mv "${TTEN_ENTRYPOINT}.new" "${TTEN_ENTRYPOINT}"
+    chmod +x "${TTEN_ENTRYPOINT}"
+  else
+    cat >> "${TTEN_ENTRYPOINT}" << EOF
+
+# ${marker}
+${merge_block}
 EOF
+  fi
 }
 
 install_portfolio_conf() {
@@ -326,8 +350,13 @@ verify_nginx_config() {
     | grep -E "server_name (emrekilic|admin\.emrekilic|api\.emrekilic|ttengamesstudio)" || true
 
   if ! docker exec "${NGINX_CONTAINER}" nginx -T 2>/dev/null | grep -q "server_name emrekilic.web.tr"; then
-    echo "HATA: portfolio.conf nginx'e yüklenmemiş."
-    docker exec "${NGINX_CONTAINER}" ls -la /etc/nginx/conf.d/ || true
+    echo "UYARI: portfolio henüz yüklenmemiş, default.conf'a birleştiriliyor..."
+    merge_portfolio_into_nginx
+  fi
+
+  if ! docker exec "${NGINX_CONTAINER}" nginx -T 2>/dev/null | grep -q "server_name emrekilic.web.tr"; then
+    echo "HATA: portfolio.conf nginx'e yüklenemedi."
+    docker exec "${NGINX_CONTAINER}" ls -la /etc/nginx/conf.d/ /etc/nginx/templates/ 2>/dev/null || true
     exit 1
   fi
 }
@@ -375,7 +404,9 @@ echo ""
 echo "==> 5/5 Nginx yeniden başlatılıyor..."
 docker restart "${NGINX_CONTAINER}"
 sleep 4
-docker exec "${NGINX_CONTAINER}" nginx -t
+
+echo "==> 5b/5 portfolio.conf → default.conf birleştirme..."
+merge_portfolio_into_nginx
 
 verify_nginx_config
 test_sites
