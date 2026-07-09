@@ -260,6 +260,20 @@ find_tten_main_template() {
 }
 
 merge_portfolio_into_nginx() {
+  local attempt
+
+  for attempt in $(seq 1 30); do
+    if docker exec "${NGINX_CONTAINER}" true 2>/dev/null; then
+      break
+    fi
+    if [[ "${attempt}" -eq 30 ]]; then
+      echo "HATA: ${NGINX_CONTAINER} 60s içinde ayağa kalkmadı."
+      echo "  docker logs ${NGINX_CONTAINER} --tail 30"
+      exit 1
+    fi
+    sleep 2
+  done
+
   docker exec "${NGINX_CONTAINER}" sh -c '
     if [ ! -f /etc/nginx/templates/portfolio.conf ]; then
       echo "portfolio.conf yok" >&2
@@ -269,8 +283,7 @@ merge_portfolio_into_nginx() {
       echo "default.conf yok" >&2
       exit 1
     fi
-    # Eski portfolio bloklarını kaldır, tek sefer ekle (çift merge önlenir)
-    awk "/^# Portfolio/ { skip=1 } !skip { print }" \
+    awk "/^# Portfolio|^upstream portfolio_frontend|^map \\$/ { skip=1 } !skip { print }" \
       /etc/nginx/conf.d/default.conf > /tmp/default.clean
     cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean
     mv /tmp/default.clean /etc/nginx/conf.d/default.conf
@@ -280,9 +293,9 @@ merge_portfolio_into_nginx() {
 }
 
 ensure_portfolio_include() {
-  local marker="portfolio-merge-v2"
+  local marker="portfolio-merge-v3"
   local main_template
-  local merge_block='if [ -f /etc/nginx/templates/portfolio.conf ]; then if ! grep -q "server_name emrekilic.web.tr" /etc/nginx/conf.d/default.conf 2>/dev/null; then cat /etc/nginx/templates/portfolio.conf >> /etc/nginx/conf.d/default.conf; fi; fi'
+  local merge_block='if [ -f /etc/nginx/templates/portfolio.conf ] && [ -f /etc/nginx/conf.d/default.conf ]; then awk "/^# Portfolio|^upstream portfolio_frontend|^map \\$/ { skip=1 } !skip { print }" /etc/nginx/conf.d/default.conf > /tmp/default.clean && mv /tmp/default.clean /etc/nginx/conf.d/default.conf && cat /etc/nginx/templates/portfolio.conf >> /etc/nginx/conf.d/default.conf; fi'
 
   if main_template="$(find_tten_main_template)"; then
     if ! grep -qF "server_name emrekilic.web.tr" "${main_template}" 2>/dev/null; then
@@ -310,6 +323,11 @@ ensure_portfolio_include() {
 
   echo "==> entrypoint.sh → portfolio merge hook ekleniyor (${marker})..."
   cp "${TTEN_ENTRYPOINT}" "${TTEN_ENTRYPOINT}.bak.portfolio"
+
+  # Eski v1/v2 hook varsa kaldır
+  sed -i '/portfolio-merge-v[12]/d' "${TTEN_ENTRYPOINT}" 2>/dev/null || \
+    sed '/portfolio-merge-v[12]/d' "${TTEN_ENTRYPOINT}" > "${TTEN_ENTRYPOINT}.strip" && \
+    mv "${TTEN_ENTRYPOINT}.strip" "${TTEN_ENTRYPOINT}"
 
   if grep -qE 'exec (\$@|nginx)' "${TTEN_ENTRYPOINT}"; then
     awk -v marker="${marker}" -v block="${merge_block}" '
