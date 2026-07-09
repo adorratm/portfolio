@@ -413,8 +413,10 @@ install_portfolio_conf "${SSL_MODE}"
 
 echo ""
 echo "==> 5/5 Nginx yeniden başlatılıyor..."
+# Ağ bağlantısı nginx start'tan ÖNCE olmalı (upstream DNS)
+connect_portfolio_to_tten_network "$(detect_tten_network)"
 docker restart "${NGINX_CONTAINER}"
-sleep 4
+sleep 5
 
 echo "==> 5b/5 portfolio.conf → default.conf birleştirme..."
 merge_portfolio_into_nginx

@@ -74,4 +74,15 @@ API_PORT="${API_PORT:-3102}"
 echo "==> Backend health check..."
 wait_for_health "${API_PORT}" "/api/v1/health" 40
 
+# TTEN nginx ile paylaşılan sunucuda portfolio container'larını TTEN ağına bağla
+TTEN_NET="${PORTFOLIO_TTEN_NETWORK:-ttengamesstudio_ttengamesstudio-network}"
+if docker network inspect "${TTEN_NET}" >/dev/null 2>&1; then
+  echo "==> Portfolio → ${TTEN_NET} ağına bağlanıyor..."
+  for container in portfolio-prod-frontend portfolio-prod-admin portfolio-prod-backend; do
+    if docker ps --format '{{.Names}}' | grep -qx "${container}"; then
+      docker network connect "${TTEN_NET}" "${container}" 2>/dev/null || true
+    fi
+  done
+fi
+
 echo "Deploy tamamlandı: $(date -Is)"
