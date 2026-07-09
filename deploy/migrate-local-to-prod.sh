@@ -35,7 +35,7 @@ usage() {
   cat <<'EOF'
 Kullanım:
   bash deploy/migrate-local-to-prod.sh export
-  bash deploy/migrate-local-to-prod.sh import [--dump dosya.dump]
+  bash deploy/migrate-local-to-prod.sh import [--dump dosya.sql|dosya.dump]
   bash deploy/migrate-local-to-prod.sh sync-uploads [--archive dosya.tar.gz]
 
 export   — Yerel Postgres yedeği + uploads arşivi
@@ -122,35 +122,34 @@ resolve_export_mode() {
 }
 
 export_via_docker() {
-  local dump="$1"
+  local outfile="$1"
   require_container "${LOCAL_PG_CONTAINER}"
 
   echo "==> Docker Postgres dışa aktarılıyor (${LOCAL_PG_CONTAINER})..."
   docker exec "${LOCAL_PG_CONTAINER}" pg_dump \
     -U "${LOCAL_PG_USER:-portfolio}" \
     -d "${LOCAL_PG_DB}" \
-    --format=custom \
+    --format=plain \
+    --clean \
+    --if-exists \
     --no-owner \
     --no-acl \
-    -f /tmp/portfolio-local.dump
-  docker cp "${LOCAL_PG_CONTAINER}:/tmp/portfolio-local.dump" "${dump}"
-  docker exec "${LOCAL_PG_CONTAINER}" rm -f /tmp/portfolio-local.dump
+    -f /tmp/portfolio-local.sql
+  docker cp "${LOCAL_PG_CONTAINER}:/tmp/portfolio-local.sql" "${outfile}"
+  docker exec "${LOCAL_PG_CONTAINER}" rm -f /tmp/portfolio-local.sql
 }
 
 export_via_native() {
-  local dump="$1"
+  local outfile="$1"
   local pg_dump_bin
+  local dump_format="${LOCAL_PG_DUMP_FORMAT:-plain}"
 
   pg_dump_bin="$(command -v pg_dump || true)"
   if [[ -z "${pg_dump_bin}" ]]; then
     echo "Hata: pg_dump bulunamadı."
     echo ""
     echo "Windows — PostgreSQL bin klasörünü PATH'e ekleyin, örn.:"
-    echo '  set "PATH=C:\Program Files\PostgreSQL\16\bin;%PATH%"'
-    echo ""
-    echo "Veya PowerShell ile doğrudan:"
-    echo '  $env:PGPASSWORD="SIFRENIZ"'
-    echo '  & "C:\Program Files\PostgreSQL\16\bin\pg_dump.exe" -h localhost -p 5432 -U postgres -d portfolio -Fc --no-owner --no-acl -f deploy\artifacts\portfolio-local.dump'
+    echo '  export PATH="/c/Program Files/PostgreSQL/18/bin:$PATH"'
     exit 1
   fi
 
@@ -166,7 +165,22 @@ export_via_native() {
     LOCAL_PG_PORT="5432"
   fi
 
-  echo "==> Yerel PostgreSQL dışa aktarılıyor..."
+  if [[ "${dump_format}" == "custom" ]]; then
+    echo "==> Yerel PostgreSQL dışa aktarılıyor (custom dump — hedef PG18+)..."
+    echo "    host=${LOCAL_PG_HOST} port=${LOCAL_PG_PORT} user=${LOCAL_PG_USER} db=${LOCAL_PG_DB}"
+    PGPASSWORD="${LOCAL_PG_PASSWORD}" "${pg_dump_bin}" \
+      -h "${LOCAL_PG_HOST}" \
+      -p "${LOCAL_PG_PORT}" \
+      -U "${LOCAL_PG_USER}" \
+      -d "${LOCAL_PG_DB}" \
+      --format=custom \
+      --no-owner \
+      --no-acl \
+      -f "${outfile}"
+    return 0
+  fi
+
+  echo "==> Yerel PostgreSQL dışa aktarılıyor (düz SQL)..."
   echo "    host=${LOCAL_PG_HOST} port=${LOCAL_PG_PORT} user=${LOCAL_PG_USER} db=${LOCAL_PG_DB}"
 
   PGPASSWORD="${LOCAL_PG_PASSWORD}" "${pg_dump_bin}" \
@@ -174,21 +188,27 @@ export_via_native() {
     -p "${LOCAL_PG_PORT}" \
     -U "${LOCAL_PG_USER}" \
     -d "${LOCAL_PG_DB}" \
-    --format=custom \
+    --format=plain \
+    --clean \
+    --if-exists \
     --no-owner \
     --no-acl \
-    -f "${dump}"
+    -f "${outfile}"
 }
 
 cmd_export() {
   local mode dump uploads
 
   mkdir -p "${ARTIFACTS}"
-  dump="${ARTIFACTS}/portfolio-local.dump"
+  dump="${ARTIFACTS}/portfolio-local.sql"
   uploads="${ARTIFACTS}/portfolio-uploads.tar.gz"
 
   load_backend_env
   mode="$(resolve_export_mode)"
+
+  if [[ "${LOCAL_PG_DUMP_FORMAT:-plain}" == "custom" ]]; then
+    dump="${ARTIFACTS}/portfolio-local.dump"
+  fi
 
   case "${mode}" in
     docker) export_via_docker "${dump}" ;;
@@ -244,14 +264,17 @@ EOSQL
 }
 
 cmd_import() {
-  local dump="${ARTIFACTS}/portfolio-local.dump"
+  local dump="${ARTIFACTS}/portfolio-local.sql"
   if [[ "${1:-}" == "--dump" ]]; then
     dump="$2"
+  elif [[ ! -f "${dump}" && -f "${ARTIFACTS}/portfolio-local.dump" ]]; then
+    dump="${ARTIFACTS}/portfolio-local.dump"
   fi
 
   if [[ ! -f "${dump}" ]]; then
-    echo "Hata: dump bulunamadı: ${dump}"
-    echo "Önce yerelde export çalıştırın ve scp ile sunucuya kopyalayın."
+    echo "Hata: yedek dosyası bulunamadı."
+    echo "  Beklenen: ${ARTIFACTS}/portfolio-local.sql"
+    echo "  Önce yerelde export çalıştırın ve scp ile sunucuya kopyalayın."
     exit 1
   fi
 
@@ -261,23 +284,34 @@ cmd_import() {
   echo "==> Uygulama container'ları durduruluyor..."
   docker compose -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" stop backend frontend admin 2>/dev/null || true
 
-  echo "==> Production veritabanına yükleniyor..."
-  docker cp "${dump}" "${PROD_PG_CONTAINER}:/tmp/portfolio-local.dump"
+  echo "==> Production veritabanına yükleniyor (${dump})..."
+  docker cp "${dump}" "${PROD_PG_CONTAINER}:/tmp/portfolio-import"
 
   docker exec "${PROD_PG_CONTAINER}" psql -U "${DATABASE_USER}" -d postgres -v ON_ERROR_STOP=1 -c \
     "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${DATABASE_NAME}' AND pid <> pg_backend_pid();"
 
-  docker exec "${PROD_PG_CONTAINER}" dropdb -U "${DATABASE_USER}" --if-exists "${DATABASE_NAME}"
-  docker exec "${PROD_PG_CONTAINER}" createdb -U "${DATABASE_USER}" "${DATABASE_NAME}"
+  if [[ "${dump}" == *.sql ]]; then
+    docker exec "${PROD_PG_CONTAINER}" psql -U "${DATABASE_USER}" -d postgres -v ON_ERROR_STOP=1 -c \
+      "DROP DATABASE IF EXISTS ${DATABASE_NAME};"
+    docker exec "${PROD_PG_CONTAINER}" psql -U "${DATABASE_USER}" -d postgres -v ON_ERROR_STOP=1 -c \
+      "CREATE DATABASE ${DATABASE_NAME};"
+    docker exec "${PROD_PG_CONTAINER}" psql \
+      -U "${DATABASE_USER}" \
+      -d "${DATABASE_NAME}" \
+      -v ON_ERROR_STOP=1 \
+      -f /tmp/portfolio-import
+  else
+    docker exec "${PROD_PG_CONTAINER}" dropdb -U "${DATABASE_USER}" --if-exists "${DATABASE_NAME}"
+    docker exec "${PROD_PG_CONTAINER}" createdb -U "${DATABASE_USER}" "${DATABASE_NAME}"
+    docker exec "${PROD_PG_CONTAINER}" pg_restore \
+      -U "${DATABASE_USER}" \
+      -d "${DATABASE_NAME}" \
+      --no-owner \
+      --no-acl \
+      /tmp/portfolio-import
+  fi
 
-  docker exec "${PROD_PG_CONTAINER}" pg_restore \
-    -U "${DATABASE_USER}" \
-    -d "${DATABASE_NAME}" \
-    --no-owner \
-    --no-acl \
-    /tmp/portfolio-local.dump
-
-  docker exec "${PROD_PG_CONTAINER}" rm -f /tmp/portfolio-local.dump
+  docker exec "${PROD_PG_CONTAINER}" rm -f /tmp/portfolio-import
 
   echo "==> Medya URL'leri güncelleniyor..."
   fix_media_urls "${LOCAL_API_ORIGIN}" "${PROD_API_ORIGIN}"

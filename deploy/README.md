@@ -345,13 +345,17 @@ $env:PGPASSWORD = "SIFRENIZ"
 & "C:\Program Files\PostgreSQL\16\bin\pg_dump.exe" `
   -h localhost -p 5432 -U postgres -d portfolio `
   -Fc --no-owner --no-acl `
-  -f deploy\artifacts\portfolio-local.dump
+  -f deploy\artifacts\portfolio-local.sql
 ```
 
 > **Not:** `6432` portu PgBouncer içindir; yedek için doğrudan Postgres **`5432`** kullanın.
+>
+> Windows PostgreSQL 18 ile sunucu PostgreSQL 18 aynı sürümdeyse custom dump da kullanılabilir:
+> `LOCAL_PG_DUMP_FORMAT=custom bash deploy/migrate-local-to-prod.sh export`
 
 Oluşan dosyalar:
-- `deploy/artifacts/portfolio-local.dump` — veritabanı yedeği
+- `deploy/artifacts/portfolio-local.sql` — veritabanı yedeği (önerilen, tüm sürümlerle uyumlu)
+- `deploy/artifacts/portfolio-local.dump` — custom format (yalnızca PG18+ hedef)
 - `deploy/artifacts/portfolio-uploads.tar.gz` — `backend/uploads/` varsa medya dosyaları
 
 ### 1b. Yerel makine — Docker Postgres
@@ -364,7 +368,7 @@ LOCAL_PG_MODE=docker bash deploy/migrate-local-to-prod.sh export
 ### 2. Sunucuya kopyala
 
 ```bash
-scp deploy/artifacts/portfolio-local.dump \
+scp deploy/artifacts/portfolio-local.sql \
     deploy/artifacts/portfolio-uploads.tar.gz \
     root@SUNUCU_IP:/opt/portfolio/deploy/artifacts/
 ```
@@ -394,6 +398,28 @@ docker cp portfolio-prod-postgres:/tmp/backup.dump ./prod-backup-$(date +%F).dum
 ### S3 kullanıyorsanız
 
 AWS anahtarları `deploy/.env` içinde doluysa medya zaten S3'te olabilir; yalnızca DB import yeterli. Yerel `uploads/` kullanıyorsanız `sync-uploads` adımını atlamayın.
+
+## PostgreSQL 18 yükseltmesi (production)
+
+`docker-compose.prod.yml` artık `postgres:18-alpine` kullanır. Major sürüm değişiminde volume sıfırlanmalıdır.
+
+```bash
+cd /opt/portfolio
+git fetch origin && git checkout origin/main -- docker-compose.prod.yml deploy/upgrade-postgres.sh
+
+# Mevcut prod verisini yedekleyip PG18'e geç (otomatik geri yükleme)
+bash deploy/upgrade-postgres.sh
+
+# Veya yükselt, ardından yerel veriyi yükle:
+bash deploy/upgrade-postgres.sh --skip-restore
+bash deploy/migrate-local-to-prod.sh import
+```
+
+Kontrol:
+
+```bash
+docker exec portfolio-prod-postgres psql -U portfolio -d portfolio -tAc 'SELECT version();'
+```
 
 ## SEO kontrol listesi
 

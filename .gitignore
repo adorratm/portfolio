@@ -2,6 +2,7 @@ docs
 .env
 deploy/.env
 deploy/artifacts/*.dump
+deploy/artifacts/*.sql
 deploy/artifacts/*.tar.gz
 node_modules
 dist
