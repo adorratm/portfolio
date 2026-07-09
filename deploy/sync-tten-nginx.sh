@@ -2,8 +2,61 @@
 # TTEN nginx'e portfolio.conf merge + reload + kısa doğrulama
 set -euo pipefail
 
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ENV_FILE="${ROOT_DIR}/deploy/.env"
 NGINX_CONTAINER="${NGINX_CONTAINER:-ttengamesstudio-nginx}"
 TTEN_TPL="${TTEN_TEMPLATES:-/opt/ttengamesstudio/docker/nginx/templates}"
+TTEN_NET="${PORTFOLIO_TTEN_NETWORK:-ttengamesstudio_ttengamesstudio-network}"
+
+if [[ -f "${ENV_FILE}" ]]; then
+  # shellcheck disable=SC1090
+  set -a
+  source "${ENV_FILE}"
+  set +a
+  TTEN_NET="${PORTFOLIO_TTEN_NETWORK:-${TTEN_NET}}"
+fi
+
+PORTFOLIO_CONTAINERS=(portfolio-prod-frontend portfolio-prod-admin portfolio-prod-backend)
+
+ensure_portfolio_on_tten_network() {
+  local container on_net
+
+  if ! docker network inspect "${TTEN_NET}" >/dev/null 2>&1; then
+    echo "TTEN ağı yok (${TTEN_NET}) — atlanıyor."
+    return 1
+  fi
+
+  echo "==> Portfolio → ${TTEN_NET} ağı..."
+  for container in "${PORTFOLIO_CONTAINERS[@]}"; do
+    if ! docker ps --format '{{.Names}}' | grep -qx "${container}"; then
+      echo "  UYARI: ${container} çalışmıyor"
+      continue
+    fi
+    on_net="$(docker network inspect "${TTEN_NET}" --format '{{range .Containers}}{{.Name}} {{end}}' | grep -ow "${container}" || true)"
+    if [[ -n "${on_net}" ]]; then
+      echo "  OK  ${container}"
+    else
+      echo "  + ${container} bağlanıyor..."
+      docker network connect "${TTEN_NET}" "${container}"
+    fi
+  done
+  return 0
+}
+
+wait_for_nginx_upstream() {
+  local attempt
+
+  for attempt in $(seq 1 15); do
+    if docker exec "${NGINX_CONTAINER}" wget -q --spider --timeout=3 http://portfolio-prod-frontend:3000/tr 2>/dev/null; then
+      echo "  OK  portfolio-prod-frontend:3000 (${attempt}. deneme)"
+      return 0
+    fi
+    echo "  Bekleniyor... frontend upstream (${attempt}/15)"
+    ensure_portfolio_on_tten_network || true
+    sleep 2
+  done
+  return 1
+}
 
 if ! docker ps --format '{{.Names}}' | grep -qx "${NGINX_CONTAINER}"; then
   echo "TTEN nginx yok (${NGINX_CONTAINER}) — atlanıyor."
@@ -14,6 +67,8 @@ if [[ ! -f "${TTEN_TPL}/portfolio.conf" ]]; then
   echo "portfolio.conf yok (${TTEN_TPL}) — nginx sync atlandı."
   exit 0
 fi
+
+ensure_portfolio_on_tten_network || exit 0
 
 echo "==> Nginx portfolio merge + reload..."
 docker exec "${NGINX_CONTAINER}" sh -c '
@@ -31,20 +86,23 @@ docker exec "${NGINX_CONTAINER}" nginx -t
 docker exec "${NGINX_CONTAINER}" nginx -s reload
 
 echo "==> Nginx → portfolio upstream testi..."
-if docker exec "${NGINX_CONTAINER}" wget -qSO- http://portfolio-prod-frontend:3000/tr 2>&1 | head -1 | grep -q '200'; then
-  echo "  OK  portfolio-prod-frontend:3000"
-else
-  echo "  UYARI: nginx container'ından frontend erişilemedi."
-  echo "        docker network inspect ttengamesstudio_ttengamesstudio-network | grep portfolio"
+if ! wait_for_nginx_upstream; then
+  echo "  HATA: nginx container'ından frontend erişilemedi."
+  docker network inspect "${TTEN_NET}" --format '{{range .Containers}}{{.Name}} {{end}}' 2>/dev/null || true
+  docker logs portfolio-prod-frontend --tail 20 2>&1 || true
   exit 1
 fi
 
-if curl -fsSI --resolve emrekilic.web.tr:443:127.0.0.1 https://emrekilic.web.tr/tr -k 2>/dev/null | head -1 | grep -qE '200|301|302'; then
-  echo "  OK  https://emrekilic.web.tr/tr"
-else
-  echo "  UYARI: HTTPS site testi başarısız (502 olabilir)."
-  docker exec "${NGINX_CONTAINER}" tail -5 /var/log/nginx/error.log 2>/dev/null || true
-  exit 1
-fi
+for attempt in $(seq 1 10); do
+  if curl -fsSI --resolve emrekilic.web.tr:443:127.0.0.1 https://emrekilic.web.tr/tr -k 2>/dev/null | head -1 | grep -qE 'HTTP/2 200|HTTP/1.1 200|301|302'; then
+    echo "  OK  https://emrekilic.web.tr/tr"
+    echo "Nginx sync tamam."
+    exit 0
+  fi
+  echo "  Bekleniyor... HTTPS site (${attempt}/10)"
+  sleep 2
+done
 
-echo "Nginx sync tamam."
+echo "  HATA: HTTPS site testi başarısız (502 olabilir)."
+docker exec "${NGINX_CONTAINER}" tail -10 /var/log/nginx/error.log 2>/dev/null || true
+exit 1

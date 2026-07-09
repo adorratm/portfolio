@@ -123,7 +123,22 @@ for service in backend frontend admin; do
 done
 
 echo "==> Uygulama container'ları ayağa kaldırılıyor..."
-"${COMPOSE[@]}" up -d --no-build backend frontend admin
+# Ağ değişiklikleri (ttengames) için recreate gerekir
+"${COMPOSE[@]}" up -d --no-build --force-recreate backend frontend admin
+
+echo "==> Frontend hazır bekleniyor..."
+FRONTEND_PORT="$(grep '^FRONTEND_HOST_PORT=' "${ENV_FILE}" | cut -d= -f2)"
+FRONTEND_PORT="${FRONTEND_PORT:-3100}"
+for i in $(seq 1 30); do
+  if curl -fsS "http://127.0.0.1:${FRONTEND_PORT}/tr" >/dev/null 2>&1; then
+    echo "Frontend hazır (${i}. deneme)."
+    break
+  fi
+  if [[ "${i}" -eq 30 ]]; then
+    echo "UYARI: Frontend host portu yanıt vermiyor; nginx sync yine de denenecek."
+  fi
+  sleep 2
+done
 
 echo "==> Container durumu:"
 "${COMPOSE[@]}" ps
