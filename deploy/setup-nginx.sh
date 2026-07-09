@@ -23,6 +23,17 @@ install_configs() {
   done
 }
 
+reload_or_start_nginx() {
+  nginx -t
+  if systemctl is-active --quiet nginx; then
+    systemctl reload nginx
+  else
+    echo "==> nginx çalışmıyor, başlatılıyor..."
+    systemctl enable nginx
+    systemctl start nginx
+  fi
+}
+
 echo "==> Certbot webroot klasörü hazırlanıyor..."
 mkdir -p /var/www/certbot
 
@@ -32,8 +43,7 @@ if [[ -f "${CERT_PATH}" ]]; then
 else
   echo "==> Adım 1/3: HTTP bootstrap config (sertifika olmadan)..."
   install_configs "http"
-  nginx -t
-  systemctl reload nginx
+  reload_or_start_nginx
 
   echo ""
   echo "==> Adım 2/3: Let's Encrypt sertifikası alınıyor (webroot)..."
@@ -53,8 +63,7 @@ else
 fi
 
 echo "==> Nginx test ediliyor..."
-nginx -t
-systemctl reload nginx
+reload_or_start_nginx
 
 echo ""
 echo "Kurulum tamam."

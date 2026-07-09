@@ -112,6 +112,24 @@ Aynı sunucu IP'sine gidebilir — Nginx domain'e göre ayırır.
 
 **Önemli:** `api` subdomain'i şart (health check ve backend için). `ap` değil, `api`.
 
+### `nginx.service is not active, cannot reload`
+
+Config dosyaları kopyalanmış olabilir ama script certbot adımına geçmeden durmuş olabilir. Sunucuda:
+
+```bash
+sudo nginx -t
+sudo systemctl enable nginx
+sudo systemctl start nginx
+sudo CERTBOT_EMAIL=senin@email.com ./deploy/setup-nginx.sh
+```
+
+`start` başarısız olursa 80/443 portunu kim dinliyor bakın:
+
+```bash
+sudo ss -tlnp | grep -E ':80|:443'
+sudo systemctl status nginx
+```
+
 ### emrekilic.web.tr TTEN Games gösteriyorsa
 
 Nginx'te `emrekilic.web.tr` için ayrı `server` bloğu yok → istek TTEN'in default server'ına düşer.
