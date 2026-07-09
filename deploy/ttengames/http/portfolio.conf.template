@@ -1,0 +1,82 @@
+# Portfolio — emrekilic.web.tr ailesi (HTTP bootstrap, tek dosya)
+# ttengamesstudio-nginx templates dizinine kopyalanır → portfolio.conf.template
+
+upstream portfolio_frontend {
+    server @FRONTEND_UPSTREAM@;
+    keepalive 32;
+}
+
+upstream portfolio_admin {
+    server @ADMIN_UPSTREAM@;
+    keepalive 16;
+}
+
+upstream portfolio_api {
+    server @API_UPSTREAM@;
+    keepalive 32;
+}
+
+# --- emrekilic.web.tr ---
+server {
+    listen 80;
+    server_name emrekilic.web.tr www.emrekilic.web.tr;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        proxy_pass http://portfolio_frontend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $${host};
+        proxy_set_header X-Real-IP $${remote_addr};
+        proxy_set_header X-Forwarded-For $${proxy_add_x_forwarded_for};
+        proxy_set_header X-Forwarded-Proto $${scheme};
+        proxy_set_header Upgrade $${http_upgrade};
+        proxy_set_header Connection "upgrade";
+    }
+}
+
+# --- admin.emrekilic.web.tr ---
+server {
+    listen 80;
+    server_name admin.emrekilic.web.tr;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        proxy_pass http://portfolio_admin;
+        proxy_http_version 1.1;
+        proxy_set_header Host $${host};
+        proxy_set_header X-Real-IP $${remote_addr};
+        proxy_set_header X-Forwarded-For $${proxy_add_x_forwarded_for};
+        proxy_set_header X-Forwarded-Proto $${scheme};
+        proxy_set_header Upgrade $${http_upgrade};
+        proxy_set_header Connection "upgrade";
+    }
+}
+
+# --- api.emrekilic.web.tr ---
+server {
+    listen 80;
+    server_name api.emrekilic.web.tr;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        proxy_pass http://portfolio_api;
+        proxy_http_version 1.1;
+        proxy_set_header Host $${host};
+        proxy_set_header X-Real-IP $${remote_addr};
+        proxy_set_header X-Forwarded-For $${proxy_add_x_forwarded_for};
+        proxy_set_header X-Forwarded-Proto $${scheme};
+        proxy_set_header Upgrade $${http_upgrade};
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400;
+        client_max_body_size 12M;
+    }
+}
