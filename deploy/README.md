@@ -160,10 +160,53 @@ docker exec <nginx_container> nginx -s reload
 `./deploy/setup-nginx.sh: command not found` görürseniz dosya deploy edilmemiş veya satır sonu bozuksa:
 
 ```bash
-ls -la deploy/*.sh
-sed -i 's/\r$//' deploy/setup-nginx.sh deploy/setup-shared-nginx.sh
-chmod +x deploy/setup-nginx.sh deploy/setup-shared-nginx.sh
+ls -la deploy/*.sh deploy/ttengames/
+sed -i 's/\r$//' deploy/setup-nginx.sh deploy/setup-shared-nginx.sh deploy/ttengames/install-nginx.sh
+chmod +x deploy/setup-nginx.sh deploy/setup-shared-nginx.sh deploy/ttengames/install-nginx.sh
 ```
+
+### TTEN Games ile aynı sunucu (`ttengamesstudio-nginx`)
+
+80/443 `ttengamesstudio-nginx` container'ında. Mount'lar:
+
+| Host | Container |
+|------|-----------|
+| `/opt/ttengamesstudio/docker/nginx/templates` | `/etc/nginx/templates` |
+| `/var/www/certbot` | `/var/www/certbot` |
+| `/etc/letsencrypt` | `/etc/letsencrypt` |
+
+Portfolio config'leri **templates** dizinine `.conf.template` olarak eklenir. Nginx container içinde olduğu için upstream `127.0.0.1` değil host IP kullanır (`172.17.0.1`).
+
+```bash
+cd /opt/portfolio
+chmod +x deploy/ttengames/install-nginx.sh
+
+# 1) HTTP (sertifika öncesi)
+sudo ./deploy/ttengames/install-nginx.sh http
+
+# Host erişim testi (başarısızsa PORTFOLIO_HOST değiştirin)
+docker exec ttengamesstudio-nginx wget -qO- http://172.17.0.1:3100/tr | head -3
+
+curl -I -H 'Host: emrekilic.web.tr' http://127.0.0.1/tr
+
+# 2) Let's Encrypt (Cloudflare hata verirse DNS only yapın)
+sudo certbot certonly --webroot -w /var/www/certbot \
+  -d emrekilic.web.tr -d admin.emrekilic.web.tr -d api.emrekilic.web.tr \
+  -m senin@email.com --agree-tos --non-interactive
+
+# 3) HTTPS
+sudo ./deploy/ttengames/install-nginx.sh https
+
+curl -I https://emrekilic.web.tr/tr
+```
+
+`172.17.0.1` çalışmazsa:
+
+```bash
+sudo PORTFOLIO_HOST=host.docker.internal ./deploy/ttengames/install-nginx.sh http
+```
+
+(TTEN `docker-compose`'da `extra_hosts: ["host.docker.internal:host-gateway"]` gerekebilir.)
 
 ### `nginx.service is not active, cannot reload`
 
