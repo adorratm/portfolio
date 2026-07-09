@@ -1,19 +1,9 @@
-# Portfolio — emrekilic.web.tr ailesi (HTTPS, tek dosya)
-# ttengamesstudio-nginx templates dizinine kopyalanır → portfolio.conf.template
+# Portfolio — emrekilic.web.tr ailesi (HTTPS)
+# Docker DNS: resolver + değişken proxy_pass (upstream keepalive 502 önlenir)
 
-upstream portfolio_frontend {
-    server @FRONTEND_UPSTREAM@;
-    keepalive 32;
-}
-
-upstream portfolio_admin {
-    server @ADMIN_UPSTREAM@;
-    keepalive 16;
-}
-
-upstream portfolio_api {
-    server @API_UPSTREAM@;
-    keepalive 32;
+map $${http_upgrade} $${connection_upgrade} {
+    default upgrade;
+    ''      close;
 }
 
 # --- emrekilic.web.tr ---
@@ -38,6 +28,7 @@ server {
     listen 443 ssl;
     http2 on;
     server_name emrekilic.web.tr;
+    resolver 127.0.0.11 valid=30s ipv6=off;
 
     ssl_certificate     /etc/letsencrypt/live/emrekilic.web.tr/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/emrekilic.web.tr/privkey.pem;
@@ -52,14 +43,15 @@ server {
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
 
     location / {
-        proxy_pass http://portfolio_frontend;
+        set $backend "@FRONTEND_UPSTREAM@";
+        proxy_pass http://$backend;
         proxy_http_version 1.1;
         proxy_set_header Host $${host};
         proxy_set_header X-Real-IP $${remote_addr};
         proxy_set_header X-Forwarded-For $${proxy_add_x_forwarded_for};
         proxy_set_header X-Forwarded-Proto $${scheme};
         proxy_set_header Upgrade $${http_upgrade};
-        proxy_set_header Connection "upgrade";
+        proxy_set_header Connection $${connection_upgrade};
     }
 }
 
@@ -74,6 +66,7 @@ server {
     listen 443 ssl;
     http2 on;
     server_name admin.emrekilic.web.tr;
+    resolver 127.0.0.11 valid=30s ipv6=off;
 
     ssl_certificate     /etc/letsencrypt/live/emrekilic.web.tr/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/emrekilic.web.tr/privkey.pem;
@@ -84,14 +77,15 @@ server {
     add_header X-Content-Type-Options "nosniff" always;
 
     location / {
-        proxy_pass http://portfolio_admin;
+        set $backend "@ADMIN_UPSTREAM@";
+        proxy_pass http://$backend;
         proxy_http_version 1.1;
         proxy_set_header Host $${host};
         proxy_set_header X-Real-IP $${remote_addr};
         proxy_set_header X-Forwarded-For $${proxy_add_x_forwarded_for};
         proxy_set_header X-Forwarded-Proto $${scheme};
         proxy_set_header Upgrade $${http_upgrade};
-        proxy_set_header Connection "upgrade";
+        proxy_set_header Connection $${connection_upgrade};
     }
 }
 
@@ -106,6 +100,7 @@ server {
     listen 443 ssl;
     http2 on;
     server_name api.emrekilic.web.tr;
+    resolver 127.0.0.11 valid=30s ipv6=off;
 
     ssl_certificate     /etc/letsencrypt/live/emrekilic.web.tr/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/emrekilic.web.tr/privkey.pem;
@@ -116,14 +111,15 @@ server {
     add_header X-Content-Type-Options "nosniff" always;
 
     location / {
-        proxy_pass http://portfolio_api;
+        set $backend "@API_UPSTREAM@";
+        proxy_pass http://$backend;
         proxy_http_version 1.1;
         proxy_set_header Host $${host};
         proxy_set_header X-Real-IP $${remote_addr};
         proxy_set_header X-Forwarded-For $${proxy_add_x_forwarded_for};
         proxy_set_header X-Forwarded-Proto $${scheme};
         proxy_set_header Upgrade $${http_upgrade};
-        proxy_set_header Connection "upgrade";
+        proxy_set_header Connection $${connection_upgrade};
         proxy_read_timeout 86400;
     }
 }

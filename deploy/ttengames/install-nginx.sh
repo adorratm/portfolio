@@ -270,7 +270,7 @@ merge_portfolio_into_nginx() {
       exit 1
     fi
     # Eski portfolio bloklarını kaldır, tek sefer ekle (çift merge önlenir)
-    awk "/^upstream portfolio_frontend/ { skip=1 } !skip { print }" \
+    awk "/^# Portfolio/ { skip=1 } !skip { print }" \
       /etc/nginx/conf.d/default.conf > /tmp/default.clean
     cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean
     mv /tmp/default.clean /etc/nginx/conf.d/default.conf
