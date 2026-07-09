@@ -22,9 +22,12 @@ MODE="${1:-auto}"
 
 PORTFOLIO_CONTAINERS=(portfolio-prod-frontend portfolio-prod-admin portfolio-prod-backend)
 UPSTREAM_MODE=""
-UPSTREAM_FRONTEND=""
-UPSTREAM_ADMIN=""
-UPSTREAM_API=""
+UPSTREAM_FRONTEND_HOST=""
+UPSTREAM_FRONTEND_PORT=""
+UPSTREAM_ADMIN_HOST=""
+UPSTREAM_ADMIN_PORT=""
+UPSTREAM_API_HOST=""
+UPSTREAM_API_PORT=""
 
 if [[ "${EUID}" -ne 0 ]]; then
   echo "Root gerekli: sudo bash $0"
@@ -95,9 +98,12 @@ detect_host_upstream() {
     [[ -z "${candidate}" ]] && continue
     if test_upstream "http://${candidate}:3100/tr"; then
       UPSTREAM_MODE="host"
-      UPSTREAM_FRONTEND="${candidate}:3100"
-      UPSTREAM_ADMIN="${candidate}:3101"
-      UPSTREAM_API="${candidate}:3102"
+      UPSTREAM_FRONTEND_HOST="${candidate}"
+      UPSTREAM_FRONTEND_PORT="3100"
+      UPSTREAM_ADMIN_HOST="${candidate}"
+      UPSTREAM_ADMIN_PORT="3101"
+      UPSTREAM_API_HOST="${candidate}"
+      UPSTREAM_API_PORT="3102"
       echo "${candidate}"
       return 0
     fi
@@ -167,9 +173,12 @@ detect_docker_upstream() {
 
   if test_upstream "http://portfolio-prod-frontend:3000/tr"; then
     UPSTREAM_MODE="docker"
-    UPSTREAM_FRONTEND="portfolio-prod-frontend:3000"
-    UPSTREAM_ADMIN="portfolio-prod-admin:3000"
-    UPSTREAM_API="portfolio-prod-backend:3001"
+    UPSTREAM_FRONTEND_HOST="portfolio-prod-frontend"
+    UPSTREAM_FRONTEND_PORT="3000"
+    UPSTREAM_ADMIN_HOST="portfolio-prod-admin"
+    UPSTREAM_ADMIN_PORT="3000"
+    UPSTREAM_API_HOST="portfolio-prod-backend"
+    UPSTREAM_API_PORT="3001"
     return 0
   fi
 
@@ -191,9 +200,12 @@ setup_upstream() {
           exit 1
         fi
         UPSTREAM_MODE="host"
-        UPSTREAM_FRONTEND="${PORTFOLIO_HOST}:3100"
-        UPSTREAM_ADMIN="${PORTFOLIO_HOST}:3101"
-        UPSTREAM_API="${PORTFOLIO_HOST}:3102"
+        UPSTREAM_FRONTEND_HOST="${PORTFOLIO_HOST}"
+        UPSTREAM_FRONTEND_PORT="3100"
+        UPSTREAM_ADMIN_HOST="${PORTFOLIO_HOST}"
+        UPSTREAM_ADMIN_PORT="3101"
+        UPSTREAM_API_HOST="${PORTFOLIO_HOST}"
+        UPSTREAM_API_PORT="3102"
         ;;
       docker)
         if ! detect_docker_upstream; then
@@ -208,9 +220,12 @@ setup_upstream() {
     esac
   elif [[ -n "${PORTFOLIO_HOST:-}" ]]; then
     UPSTREAM_MODE="host"
-    UPSTREAM_FRONTEND="${PORTFOLIO_HOST}:3100"
-    UPSTREAM_ADMIN="${PORTFOLIO_HOST}:3101"
-    UPSTREAM_API="${PORTFOLIO_HOST}:3102"
+    UPSTREAM_FRONTEND_HOST="${PORTFOLIO_HOST}"
+    UPSTREAM_FRONTEND_PORT="3100"
+    UPSTREAM_ADMIN_HOST="${PORTFOLIO_HOST}"
+    UPSTREAM_ADMIN_PORT="3101"
+    UPSTREAM_API_HOST="${PORTFOLIO_HOST}"
+    UPSTREAM_API_PORT="3102"
   elif detect_host_upstream >/dev/null; then
     :
   elif detect_docker_upstream; then
@@ -228,9 +243,9 @@ setup_upstream() {
   fi
 
   echo "    Mod: ${UPSTREAM_MODE}"
-  echo "    frontend → ${UPSTREAM_FRONTEND}"
-  echo "    admin    → ${UPSTREAM_ADMIN}"
-  echo "    api      → ${UPSTREAM_API}"
+  echo "    frontend → ${UPSTREAM_FRONTEND_HOST}:${UPSTREAM_FRONTEND_PORT}"
+  echo "    admin    → ${UPSTREAM_ADMIN_HOST}:${UPSTREAM_ADMIN_PORT}"
+  echo "    api      → ${UPSTREAM_API_HOST}:${UPSTREAM_API_PORT}"
 }
 
 cleanup_old_templates() {
@@ -283,7 +298,7 @@ merge_portfolio_into_nginx() {
       echo "default.conf yok" >&2
       exit 1
     fi
-    awk "/^# Portfolio|^upstream portfolio_frontend|^map \\$/ { skip=1 } !skip { print }" \
+    awk '/^# Portfolio/ { exit } { print }' \
       /etc/nginx/conf.d/default.conf > /tmp/default.clean
     cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean
     mv /tmp/default.clean /etc/nginx/conf.d/default.conf
@@ -295,7 +310,7 @@ merge_portfolio_into_nginx() {
 ensure_portfolio_include() {
   local marker="portfolio-merge-v3"
   local main_template
-  local merge_block='if [ -f /etc/nginx/templates/portfolio.conf ] && [ -f /etc/nginx/conf.d/default.conf ]; then awk "/^# Portfolio|^upstream portfolio_frontend|^map \\$/ { skip=1 } !skip { print }" /etc/nginx/conf.d/default.conf > /tmp/default.clean && mv /tmp/default.clean /etc/nginx/conf.d/default.conf && cat /etc/nginx/templates/portfolio.conf >> /etc/nginx/conf.d/default.conf; fi'
+  local merge_block='if [ -f /etc/nginx/templates/portfolio.conf ] && [ -f /etc/nginx/conf.d/default.conf ]; then awk "/^# Portfolio/ { exit } { print }" /etc/nginx/conf.d/default.conf > /tmp/default.clean && cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean && mv /tmp/default.clean /etc/nginx/conf.d/default.conf; fi'
 
   if main_template="$(find_tten_main_template)"; then
     if ! grep -qF "server_name emrekilic.web.tr" "${main_template}" 2>/dev/null; then
@@ -360,9 +375,12 @@ install_portfolio_conf() {
   fi
 
   sed \
-    -e "s|@FRONTEND_UPSTREAM@|${UPSTREAM_FRONTEND}|g" \
-    -e "s|@ADMIN_UPSTREAM@|${UPSTREAM_ADMIN}|g" \
-    -e "s|@API_UPSTREAM@|${UPSTREAM_API}|g" \
+    -e "s|@FRONTEND_HOST@|${UPSTREAM_FRONTEND_HOST}|g" \
+    -e "s|@FRONTEND_PORT@|${UPSTREAM_FRONTEND_PORT}|g" \
+    -e "s|@ADMIN_HOST@|${UPSTREAM_ADMIN_HOST}|g" \
+    -e "s|@ADMIN_PORT@|${UPSTREAM_ADMIN_PORT}|g" \
+    -e "s|@API_HOST@|${UPSTREAM_API_HOST}|g" \
+    -e "s|@API_PORT@|${UPSTREAM_API_PORT}|g" \
     -e 's/\$\${/$/g' \
     "${src}" > "${dest}"
   echo "  + ${dest} (${ssl_mode})"

@@ -12,8 +12,8 @@ server {
     }
 
     location / {
-        set $backend "@FRONTEND_UPSTREAM@";
-        proxy_pass http://$backend;
+        set $upstream_host @FRONTEND_HOST@;
+        proxy_pass http://$upstream_host:@FRONTEND_PORT@;
         proxy_http_version 1.1;
         proxy_set_header Host $${host};
         proxy_set_header X-Real-IP $${remote_addr};
@@ -35,8 +35,8 @@ server {
     }
 
     location / {
-        set $backend "@ADMIN_UPSTREAM@";
-        proxy_pass http://$backend;
+        set $upstream_host @ADMIN_HOST@;
+        proxy_pass http://$upstream_host:@ADMIN_PORT@;
         proxy_http_version 1.1;
         proxy_set_header Host $${host};
         proxy_set_header X-Real-IP $${remote_addr};
@@ -58,8 +58,8 @@ server {
     }
 
     location / {
-        set $backend "@API_UPSTREAM@";
-        proxy_pass http://$backend;
+        set $upstream_host @API_HOST@;
+        proxy_pass http://$upstream_host:@API_PORT@;
         proxy_http_version 1.1;
         proxy_set_header Host $${host};
         proxy_set_header X-Real-IP $${remote_addr};
