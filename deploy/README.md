@@ -116,13 +116,18 @@ Aynı sunucu IP'sine gidebilir — Nginx domain'e göre ayırır.
 
 Nginx'te `emrekilic.web.tr` için ayrı `server` bloğu yok → istek TTEN'in default server'ına düşer.
 
-Sunucuda bir kez çalıştır:
+Sunucuda bir kez çalıştır (önce repo güncel olsun):
 
 ```bash
 cd /opt/portfolio
+git pull   # veya GitHub Actions deploy sonrası
 sudo chmod +x deploy/setup-nginx.sh
 sudo CERTBOT_EMAIL=senin@email.com ./deploy/setup-nginx.sh
 ```
+
+Script sırası: **HTTP config** → **certbot webroot** → **HTTPS config** (sertifika yokken SSL config yüklenmez).
+
+Certbot hata verirse Cloudflare'de `@`, `admin`, `api` kayıtlarını geçici **DNS only** (gri bulut) yap, scripti tekrar çalıştır.
 
 Doğrula:
 
