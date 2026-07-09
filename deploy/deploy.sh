@@ -25,7 +25,7 @@ echo "==> Base image'lar çekiliyor..."
 echo "==> Servisler sırayla build ediliyor (RAM dostu)..."
 for service in backend frontend admin; do
   echo "--- build: ${service} ($(date -Is))"
-  "${COMPOSE[@]}" build --no-cache=false "${service}"
+  "${COMPOSE[@]}" build "${service}"
 done
 
 echo "==> Container'lar ayağa kaldırılıyor..."
