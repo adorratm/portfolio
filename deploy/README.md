@@ -25,12 +25,17 @@ nano deploy/.env   # JWT_SECRET, DATABASE_PASSWORD, Google OAuth vb.
 chmod +x deploy/deploy.sh
 ./deploy/deploy.sh
 
-# 4. Nginx site konfigürasyonları
-sudo cp deploy/nginx/*.conf /etc/nginx/sites-available/
-sudo ln -sf /etc/nginx/sites-available/emrekilic.web.tr.conf /etc/nginx/sites-enabled/
-sudo ln -sf /etc/nginx/sites-available/admin.emrekilic.web.tr.conf /etc/nginx/sites-enabled/
-sudo ln -sf /etc/nginx/sites-available/api.emrekilic.web.tr.conf /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
+# 4. Nginx — ZORUNLU (yoksa emrekilic.web.tr TTEN sitesini gösterir!)
+sudo chmod +x deploy/setup-nginx.sh
+sudo CERTBOT_EMAIL=senin@email.com ./deploy/setup-nginx.sh
+
+# Manuel kurulum istersen:
+# sudo cp deploy/nginx/*.conf /etc/nginx/sites-available/
+# sudo ln -sf /etc/nginx/sites-available/emrekilic.web.tr.conf /etc/nginx/sites-enabled/
+# sudo ln -sf /etc/nginx/sites-available/admin.emrekilic.web.tr.conf /etc/nginx/sites-enabled/
+# sudo ln -sf /etc/nginx/sites-available/api.emrekilic.web.tr.conf /etc/nginx/sites-enabled/
+# sudo certbot certonly --nginx -d emrekilic.web.tr -d admin.emrekilic.web.tr -d api.emrekilic.web.tr
+# sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ## GitHub Actions secrets
@@ -97,11 +102,39 @@ Docker build uzun sürebilir. Workflow `command_timeout: 45m` kullanır. İlk de
 
 ## Cloudflare DNS kayıtları
 
-| Tip | Ad    | Hedef          | Proxy |
-|-----|-------|----------------|-------|
-| A   | @     | Sunucu IP      | Proxied |
-| A   | admin | Sunucu IP      | Proxied |
-| A   | ap    | Sunucu IP      | Proxied |
+Aynı sunucu IP'sine gidebilir — Nginx domain'e göre ayırır.
+
+| Tip | Ad | Hedef | Proxy |
+|-----|-----|-------|-------|
+| A | `@` | Sunucu IP | Proxied |
+| A | `admin` | Sunucu IP | Proxied |
+| A | `api` | Sunucu IP | Proxied |
+
+**Önemli:** `api` subdomain'i şart (health check ve backend için). `ap` değil, `api`.
+
+### emrekilic.web.tr TTEN Games gösteriyorsa
+
+Nginx'te `emrekilic.web.tr` için ayrı `server` bloğu yok → istek TTEN'in default server'ına düşer.
+
+Sunucuda bir kez çalıştır:
+
+```bash
+cd /opt/portfolio
+sudo chmod +x deploy/setup-nginx.sh
+sudo CERTBOT_EMAIL=senin@email.com ./deploy/setup-nginx.sh
+```
+
+Doğrula:
+
+```bash
+# Portfolio mu? (200 ve Emre/portfolio HTML gelmeli)
+curl -s http://127.0.0.1:3100/tr | head -5
+
+# Nginx emrekilic bloğu var mı?
+sudo nginx -T | grep "server_name emrekilic"
+```
+
+Cloudflare SSL: **Full (strict)** + sunucuda Let's Encrypt sertifikası.
 
 ## SSL
 
