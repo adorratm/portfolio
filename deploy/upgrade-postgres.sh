@@ -121,15 +121,14 @@ echo "==> 2/5 Uygulama servisleri durduruluyor..."
 "${COMPOSE[@]}" stop backend frontend admin pgbouncer postgres 2>/dev/null || true
 
 echo "==> 3/5 Eski Postgres container + volume kaldırılıyor..."
+"${COMPOSE[@]}" rm -sf postgres 2>/dev/null || true
 docker rm -f portfolio-prod-postgres 2>/dev/null || true
 
-VOLUME="$(docker volume ls --format '{{.Name}}' | grep portfolio_postgres_data | head -1)"
-if [[ -n "${VOLUME}" ]]; then
-  echo "    Volume siliniyor: ${VOLUME}"
-  docker volume rm "${VOLUME}"
-else
-  echo "    Eski volume bulunamadı (ilk kurulum olabilir)."
-fi
+while IFS= read -r vol; do
+  [[ -z "${vol}" ]] && continue
+  echo "    Volume siliniyor: ${vol}"
+  docker volume rm -f "${vol}" 2>/dev/null || true
+done < <(docker volume ls --format '{{.Name}}' | grep portfolio_postgres_data || true)
 
 echo "==> 4/5 PostgreSQL 18 başlatılıyor..."
 "${COMPOSE[@]}" up -d postgres

@@ -15,7 +15,8 @@ postgres_logs() {
 }
 
 postgres_needs_major_upgrade() {
-  postgres_logs | grep -qiE 'incompatible with server|database files are incompatible'
+  postgres_logs | grep -qiE \
+    'incompatible with server|database files are incompatible|major-version-specific directory|configured to store database data in a|/var/lib/postgresql/data'
 }
 
 wait_for_postgres() {
