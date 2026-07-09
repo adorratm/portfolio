@@ -45,6 +45,52 @@ sudo nginx -t && sudo systemctl reload nginx
 
 `main` branch'e push yapıldığında otomatik build ve deploy çalışır.
 
+Deploy artık sunucuda `git pull` yapmaz — dosyalar GitHub Actions runner'dan SCP ile kopyalanır. Böylece sunucunun `github.com` DNS erişimi gerekmez.
+
+## Sorun giderme
+
+### `Could not resolve host: github.com` (sunucuda git fetch)
+
+Eski workflow sunucuda `git fetch` yapıyordu. Güncel workflow SCP kullanır. Hâlâ manuel git kullanıyorsan sunucuda DNS ayarla:
+
+```bash
+sudo nano /etc/resolv.conf
+# nameserver 1.1.1.1
+# nameserver 8.8.8.8
+```
+
+Kalıcı (systemd-resolved):
+
+```bash
+sudo mkdir -p /etc/systemd/resolved.conf.d
+echo -e "[Resolve]\nDNS=1.1.1.1 8.8.8.8" | sudo tee /etc/systemd/resolved.conf.d/dns.conf
+sudo systemctl restart systemd-resolved
+```
+
+### TTEN Games deploy sırasında çöküyor
+
+Aynı sunucuda Docker build tüm RAM/CPU'yu tüketebilir. `deploy.sh` artık servisleri **sırayla** build eder (`COMPOSE_PARALLEL_LIMIT=1`).
+
+Kontrol et:
+
+```bash
+# Port çakışması olmamalı — portfolio 3100-3102, TTEN 3000/4000
+ss -tlnp | grep -E '3000|3100|4000|5432|5433|6379|6380'
+
+# deploy/.env portları
+grep HOST_PORT deploy/.env
+```
+
+TTEN container'ları:
+
+```bash
+docker ps | grep -v portfolio
+```
+
+### SSH deploy timeout
+
+Docker build uzun sürebilir. Workflow `command_timeout: 45m` kullanır. İlk deploy en uzun olanıdır.
+
 ## Cloudflare DNS kayıtları
 
 | Tip | Ad    | Hedef          | Proxy |
