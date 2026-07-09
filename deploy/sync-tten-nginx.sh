@@ -18,6 +18,33 @@ fi
 
 PORTFOLIO_CONTAINERS=(portfolio-prod-frontend portfolio-prod-admin portfolio-prod-backend)
 
+PORTFOLIO_MERGE_PATTERN='^# portfolio-merge-boundary|^server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic'
+
+verify_tten_frontend_dns() {
+  if ! docker ps --format '{{.Names}}' | grep -qx ttengamesstudio-frontend; then
+    return 0
+  fi
+
+  local frontend_ip portfolio_ip tten_ip
+  frontend_ip="$(docker exec "${NGINX_CONTAINER}" getent hosts frontend 2>/dev/null | awk '{print $1; exit}')"
+  portfolio_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' portfolio-prod-frontend 2>/dev/null | awk '{print $1}')"
+  tten_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' ttengamesstudio-frontend 2>/dev/null | awk '{print $1}')"
+
+  if [[ -n "${frontend_ip}" && -n "${portfolio_ip}" && "${frontend_ip}" == "${portfolio_ip}" ]]; then
+    echo "  HATA: 'frontend' DNS portfolio'ya çözülüyor — TTEN /_nuxt 404 verir."
+    echo "  Çözüm: docker compose -f docker-compose.prod.yml up -d --force-recreate frontend admin backend"
+    echo "          ardından bu scripti tekrar çalıştırın."
+    return 1
+  fi
+
+  if [[ -n "${frontend_ip}" && -n "${tten_ip}" && "${frontend_ip}" == "${tten_ip}" ]]; then
+    echo "  OK  frontend → ttengamesstudio-frontend (${frontend_ip})"
+  elif [[ -n "${frontend_ip}" ]]; then
+    echo "  UYARI: frontend → ${frontend_ip} (TTEN IP: ${tten_ip:-?})"
+  fi
+  return 0
+}
+
 ensure_portfolio_on_tten_network() {
   local container on_net
 
@@ -70,21 +97,23 @@ fi
 
 ensure_portfolio_on_tten_network || exit 0
 
+verify_tten_frontend_dns || exit 1
+
 echo "==> portfolio.conf güncelleniyor (repo template)..."
 bash "${ROOT_DIR}/deploy/render-portfolio-conf.sh" https
 
 echo "==> Nginx portfolio merge + reload..."
-docker exec "${NGINX_CONTAINER}" sh -c '
-  line=$(grep -n -E "^upstream portfolio_|^# Portfolio|^map \\$http_upgrade|server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" \
+docker exec "${NGINX_CONTAINER}" sh -c "
+  line=\$(grep -n -E \"${PORTFOLIO_MERGE_PATTERN}\" \
     /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1)
-  if [ -n "$line" ]; then
-    head -n $((line - 1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean
+  if [ -n \"\$line\" ]; then
+    head -n \$((line - 1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean
   else
     cp /etc/nginx/conf.d/default.conf /tmp/default.clean
   fi
   cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean
   mv /tmp/default.clean /etc/nginx/conf.d/default.conf
-'
+"
 docker exec "${NGINX_CONTAINER}" nginx -t
 docker exec "${NGINX_CONTAINER}" nginx -s reload
 
@@ -116,21 +145,33 @@ for attempt in $(seq 1 10); do
     'https://api.emrekilic.web.tr/socket.io/?EIO=4&transport=polling' -k 2>/dev/null \
     | head -c 80 | grep -qE 'sid|0\{|opened'; then
     echo "  OK  https://api.emrekilic.web.tr/socket.io (polling)"
-    echo "Nginx sync tamam."
-    exit 0
+    break
   fi
-  if docker exec "${NGINX_CONTAINER}" wget -qO- --timeout=3 \
-    'http://portfolio-prod-backend:3001/socket.io/?EIO=4&transport=polling' 2>/dev/null \
-    | head -c 80 | grep -qE 'sid|0\{|opened'; then
-    echo "  OK  backend socket.io (doğrudan)"
-    echo "  UYARI: HTTPS socket.io başarısız — portfolio.conf merge kontrol edin."
-    docker exec "${NGINX_CONTAINER}" nginx -T 2>/dev/null | grep -A2 'location /socket.io' || true
+  if [[ "${attempt}" -eq 10 ]]; then
+    echo "  HATA: Socket.IO erişilemedi."
+    docker exec "${NGINX_CONTAINER}" nginx -T 2>/dev/null | grep -E 'socket.io|api.emrekilic' | head -10 || true
     exit 1
   fi
   echo "  Bekleniyor... socket.io (${attempt}/10)"
   sleep 2
 done
 
-echo "  HATA: Socket.IO erişilemedi."
-docker exec "${NGINX_CONTAINER}" nginx -T 2>/dev/null | grep -E 'socket.io|api.emrekilic' | head -10 || true
-exit 1
+echo "==> TTEN /_nuxt statik dosya testi..."
+nuxt_path="$(curl -fsS -H 'Host: ttengamesstudio.com.tr' http://127.0.0.1/ 2>/dev/null \
+  | grep -oE '/_nuxt/[^"'\'' ]+\.css' | head -1 || true)"
+if [[ -n "${nuxt_path}" ]]; then
+  code="$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: ttengamesstudio.com.tr' "http://127.0.0.1${nuxt_path}" || echo 000)"
+  ctype="$(curl -sI -H 'Host: ttengamesstudio.com.tr' "http://127.0.0.1${nuxt_path}" | grep -i '^content-type:' | tr -d '\r' || true)"
+  if [[ "${code}" == "200" ]] && echo "${ctype}" | grep -qi 'text/css'; then
+    echo "  OK  ttengamesstudio.com.tr${nuxt_path}"
+  else
+    echo "  HATA: TTEN statik dosya → HTTP ${code} ${ctype:-} (portfolio frontend DNS çakışması?)"
+    docker exec "${NGINX_CONTAINER}" getent hosts frontend 2>/dev/null || true
+    exit 1
+  fi
+else
+  echo "  UYARI: _nuxt CSS yolu bulunamadı (TTEN HTML kontrol edin)"
+fi
+
+echo "Nginx sync tamam."
+exit 0

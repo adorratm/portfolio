@@ -1,6 +1,9 @@
 # Portfolio — production stack (Hetzner)
 # Host portları 3000/4000 dışında tutulur (TTEN Games ile çakışmaz)
 # Kullanım: docker compose -f docker-compose.prod.yml --env-file deploy/.env up -d --build
+#
+# TTEN ağı: compose ile DEĞİL, deploy/sync-tten-nginx.sh ile bağlanır.
+# Sebep: compose service adı "frontend" TTEN nginx upstream'i (frontend:3000) ile çakışır.
 
 name: portfolio-prod
 
@@ -103,7 +106,6 @@ services:
       - portfolio_uploads:/app/uploads
     networks:
       - portfolio
-      - ttengames
 
   frontend:
     build:
@@ -125,7 +127,6 @@ services:
       - "${FRONTEND_HOST_PORT:-3100}:3000"
     networks:
       - portfolio
-      - ttengames
 
   admin:
     build:
@@ -145,7 +146,6 @@ services:
       - "${ADMIN_HOST_PORT:-3101}:3000"
     networks:
       - portfolio
-      - ttengames
 
 volumes:
   portfolio_postgres_data:
@@ -155,7 +155,3 @@ volumes:
 networks:
   portfolio:
     driver: bridge
-  # TTEN nginx ile Docker DNS (deploy sonrası kopmayı önler)
-  ttengames:
-    external: true
-    name: ${PORTFOLIO_TTEN_NETWORK:-ttengamesstudio_ttengamesstudio-network}

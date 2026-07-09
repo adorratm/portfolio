@@ -158,6 +158,29 @@ sed -i 's/\r$//' deploy/setup-nginx.sh deploy/setup-shared-nginx.sh deploy/tteng
 chmod +x deploy/setup-nginx.sh deploy/setup-shared-nginx.sh deploy/ttengames/install-nginx.sh
 ```
 
+### ttengamesstudio.com.tr `/_nuxt` 404 / MIME text/html
+
+**Sebep:** Portfolio `docker-compose.prod.yml` içinde `ttengames` ağına `frontend` servis adıyla bağlanınca TTEN nginx upstream'i (`frontend:3000`) portfolio Next.js'e gider. HTML TTEN'den gelir gibi görünür ama `/_nuxt/*` istekleri portfolio'dan 404 HTML döner.
+
+**Çözüm (sunucu):**
+
+```bash
+cd /opt/portfolio
+git fetch origin
+git checkout origin/main -- docker-compose.prod.yml deploy/sync-tten-nginx.sh deploy/fix-tten-dns.sh \
+  deploy/ttengames/https/portfolio.conf.template deploy/ttengames/http/portfolio.conf.template \
+  deploy/ttengames/install-nginx.sh
+chmod +x deploy/fix-tten-dns.sh deploy/sync-tten-nginx.sh
+bash deploy/fix-tten-dns.sh
+```
+
+Doğrulama:
+
+```bash
+docker exec ttengamesstudio-nginx getent hosts frontend
+# ttengamesstudio-frontend IP'si olmalı, portfolio-prod-frontend DEĞİL
+```
+
 ### ttengamesstudio.com.tr portfolio gösteriyorsa
 
 **Sebep:** `ttengamesstudio-nginx` portfolio Docker ağına bağlandığında her iki projede de service adı `frontend` olduğu için TTEN'in `frontend:3000` upstream'i yanlışlıkla `portfolio-prod-frontend`'e gider.

@@ -71,6 +71,7 @@ sudo bash deploy/ttengames/install-nginx.sh https
 1. **Host nginx başlatmayın** — 80/443 zaten `ttengamesstudio-nginx`'te.
 2. **Nginx'i portfolio ağına bağlamayın** — `frontend` DNS çakışır.
 3. **Portfolio container'ları TTEN ağına bağlanır** — upstream: `portfolio-prod-frontend:3000`.
+4. **Compose ile TTEN ağına bağlanmayın** — service adı `frontend` TTEN upstream'i ile çakışır (`/_nuxt` 404). Ağ bağlantısı `sync-tten-nginx.sh` ile yapılır.
 
 ## Sorun giderme
 

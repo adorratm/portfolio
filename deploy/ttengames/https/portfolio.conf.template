@@ -1,4 +1,5 @@
 # Portfolio — emrekilic.web.tr ailesi (HTTPS)
+# portfolio-merge-boundary — sync/install merge bu satırdan keser (TTEN map ile karışmasın)
 # Doğrudan proxy_pass (deploy sonrası nginx reload ile DNS tazelenir)
 
 map $http_upgrade $portfolio_connection_upgrade {

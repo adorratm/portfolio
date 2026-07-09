@@ -20,6 +20,7 @@ PORTFOLIO_NETWORK="${PORTFOLIO_NETWORK:-portfolio-prod_portfolio}"
 CERT_PATH="/etc/letsencrypt/live/emrekilic.web.tr/fullchain.pem"
 MODE="${1:-auto}"
 
+PORTFOLIO_MERGE_PATTERN='^# portfolio-merge-boundary|^server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic'
 PORTFOLIO_CONTAINERS=(portfolio-prod-frontend portfolio-prod-admin portfolio-prod-backend)
 UPSTREAM_MODE=""
 UPSTREAM_FRONTEND_HOST=""
@@ -123,11 +124,29 @@ connect_portfolio_to_tten_network() {
     if docker network inspect "${tten_net}" --format '{{range .Containers}}{{.Name}} {{end}}' | grep -q "${container}"; then
       echo "    ${container} zaten ${tten_net} ağında"
     else
-      echo "    ${container} → ${tten_net}"
+      echo "    ${container} → ${tten_net} (container adı DNS; compose 'frontend' alias yok)"
       docker network connect "${tten_net}" "${container}"
     fi
   done
   sleep 2
+}
+
+verify_tten_frontend_dns() {
+  if ! docker ps --format '{{.Names}}' | grep -qx ttengamesstudio-frontend; then
+    return 0
+  fi
+
+  local frontend_ip portfolio_ip tten_ip
+  frontend_ip="$(docker exec "${NGINX_CONTAINER}" getent hosts frontend 2>/dev/null | awk '{print $1; exit}')"
+  portfolio_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' portfolio-prod-frontend 2>/dev/null | awk '{print $1}')"
+  tten_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' ttengamesstudio-frontend 2>/dev/null | awk '{print $1}')"
+
+  if [[ -n "${frontend_ip}" && -n "${portfolio_ip}" && "${frontend_ip}" == "${portfolio_ip}" ]]; then
+    echo "HATA: 'frontend' DNS portfolio'ya çözülüyor — TTEN /_nuxt 404 verir."
+    echo "  docker compose -f docker-compose.prod.yml up -d --force-recreate frontend admin backend"
+    return 1
+  fi
+  return 0
 }
 
 diagnose_docker_upstream_failure() {
@@ -170,6 +189,7 @@ detect_docker_upstream() {
 
   echo "    TTEN ağı: ${tten_net}"
   connect_portfolio_to_tten_network "${tten_net}"
+  verify_tten_frontend_dns || return 1
 
   if test_upstream "http://portfolio-prod-frontend:3000/tr"; then
     UPSTREAM_MODE="docker"
@@ -298,7 +318,7 @@ merge_portfolio_into_nginx() {
       echo "default.conf yok" >&2
       exit 1
     fi
-    line=$(grep -n -E "^upstream portfolio_|^# Portfolio|^map \\$http_upgrade|server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" \
+    line=$(grep -n -E "^# portfolio-merge-boundary|^server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" \
       /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1)
     if [ -n "$line" ]; then
       head -n $((line - 1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean
@@ -315,7 +335,7 @@ merge_portfolio_into_nginx() {
 ensure_portfolio_include() {
   local marker="portfolio-merge-v4"
   local main_template
-  local merge_block='if [ -f /etc/nginx/templates/portfolio.conf ] && [ -f /etc/nginx/conf.d/default.conf ]; then line=$(grep -n -E "^upstream portfolio_|^# Portfolio|^map \\$http_upgrade|server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); if [ -n "$line" ]; then head -n $((line-1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean; else cp /etc/nginx/conf.d/default.conf /tmp/default.clean; fi; cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean; mv /tmp/default.clean /etc/nginx/conf.d/default.conf; fi'
+  local merge_block='if [ -f /etc/nginx/templates/portfolio.conf ] && [ -f /etc/nginx/conf.d/default.conf ]; then line=$(grep -n -E "^# portfolio-merge-boundary|^server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); if [ -n "$line" ]; then head -n $((line-1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean; else cp /etc/nginx/conf.d/default.conf /tmp/default.clean; fi; cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean; mv /tmp/default.clean /etc/nginx/conf.d/default.conf; fi'
 
   if main_template="$(find_tten_main_template)"; then
     if ! grep -qF "server_name emrekilic.web.tr" "${main_template}" 2>/dev/null; then

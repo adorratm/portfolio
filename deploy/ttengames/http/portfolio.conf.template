@@ -1,4 +1,5 @@
 # Portfolio — emrekilic.web.tr ailesi (HTTP bootstrap)
+# portfolio-merge-boundary — sync/install merge bu satırdan keser
 
 map $http_upgrade $portfolio_connection_upgrade {
     default upgrade;
