@@ -1,6 +1,14 @@
 import type { Metadata } from 'next';
 import type { AppLocale } from '@/i18n/routing';
 
+export function getDefaultOgImageUrl(): string {
+  return `${getSiteUrl()}/og-image.jpg`;
+}
+
+export function resolveOgImageUrl(imageUrl?: string | null): string {
+  return imageUrl ?? getDefaultOgImageUrl();
+}
+
 const DEFAULT_SITE_URL = 'https://emrekilic.web.tr';
 
 export function getSiteUrl(): string {
@@ -63,7 +71,18 @@ export function buildOpenGraph(
     siteName: title.split(' | ').pop() ?? title,
     title,
     description,
-    ...(imageUrl ? { images: [{ url: imageUrl, width: 1200, height: 630, alt: title }] } : {}),
+    ...(imageUrl || getDefaultOgImageUrl()
+      ? {
+          images: [
+            {
+              url: resolveOgImageUrl(imageUrl),
+              width: 1200,
+              height: 630,
+              alt: title,
+            },
+          ],
+        }
+      : {}),
   };
 }
 
@@ -72,11 +91,12 @@ export function buildTwitterCard(
   description: string,
   imageUrl?: string | null,
 ): NonNullable<Metadata['twitter']> {
+  const image = resolveOgImageUrl(imageUrl);
   return {
-    card: imageUrl ? 'summary_large_image' : 'summary',
+    card: 'summary_large_image',
     title,
     description,
-    ...(imageUrl ? { images: [imageUrl] } : {}),
+    images: [image],
   };
 }
 
@@ -92,6 +112,8 @@ export function buildSiteMetadata(
 ): Metadata {
   const title = buildPageTitle(options.siteTitle, options.pageKey, locale);
 
+  const ogImage = resolveOgImageUrl(options.imageUrl);
+
   return {
     title,
     description: options.description,
@@ -102,9 +124,9 @@ export function buildSiteMetadata(
       title,
       options.description,
       options.path,
-      options.imageUrl,
+      ogImage,
     ),
-    twitter: buildTwitterCard(title, options.description, options.imageUrl),
+    twitter: buildTwitterCard(title, options.description, ogImage),
     robots: { index: true, follow: true },
   };
 }

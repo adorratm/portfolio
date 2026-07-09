@@ -4,8 +4,14 @@ import { SocialLinks } from '@/components/layout/SocialLinks';
 import { AmbientBackground } from '@/components/effects/AmbientBackground';
 import { HeroSection } from '@/components/home/HeroSection';
 import { ProjectsGrid } from '@/components/home/ProjectsGrid';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { fetchContentBundle } from '@/lib/api/client';
 import { label } from '@/lib/api/types';
+import {
+  buildPersonJsonLd,
+  buildProfilePageJsonLd,
+  buildWebSiteJsonLd,
+} from '@/lib/json-ld';
 import type { AppLocale } from '@/i18n/routing';
 
 const pillarDot: Record<string, string> = {
@@ -32,13 +38,22 @@ export default async function HomePage({
     );
   }
 
-  const { profile, siteSettings, projects, ui } = content;
+  const { profile, siteSettings, projects, ui, techStack } = content;
   const projectsTitle =
     siteSettings?.projectsSectionTitle ??
     label(ui.frontend, 'projects.title', 'Projects');
+  const siteTitle = siteSettings?.siteTitle ?? 'Emre Kılıç | Portfolio';
 
   return (
     <>
+      <JsonLd
+        data={[
+          buildPersonJsonLd(locale, { profile, siteSettings, techStack }),
+          buildWebSiteJsonLd(locale, siteTitle),
+          buildProfilePageJsonLd(locale),
+        ]}
+      />
+
       <SiteNav locale={locale} settings={siteSettings} profile={profile} />
 
       <main className="relative min-h-screen pt-20 lg:pl-64">

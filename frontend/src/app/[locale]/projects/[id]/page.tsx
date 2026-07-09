@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PageShell } from '@/components/layout/PageShell';
 import { ProjectLiveEmbed } from '@/components/projects/ProjectLiveEmbed';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { fetchContentBundle, fetchProjectById } from '@/lib/api/client';
+import { buildBreadcrumbJsonLd, buildProjectJsonLd } from '@/lib/json-ld';
 import { resolveProjectImageUrl } from '@/lib/media';
 import { buildAlternates, buildOpenGraph, buildTwitterCard, getSiteUrl } from '@/lib/seo';
 import type { AppLocale } from '@/i18n/routing';
@@ -67,9 +69,24 @@ export default async function ProjectDetailPage({
 
   const backLabel = locale === 'tr' ? '← Tüm Projeler' : '← All Projects';
   const heroImage = resolveProjectImageUrl(project);
+  const projectsLabel = locale === 'tr' ? 'Projeler' : 'Projects';
 
   return (
     <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
+      <JsonLd
+        data={[
+          buildProjectJsonLd(locale, {
+            ...project,
+            imageUrl: heroImage,
+          }),
+          buildBreadcrumbJsonLd(locale, [
+            { name: locale === 'tr' ? 'Ana Sayfa' : 'Home', path: '' },
+            { name: projectsLabel, path: '/projects' },
+            { name: project.title, path: `/projects/${id}` },
+          ]),
+        ]}
+      />
+
       <Link
         href={`/${locale}/projects`}
         className="mb-8 inline-flex font-mono text-sm text-secondary transition-colors hover:text-primary"

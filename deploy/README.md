@@ -80,6 +80,9 @@ cd backend && yarn translate:en
 - [ ] `NEXT_PUBLIC_SITE_URL=https://emrekilic.web.tr` production'da ayarlı
 - [ ] `https://emrekilic.web.tr/sitemap.xml` erişilebilir
 - [ ] `https://emrekilic.web.tr/robots.txt` erişilebilir
-- [ ] Google Search Console'a site ekle
+- [ ] `https://emrekilic.web.tr/og-image.jpg` sosyal önizleme görseli
+- [ ] Google Search Console'a site ekle + sitemap gönder
+- [ ] Opsiyonel: `NEXT_PUBLIC_GA_MEASUREMENT_ID` veya `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`
+- [ ] [Rich Results Test](https://search.google.com/test/rich-results) ile JSON-LD doğrula
 - [ ] Cloudflare'de Brotli + Auto Minify açık
 - [ ] Cloudflare Page Rule: `www` → apex yönlendirmesi

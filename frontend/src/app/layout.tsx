@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Analytics } from '@/components/seo/Analytics';
+import { getSiteUrl } from '@/lib/seo';
 import '@/app/globals.css';
 
 const inter = Inter({
@@ -15,6 +17,15 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Emre Kılıç | Portfolio',
   description: 'Backend mimarı portfolyo sitesi',
+  metadataBase: new URL(getSiteUrl()),
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
 };
 
 /**
@@ -30,6 +41,7 @@ export default function RootLayout({
     <html lang="tr" className="dark">
       <body className={`${inter.variable} ${jetbrains.variable} antialiased`}>
         {children}
+        <Analytics />
       </body>
     </html>
   );
