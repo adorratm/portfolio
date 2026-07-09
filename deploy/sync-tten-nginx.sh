@@ -85,22 +85,33 @@ wait_for_nginx_upstream() {
   return 1
 }
 
-if ! docker ps --format '{{.Names}}' | grep -qx "${NGINX_CONTAINER}"; then
+if ! docker ps -a --format '{{.Names}}' | grep -qx "${NGINX_CONTAINER}"; then
   echo "TTEN nginx yok (${NGINX_CONTAINER}) — atlanıyor."
   exit 0
 fi
 
-if [[ ! -f "${TTEN_TPL}/portfolio.conf" ]]; then
-  echo "portfolio.conf yok (${TTEN_TPL}) — nginx sync atlandı."
+echo "==> portfolio.conf güncelleniyor (repo template)..."
+bash "${ROOT_DIR}/deploy/render-portfolio-conf.sh" https
+export PORTFOLIO_CONF_HOST="${TTEN_TPL}/portfolio.conf"
+
+if ! docker ps --format '{{.Names}}' | grep -qx "${NGINX_CONTAINER}"; then
+  echo "TTEN nginx çalışmıyor (${NGINX_CONTAINER}) — conf render edildi, sync atlandı."
   exit 0
+fi
+
+echo "==> Nginx container hazır bekleniyor..."
+if ! wait_for_nginx_running "${NGINX_CONTAINER}" 60; then
+  if [[ -f "${PORTFOLIO_CONF_HOST}" ]]; then
+    recover_nginx_from_restart_loop "${NGINX_CONTAINER}" "${PORTFOLIO_CONF_HOST}"
+  else
+    echo "HATA: nginx hazır değil ve ${PORTFOLIO_CONF_HOST} yok."
+    exit 1
+  fi
 fi
 
 ensure_portfolio_on_tten_network || exit 0
 
 verify_tten_frontend_dns || exit 1
-
-echo "==> portfolio.conf güncelleniyor (repo template)..."
-bash "${ROOT_DIR}/deploy/render-portfolio-conf.sh" https
 
 echo "==> Nginx portfolio conf.d + default.conf temizliği..."
 apply_portfolio_nginx_config "${NGINX_CONTAINER}"
