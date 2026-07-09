@@ -175,17 +175,16 @@ chmod +x deploy/setup-nginx.sh deploy/setup-shared-nginx.sh deploy/ttengames/ins
 | `/var/www/certbot` | `/var/www/certbot` |
 | `/etc/letsencrypt` | `/etc/letsencrypt` |
 
-Portfolio config'leri **templates** dizinine `.conf.template` olarak eklenir. Nginx container içinde olduğu için upstream `127.0.0.1` değil host IP kullanır (`172.17.0.1`).
+Portfolio config'leri **templates** dizinine `.conf.template` olarak eklenir.
+
+**Önerilen:** Docker network modu (host IP gerekmez):
 
 ```bash
 cd /opt/portfolio
 chmod +x deploy/ttengames/install-nginx.sh
 
-# 1) HTTP (sertifika öncesi)
-sudo ./deploy/ttengames/install-nginx.sh http
-
-# Host erişim testi (başarısızsa PORTFOLIO_HOST değiştirin)
-docker exec ttengamesstudio-nginx wget -qO- http://172.17.0.1:3100/tr | head -3
+# 1) HTTP — nginx'i portfolio ağına bağlar, container adlarıyla proxy yapar
+sudo PORTFOLIO_MODE=network ./deploy/ttengames/install-nginx.sh http
 
 curl -I -H 'Host: emrekilic.web.tr' http://127.0.0.1/tr
 
@@ -195,15 +194,15 @@ sudo certbot certonly --webroot -w /var/www/certbot \
   -m senin@email.com --agree-tos --non-interactive
 
 # 3) HTTPS
-sudo ./deploy/ttengames/install-nginx.sh https
+sudo PORTFOLIO_MODE=network ./deploy/ttengames/install-nginx.sh https
 
 curl -I https://emrekilic.web.tr/tr
 ```
 
-`172.17.0.1` çalışmazsa:
+`172.17.0.1` ile host modu gerekirse:
 
 ```bash
-sudo PORTFOLIO_HOST=host.docker.internal ./deploy/ttengames/install-nginx.sh http
+sudo PORTFOLIO_MODE=host PORTFOLIO_HOST=host.docker.internal ./deploy/ttengames/install-nginx.sh http
 ```
 
 (TTEN `docker-compose`'da `extra_hosts: ["host.docker.internal:host-gateway"]` gerekebilir.)

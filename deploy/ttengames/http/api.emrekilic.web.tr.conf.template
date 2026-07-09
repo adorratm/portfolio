@@ -1,6 +1,6 @@
 # Portfolio — api.emrekilic.web.tr (HTTP bootstrap)
 upstream portfolio_api {
-    server @PORTFOLIO_HOST@:3102;
+    server @API_UPSTREAM@;
     keepalive 32;
 }
 

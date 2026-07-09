@@ -1,6 +1,6 @@
 # Portfolio — emrekilic.web.tr (HTTPS)
 upstream portfolio_frontend {
-    server @PORTFOLIO_HOST@:3100;
+    server @FRONTEND_UPSTREAM@;
     keepalive 32;
 }
 

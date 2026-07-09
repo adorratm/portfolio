@@ -1,6 +1,6 @@
 # Portfolio — admin.emrekilic.web.tr (HTTPS)
 upstream portfolio_admin {
-    server @PORTFOLIO_HOST@:3101;
+    server @ADMIN_UPSTREAM@;
     keepalive 16;
 }
 
