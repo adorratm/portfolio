@@ -112,6 +112,59 @@ Aynı sunucu IP'sine gidebilir — Nginx domain'e göre ayırır.
 
 **Önemli:** `api` subdomain'i şart (health check ve backend için). `ap` değil, `api`.
 
+### Port 80/443 zaten kullanımda (`Address already in use`)
+
+TTEN Games zaten 80/443'ü dinliyorsa **ikinci bir host nginx başlatılamaz**. Portfolio config'lerini mevcut (aktif) nginx'e eklemeniz gerekir.
+
+```bash
+cd /opt/portfolio
+
+# Script var mı? (yoksa: git pull veya GitHub Actions deploy bekleyin)
+ls -la deploy/setup-shared-nginx.sh
+chmod +x deploy/setup-shared-nginx.sh deploy/setup-nginx.sh
+
+# 80/443'ü kim dinliyor?
+sudo ss -tlnp | grep -E ':80|:443'
+docker ps --format 'table {{.Names}}\t{{.Ports}}' | grep -E '80|443'
+
+# Paylaşılan nginx kurulumu
+sudo CERTBOT_EMAIL=senin@email.com ./deploy/setup-shared-nginx.sh
+
+# Docker nginx container adını biliyorsanız (ör. tten-nginx):
+sudo NGINX_CONTAINER=tten-nginx CERTBOT_EMAIL=senin@email.com ./deploy/setup-shared-nginx.sh
+```
+
+Config'ler varsayılan olarak `/etc/nginx/conf.d/portfolio/` altına kopyalanır. **Aktif nginx** (çoğunlukla Docker içindeki) bu dizini include etmeli:
+
+```nginx
+include /etc/nginx/conf.d/portfolio/*.conf;
+```
+
+Docker nginx host'taki `/etc/nginx` veya `conf.d` dizinini volume olarak mount ediyorsa include zaten çalışır. Mount farklı bir dizinse:
+
+```bash
+# Örnek: TTEN nginx config volume'u
+docker inspect <nginx_container> --format '{{range .Mounts}}{{.Source}} -> {{.Destination}}{{"\n"}}{{end}}'
+
+# Config'leri o dizine kopyalayın
+sudo NGINX_CONF_DIR=/yol/conf.d/portfolio CERTBOT_EMAIL=... ./deploy/setup-shared-nginx.sh
+```
+
+Son adım — aktif nginx'i reload:
+
+```bash
+docker exec <nginx_container> nginx -t
+docker exec <nginx_container> nginx -s reload
+```
+
+`./deploy/setup-nginx.sh: command not found` görürseniz dosya deploy edilmemiş veya satır sonu bozuksa:
+
+```bash
+ls -la deploy/*.sh
+sed -i 's/\r$//' deploy/setup-nginx.sh deploy/setup-shared-nginx.sh
+chmod +x deploy/setup-nginx.sh deploy/setup-shared-nginx.sh
+```
+
 ### `nginx.service is not active, cannot reload`
 
 Config dosyaları kopyalanmış olabilir ama script certbot adımına geçmeden durmuş olabilir. Sunucuda:
