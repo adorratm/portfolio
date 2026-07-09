@@ -52,10 +52,9 @@ sudo PORTFOLIO_TTEN_NETWORK=ttengamesstudio_ttengamesstudio-network \
 Script otomatik olarak:
 - Nginx'i portfolio ağından ayırır (TTEN `frontend` DNS çakışmasını önler)
 - Portfolio container'larını TTEN ağına bağlar (`portfolio-prod-frontend:3000`)
-- `portfolio.conf` yazar ve TTEN `default.conf.template` içine `include` ekler
-- Her iki siteyi test eder
+- `portfolio.conf` yazar; TTEN template veya `entrypoint.sh` içine `include` ekler
 
-> TTEN entrypoint yalnızca `default.conf.template` işler; portfolio ayrı `.conf` dosyası olarak include edilir.
+> TTEN yalnızca kendi template'ini işler; portfolio `include /etc/nginx/templates/portfolio.conf` ile yüklenir.
 
 ### 3. SSL (emrekilic)
 

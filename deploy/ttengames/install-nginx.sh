@@ -14,6 +14,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TTEN_TEMPLATES="${TTEN_TEMPLATES:-/opt/ttengamesstudio/docker/nginx/templates}"
+TTEN_ENTRYPOINT="${TTEN_ENTRYPOINT:-/opt/ttengamesstudio/docker/nginx/entrypoint.sh}"
 NGINX_CONTAINER="${NGINX_CONTAINER:-ttengamesstudio-nginx}"
 PORTFOLIO_NETWORK="${PORTFOLIO_NETWORK:-portfolio-prod_portfolio}"
 CERT_PATH="/etc/letsencrypt/live/emrekilic.web.tr/fullchain.pem"
@@ -236,23 +237,66 @@ cleanup_old_templates() {
   rm -f "${TTEN_TEMPLATES}"/portfolio-*.conf.template "${TTEN_TEMPLATES}"/portfolio.conf.template
 }
 
-ensure_portfolio_include() {
-  local default_template="${TTEN_TEMPLATES}/default.conf.template"
-  local marker="include /etc/nginx/templates/portfolio.conf"
+find_tten_main_template() {
+  local candidate
 
-  if [[ ! -f "${default_template}" ]]; then
-    echo "Hata: ${default_template} bulunamadı."
+  for candidate in \
+    "${TTEN_TEMPLATES}/default.conf.template" \
+    "${TTEN_TEMPLATES}/default.template" \
+    "${TTEN_TEMPLATES}/nginx.conf.template"; do
+    if [[ -f "${candidate}" ]]; then
+      echo "${candidate}"
+      return 0
+    fi
+  done
+
+  candidate="$(find "${TTEN_TEMPLATES}" -maxdepth 1 -type f -name '*.template' ! -name 'portfolio*.template' 2>/dev/null | head -1)"
+  if [[ -n "${candidate}" ]]; then
+    echo "${candidate}"
+    return 0
+  fi
+
+  return 1
+}
+
+ensure_portfolio_include() {
+  local marker="include /etc/nginx/templates/portfolio.conf"
+  local main_template
+
+  if main_template="$(find_tten_main_template)"; then
+    if ! grep -qF "${marker}" "${main_template}"; then
+      echo "==> ${main_template} → portfolio include ekleniyor..."
+      {
+        echo ""
+        echo "# Portfolio (emrekilic.web.tr) — deploy/ttengames/install-nginx.sh"
+        echo "${marker};"
+      } >> "${main_template}"
+    fi
+    return 0
+  fi
+
+  if [[ ! -f "${TTEN_ENTRYPOINT}" ]]; then
+    echo "Hata: TTEN nginx template veya entrypoint bulunamadı."
+    echo "  ls -la ${TTEN_TEMPLATES}"
+    echo "  ls -la ${TTEN_ENTRYPOINT}"
     exit 1
   fi
 
-  if ! grep -qF "${marker}" "${default_template}"; then
-    echo "==> default.conf.template → portfolio include ekleniyor..."
-    {
-      echo ""
-      echo "# Portfolio (emrekilic.web.tr) — deploy/ttengames/install-nginx.sh"
-      echo "${marker};"
-    } >> "${default_template}"
+  if grep -qF "install-nginx.sh portfolio include" "${TTEN_ENTRYPOINT}"; then
+    echo "==> entrypoint.sh zaten portfolio include içeriyor"
+    return 0
   fi
+
+  echo "==> entrypoint.sh → portfolio include ekleniyor..."
+  cat >> "${TTEN_ENTRYPOINT}" << 'EOF'
+
+# install-nginx.sh portfolio include
+if [ -f /etc/nginx/templates/portfolio.conf ]; then
+  if ! grep -qF 'include /etc/nginx/templates/portfolio.conf' /etc/nginx/conf.d/default.conf 2>/dev/null; then
+    echo 'include /etc/nginx/templates/portfolio.conf;' >> /etc/nginx/conf.d/default.conf
+  fi
+fi
+EOF
 }
 
 install_portfolio_conf() {
