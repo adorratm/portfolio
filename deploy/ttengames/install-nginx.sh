@@ -13,6 +13,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=../lib/nginx-merge-portfolio.sh
+source "${ROOT_DIR}/deploy/lib/nginx-merge-portfolio.sh"
 TTEN_TEMPLATES="${TTEN_TEMPLATES:-/opt/ttengamesstudio/docker/nginx/templates}"
 TTEN_ENTRYPOINT="${TTEN_ENTRYPOINT:-/opt/ttengamesstudio/docker/nginx/entrypoint.sh}"
 NGINX_CONTAINER="${NGINX_CONTAINER:-ttengamesstudio-nginx}"
@@ -20,7 +22,6 @@ PORTFOLIO_NETWORK="${PORTFOLIO_NETWORK:-portfolio-prod_portfolio}"
 CERT_PATH="/etc/letsencrypt/live/emrekilic.web.tr/fullchain.pem"
 MODE="${1:-auto}"
 
-PORTFOLIO_MERGE_PATTERN='^# portfolio-merge-boundary|^server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic'
 PORTFOLIO_CONTAINERS=(portfolio-prod-frontend portfolio-prod-admin portfolio-prod-backend)
 UPSTREAM_MODE=""
 UPSTREAM_FRONTEND_HOST=""
@@ -309,45 +310,30 @@ merge_portfolio_into_nginx() {
     sleep 2
   done
 
-  docker exec "${NGINX_CONTAINER}" sh -c '
-    if [ ! -f /etc/nginx/templates/portfolio.conf ]; then
-      echo "portfolio.conf yok" >&2
-      exit 1
-    fi
-    if [ ! -f /etc/nginx/conf.d/default.conf ]; then
-      echo "default.conf yok" >&2
-      exit 1
-    fi
-    line=$(grep -n -E "^# portfolio-merge-boundary|^server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" \
-      /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1)
-    if [ -n "$line" ]; then
-      head -n $((line - 1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean
-    else
-      cp /etc/nginx/conf.d/default.conf /tmp/default.clean
-    fi
-    cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean
-    mv /tmp/default.clean /etc/nginx/conf.d/default.conf
-  '
-  docker exec "${NGINX_CONTAINER}" nginx -t
-  docker exec "${NGINX_CONTAINER}" nginx -s reload
+  merge_portfolio_with_recovery "${NGINX_CONTAINER}"
+}
+
+remove_stale_portfolio_include() {
+  local main_template
+
+  if ! main_template="$(find_tten_main_template)"; then
+    return 0
+  fi
+
+  if grep -qF 'include /etc/nginx/templates/portfolio.conf;' "${main_template}" 2>/dev/null; then
+    echo "==> ${main_template} içinden portfolio include kaldırılıyor (merge-only)..."
+    sed -i '/include \/etc\/nginx\/templates\/portfolio.conf;/d' "${main_template}" 2>/dev/null || \
+      grep -v 'include /etc/nginx/templates/portfolio.conf;' "${main_template}" > "${main_template}.strip" && \
+      mv "${main_template}.strip" "${main_template}"
+    sed -i '/^# Portfolio (emrekilic.web.tr)$/d' "${main_template}" 2>/dev/null || true
+  fi
 }
 
 ensure_portfolio_include() {
-  local marker="portfolio-merge-v4"
-  local main_template
-  local merge_block='if [ -f /etc/nginx/templates/portfolio.conf ] && [ -f /etc/nginx/conf.d/default.conf ]; then line=$(grep -n -E "^# portfolio-merge-boundary|^server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); if [ -n "$line" ]; then head -n $((line-1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean; else cp /etc/nginx/conf.d/default.conf /tmp/default.clean; fi; cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean; mv /tmp/default.clean /etc/nginx/conf.d/default.conf; fi'
+  local marker="portfolio-merge-v5"
+  local merge_block='if [ -f /etc/nginx/templates/portfolio.conf ] && [ -f /etc/nginx/conf.d/default.conf ]; then line=$(grep -n "^# portfolio-merge-boundary" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); if [ -z "$line" ]; then line=$(grep -n "^map \$http_upgrade \$portfolio_connection_upgrade" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); fi; if [ -z "$line" ]; then line=$(grep -n "^# Portfolio — emrekilic" /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1); fi; if [ -n "$line" ]; then head -n $((line-1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean; else cp /etc/nginx/conf.d/default.conf /tmp/default.clean; fi; cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean; mv /tmp/default.clean /etc/nginx/conf.d/default.conf; fi'
 
-  if main_template="$(find_tten_main_template)"; then
-    if ! grep -qF "server_name emrekilic.web.tr" "${main_template}" 2>/dev/null; then
-      echo "==> ${main_template} sonuna portfolio.conf include ekleniyor..."
-      {
-        echo ""
-        echo "# Portfolio (emrekilic.web.tr)"
-        echo "include /etc/nginx/templates/portfolio.conf;"
-      } >> "${main_template}"
-    fi
-    return 0
-  fi
+  remove_stale_portfolio_include
 
   if [[ ! -f "${TTEN_ENTRYPOINT}" ]]; then
     echo "Hata: TTEN nginx template veya entrypoint bulunamadı."
@@ -364,9 +350,8 @@ ensure_portfolio_include() {
   echo "==> entrypoint.sh → portfolio merge hook ekleniyor (${marker})..."
   cp "${TTEN_ENTRYPOINT}" "${TTEN_ENTRYPOINT}.bak.portfolio"
 
-  # Eski v1–v3 hook satırlarını kaldır
-  sed -i '/portfolio-merge-v[123]/d' "${TTEN_ENTRYPOINT}" 2>/dev/null || \
-    sed '/portfolio-merge-v[123]/d' "${TTEN_ENTRYPOINT}" > "${TTEN_ENTRYPOINT}.strip" && \
+  sed -i '/portfolio-merge-v[0-9]/d' "${TTEN_ENTRYPOINT}" 2>/dev/null || \
+    sed '/portfolio-merge-v[0-9]/d' "${TTEN_ENTRYPOINT}" > "${TTEN_ENTRYPOINT}.strip" && \
     mv "${TTEN_ENTRYPOINT}.strip" "${TTEN_ENTRYPOINT}"
 
   if grep -qE 'exec (\$@|nginx)' "${TTEN_ENTRYPOINT}"; then

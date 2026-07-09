@@ -3,6 +3,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=lib/nginx-merge-portfolio.sh
+source "${ROOT_DIR}/deploy/lib/nginx-merge-portfolio.sh"
 ENV_FILE="${ROOT_DIR}/deploy/.env"
 NGINX_CONTAINER="${NGINX_CONTAINER:-ttengamesstudio-nginx}"
 TTEN_TPL="${TTEN_TEMPLATES:-/opt/ttengamesstudio/docker/nginx/templates}"
@@ -17,8 +19,6 @@ if [[ -f "${ENV_FILE}" ]]; then
 fi
 
 PORTFOLIO_CONTAINERS=(portfolio-prod-frontend portfolio-prod-admin portfolio-prod-backend)
-
-PORTFOLIO_MERGE_PATTERN='^# portfolio-merge-boundary|^server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic'
 
 verify_tten_frontend_dns() {
   if ! docker ps --format '{{.Names}}' | grep -qx ttengamesstudio-frontend; then
@@ -103,19 +103,7 @@ echo "==> portfolio.conf güncelleniyor (repo template)..."
 bash "${ROOT_DIR}/deploy/render-portfolio-conf.sh" https
 
 echo "==> Nginx portfolio merge + reload..."
-docker exec "${NGINX_CONTAINER}" sh -c "
-  line=\$(grep -n -E \"${PORTFOLIO_MERGE_PATTERN}\" \
-    /etc/nginx/conf.d/default.conf 2>/dev/null | head -1 | cut -d: -f1)
-  if [ -n \"\$line\" ]; then
-    head -n \$((line - 1)) /etc/nginx/conf.d/default.conf > /tmp/default.clean
-  else
-    cp /etc/nginx/conf.d/default.conf /tmp/default.clean
-  fi
-  cat /etc/nginx/templates/portfolio.conf >> /tmp/default.clean
-  mv /tmp/default.clean /etc/nginx/conf.d/default.conf
-"
-docker exec "${NGINX_CONTAINER}" nginx -t
-docker exec "${NGINX_CONTAINER}" nginx -s reload
+merge_portfolio_with_recovery "${NGINX_CONTAINER}"
 
 echo "==> Nginx → portfolio upstream testi..."
 if ! wait_for_nginx_upstream; then

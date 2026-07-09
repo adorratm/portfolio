@@ -158,6 +158,25 @@ sed -i 's/\r$//' deploy/setup-nginx.sh deploy/setup-shared-nginx.sh deploy/tteng
 chmod +x deploy/setup-nginx.sh deploy/setup-shared-nginx.sh deploy/ttengames/install-nginx.sh
 ```
 
+### nginx `map directive is not allowed here` / merge başarısız
+
+**Sebep:** Eski merge `server_name emrekilic` satırında kesiyordu → açık `server` bloğu + `map` server içinde kalıyordu.
+
+**Çözüm:**
+
+```bash
+cd /opt/portfolio
+git fetch origin
+git checkout origin/main -- deploy/lib/nginx-merge-portfolio.sh deploy/sync-tten-nginx.sh \
+  deploy/ttengames/install-nginx.sh deploy/ttengames/https/portfolio.conf.template \
+  deploy/ttengames/http/portfolio.conf.template deploy/fix-tten-dns.sh
+chmod +x deploy/lib/nginx-merge-portfolio.sh deploy/sync-tten-nginx.sh deploy/fix-tten-dns.sh
+sudo bash deploy/ttengames/install-nginx.sh https
+bash deploy/sync-tten-nginx.sh
+```
+
+`listen ... http2` uyarıları TTEN şablonundan gelir (zararsız). Portfolio artık `listen 443 ssl;` kullanır.
+
 ### ttengamesstudio.com.tr `/_nuxt` 404 / MIME text/html
 
 **Sebep:** Portfolio `docker-compose.prod.yml` içinde `ttengames` ağına `frontend` servis adıyla bağlanınca TTEN nginx upstream'i (`frontend:3000`) portfolio Next.js'e gider. HTML TTEN'den gelir gibi görünür ama `/_nuxt/*` istekleri portfolio'dan 404 HTML döner.

@@ -24,7 +24,14 @@ fi
 echo "==> 1/4 Portfolio container'ları recreate (ttengames compose ağından çıkar)..."
 "${COMPOSE[@]}" up -d --no-build --force-recreate frontend admin backend
 
-echo "==> 2/4 Nginx default.conf TTEN şablonundan yenileniyor..."
+echo "==> 2/4 TTEN entrypoint merge hook (v5) + portfolio.conf..."
+if [[ "${EUID}" -eq 0 ]] && [[ -x "${ROOT_DIR}/deploy/ttengames/install-nginx.sh" ]]; then
+  bash "${ROOT_DIR}/deploy/ttengames/install-nginx.sh" https
+else
+  echo "  UYARI: install-nginx root olmadan atlandı — sudo bash deploy/ttengames/install-nginx.sh https"
+fi
+
+echo "==> 3/4 Nginx default.conf TTEN şablonundan yenileniyor..."
 docker restart "${NGINX_CONTAINER}"
 for i in $(seq 1 30); do
   if docker exec "${NGINX_CONTAINER}" nginx -t >/dev/null 2>&1; then
@@ -33,10 +40,10 @@ for i in $(seq 1 30); do
   sleep 2
 done
 
-echo "==> 3/4 Portfolio nginx sync..."
+echo "==> 4/4 Portfolio nginx sync..."
 bash "${ROOT_DIR}/deploy/sync-tten-nginx.sh"
 
-echo "==> 4/4 TTEN /_nuxt doğrulama..."
+echo "==> 5/5 TTEN /_nuxt doğrulama..."
 nuxt_path="$(curl -fsS -H 'Host: ttengamesstudio.com.tr' http://127.0.0.1/ 2>/dev/null \
   | grep -oE '/_nuxt/[^"'\'' ]+\.css' | head -1 || true)"
 

@@ -1,10 +1,5 @@
+# portfolio-merge-boundary
 # Portfolio — emrekilic.web.tr ailesi (HTTP bootstrap)
-# portfolio-merge-boundary — sync/install merge bu satırdan keser
-
-map $http_upgrade $portfolio_connection_upgrade {
-    default upgrade;
-    ''      close;
-}
 
 # --- emrekilic.web.tr ---
 server {
@@ -22,7 +17,6 @@ server {
         proxy_set_header X-Real-IP $${remote_addr};
         proxy_set_header X-Forwarded-For $${proxy_add_x_forwarded_for};
         proxy_set_header X-Forwarded-Proto $${scheme};
-        proxy_set_header Upgrade $${http_upgrade};
     }
 }
 
@@ -42,7 +36,6 @@ server {
         proxy_set_header X-Real-IP $${remote_addr};
         proxy_set_header X-Forwarded-For $${proxy_add_x_forwarded_for};
         proxy_set_header X-Forwarded-Proto $${scheme};
-        proxy_set_header Upgrade $${http_upgrade};
     }
 }
 
@@ -63,7 +56,7 @@ server {
         proxy_set_header X-Forwarded-For $${proxy_add_x_forwarded_for};
         proxy_set_header X-Forwarded-Proto $${scheme};
         proxy_set_header Upgrade $${http_upgrade};
-        proxy_set_header Connection $portfolio_connection_upgrade;
+        proxy_set_header Connection $connection_upgrade;
         proxy_read_timeout 86400;
         proxy_send_timeout 86400;
         proxy_buffering off;
@@ -77,8 +70,6 @@ server {
         proxy_set_header X-Real-IP $${remote_addr};
         proxy_set_header X-Forwarded-For $${proxy_add_x_forwarded_for};
         proxy_set_header X-Forwarded-Proto $${scheme};
-        proxy_set_header Upgrade $${http_upgrade};
-        proxy_set_header Connection $portfolio_connection_upgrade;
         proxy_read_timeout 86400;
         client_max_body_size 12M;
     }
