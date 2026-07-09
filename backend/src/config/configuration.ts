@@ -37,6 +37,9 @@ export default registerAs('app', () => {
       username: env('DATABASE_USER', 'portfolio'),
       password: env('DATABASE_PASSWORD', 'portfolio_dev'),
       database: env('DATABASE_NAME', 'portfolio'),
+      synchronize:
+        env('NODE_ENV', 'development') === 'development' ||
+        env('DATABASE_SYNCHRONIZE', 'false') === 'true',
     },
     redis: {
       host: env('REDIS_HOST', 'localhost'),

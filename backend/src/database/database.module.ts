@@ -23,7 +23,7 @@ import { SeedService } from '@database/seed.service';
           password: db.password,
           database: db.database,
           autoLoadEntities: true,
-          synchronize: config.get('app.nodeEnv') === 'development',
+          synchronize: config.get('app.database.synchronize') === true,
           // PgBouncer transaction pooling — statement_timeout startup param desteklenmez
           extra: {
             max: 10,

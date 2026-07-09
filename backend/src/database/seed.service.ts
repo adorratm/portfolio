@@ -22,17 +22,24 @@ export class SeedService implements OnModuleInit {
   constructor(@InjectEntityManager() private readonly em: EntityManager) {}
 
   async onModuleInit(): Promise<void> {
-    if ((await this.em.count(ProfileContent)) === 0) {
-      this.logger.log('Örnek CMS verisi ekleniyor...');
-      await this.seedCms();
-    }
-    if ((await this.em.count(UiTranslation)) === 0) {
-      this.logger.log('UI çevirileri ekleniyor...');
-      await this.seedUiTranslations();
-    }
-    if ((await this.em.count(AboutContent)) === 0) {
-      this.logger.log('CV / özgeçmiş içeriği ekleniyor...');
-      await this.seedCv();
+    try {
+      if ((await this.em.count(ProfileContent)) === 0) {
+        this.logger.log('Örnek CMS verisi ekleniyor...');
+        await this.seedCms();
+      }
+      if ((await this.em.count(UiTranslation)) === 0) {
+        this.logger.log('UI çevirileri ekleniyor...');
+        await this.seedUiTranslations();
+      }
+      if ((await this.em.count(AboutContent)) === 0) {
+        this.logger.log('CV / özgeçmiş içeriği ekleniyor...');
+        await this.seedCv();
+      }
+    } catch (error) {
+      this.logger.error(
+        'Seed atlanamadı — veritabanı şeması hazır mı? DATABASE_SYNCHRONIZE=true kontrol edin.',
+        error,
+      );
     }
   }
 
