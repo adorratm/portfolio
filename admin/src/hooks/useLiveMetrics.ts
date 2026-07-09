@@ -23,8 +23,13 @@ export function useLiveMetrics(): SystemMetrics | null {
 
   useEffect(() => {
     const socket: Socket = io(`${WS_BASE}/metrics`, {
-      transports: ['websocket', 'polling'],
+      // Long-polling: nginx + Cloudflare arkasında WebSocket upgrade sık sorun çıkarır
+      transports: ['polling'],
+      upgrade: false,
       path: '/socket.io',
+      reconnection: true,
+      reconnectionAttempts: 10,
+      timeout: 20000,
     });
 
     socket.on('metrics', (data: SystemMetrics) => {

@@ -20,6 +20,12 @@ async function bootstrap(): Promise<void> {
   const adminUrl = config.get<string>('app.adminUrl');
   const frontendUrl = config.get<string>('app.frontendUrl');
 
+  // Nginx / Cloudflare arkasında Socket.IO ve proxy header'ları
+  const httpAdapter = app.getHttpAdapter();
+  if (httpAdapter?.getInstance) {
+    httpAdapter.getInstance().set('trust proxy', 1);
+  }
+
   app.setGlobalPrefix(apiPrefix);
 
   app.useGlobalPipes(
