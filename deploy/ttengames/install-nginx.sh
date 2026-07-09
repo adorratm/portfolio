@@ -43,14 +43,45 @@ resolve_mode() {
 }
 
 detect_tten_network() {
-  docker inspect "${NGINX_CONTAINER}" --format '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}' \
-    | grep -v '^portfolio' \
-    | head -1
+  local nginx_nets frontend_nets common
+
+  if [[ -n "${PORTFOLIO_TTEN_NETWORK:-}" ]]; then
+    echo "${PORTFOLIO_TTEN_NETWORK}"
+    return 0
+  fi
+
+  if ! docker ps --format '{{.Names}}' | grep -qx ttengamesstudio-frontend; then
+    return 1
+  fi
+
+  nginx_nets="$(docker inspect "${NGINX_CONTAINER}" --format '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}')"
+  frontend_nets="$(docker inspect ttengamesstudio-frontend --format '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}')"
+  common="$(comm -12 <(echo "${nginx_nets}" | sort) <(echo "${frontend_nets}" | sort) | head -1)"
+
+  if [[ -n "${common}" ]]; then
+    echo "${common}"
+    return 0
+  fi
+
+  echo "${nginx_nets}" | grep -v '^portfolio' | head -1
+}
+
+fetch_url_from_nginx() {
+  local url="$1"
+  docker exec "${NGINX_CONTAINER}" sh -c "
+    if command -v wget >/dev/null 2>&1; then
+      wget -qO- --timeout=5 '${url}'
+    elif command -v curl >/dev/null 2>&1; then
+      curl -fsS --max-time 5 '${url}'
+    else
+      exit 127
+    fi
+  " 2>/dev/null
 }
 
 test_upstream() {
   local url="$1"
-  docker exec "${NGINX_CONTAINER}" wget -qO- --timeout=4 "${url}" 2>/dev/null | head -1 | grep -q .
+  fetch_url_from_nginx "${url}" | head -1 | grep -q .
 }
 
 detect_host_upstream() {
@@ -75,15 +106,44 @@ detect_host_upstream() {
 
 connect_portfolio_to_tten_network() {
   local tten_net="$1"
-  local container
+  local container rc
 
   for container in "${PORTFOLIO_CONTAINERS[@]}"; do
     if ! docker ps --format '{{.Names}}' | grep -qx "${container}"; then
       echo "Hata: ${container} çalışmıyor. Önce: cd /opt/portfolio && ./deploy/deploy.sh"
       exit 1
     fi
-    docker network connect "${tten_net}" "${container}" 2>/dev/null || true
+    if docker network inspect "${tten_net}" --format '{{range .Containers}}{{.Name}} {{end}}' | grep -q "${container}"; then
+      echo "    ${container} zaten ${tten_net} ağında"
+    else
+      echo "    ${container} → ${tten_net}"
+      docker network connect "${tten_net}" "${container}"
+    fi
   done
+  sleep 2
+}
+
+diagnose_docker_upstream_failure() {
+  local tten_net="$1"
+  echo ""
+  echo "Docker modu teşhisi:"
+  echo "  TTEN ağı: ${tten_net:-<bulunamadı>}"
+  echo "  Nginx ağları:"
+  docker inspect "${NGINX_CONTAINER}" --format '{{range $k,$v := .NetworkSettings.Networks}}    - {{$k}}{{"\n"}}{{end}}' || true
+  echo "  Portfolio container'ları:"
+  docker ps --format '    - {{.Names}} ({{.Status}})' | grep portfolio-prod || true
+  if [[ -n "${tten_net}" ]]; then
+    echo "  ${tten_net} üyeleri:"
+    docker network inspect "${tten_net}" --format '{{range .Containers}}    - {{.Name}}{{"\n"}}{{end}}' 2>/dev/null || true
+  fi
+  echo "  DNS (nginx içinden):"
+  docker exec "${NGINX_CONTAINER}" getent hosts portfolio-prod-frontend 2>/dev/null || echo "    portfolio-prod-frontend çözülemedi"
+  echo "  HTTP test:"
+  fetch_url_from_nginx "http://portfolio-prod-frontend:3000/tr" | head -1 || echo "    erişim yok"
+  echo ""
+  echo "Manuel:"
+  echo "  docker network ls"
+  echo "  PORTFOLIO_TTEN_NETWORK=<ağ_adı> sudo PORTFOLIO_UPSTREAM_MODE=docker bash $0 ${SSL_MODE}"
 }
 
 detect_docker_upstream() {
@@ -91,6 +151,7 @@ detect_docker_upstream() {
 
   tten_net="$(detect_tten_network)"
   if [[ -z "${tten_net}" ]]; then
+    diagnose_docker_upstream_failure ""
     return 1
   fi
 
@@ -102,9 +163,10 @@ detect_docker_upstream() {
     UPSTREAM_FRONTEND="portfolio-prod-frontend:3000"
     UPSTREAM_ADMIN="portfolio-prod-admin:3000"
     UPSTREAM_API="portfolio-prod-backend:3001"
-    echo "portfolio-prod-frontend"
     return 0
   fi
+
+  diagnose_docker_upstream_failure "${tten_net}"
   return 1
 }
 
@@ -127,7 +189,10 @@ setup_upstream() {
         UPSTREAM_API="${PORTFOLIO_HOST}:3102"
         ;;
       docker)
-        detect_docker_upstream >/dev/null || { echo "HATA: docker modu başarısız."; exit 1; }
+        if ! detect_docker_upstream; then
+          echo "HATA: docker modu başarısız."
+          exit 1
+        fi
         ;;
       *)
         echo "HATA: PORTFOLIO_UPSTREAM_MODE=host|docker olmalı."
@@ -141,7 +206,7 @@ setup_upstream() {
     UPSTREAM_API="${PORTFOLIO_HOST}:3102"
   elif detect_host_upstream >/dev/null; then
     :
-  elif detect_docker_upstream >/dev/null; then
+  elif detect_docker_upstream; then
     :
   else
     echo ""
