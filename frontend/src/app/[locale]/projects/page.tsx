@@ -1,7 +1,30 @@
+import type { Metadata } from 'next';
 import { PageShell } from '@/components/layout/PageShell';
 import { ProjectsGrid } from '@/components/home/ProjectsGrid';
 import { fetchAllProjects, fetchContentBundle } from '@/lib/api/client';
+import { buildSiteMetadata } from '@/lib/seo';
 import type { AppLocale } from '@/i18n/routing';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const content = await fetchContentBundle(locale).catch(() => null);
+  const siteTitle = content?.siteSettings?.siteTitle ?? 'Emre Kılıç | Portfolio';
+  const description =
+    locale === 'tr'
+      ? 'Geliştirdiğim yazılım projeleri ve canlı sistemler'
+      : 'Software projects and live systems I have built';
+
+  return buildSiteMetadata(locale, {
+    siteTitle,
+    description,
+    path: '/projects',
+    pageKey: 'projects',
+  });
+}
 
 /** Tüm projeler listesi */
 export default async function ProjectsPage({

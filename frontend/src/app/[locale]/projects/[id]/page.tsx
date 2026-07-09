@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -5,6 +6,7 @@ import { PageShell } from '@/components/layout/PageShell';
 import { ProjectLiveEmbed } from '@/components/projects/ProjectLiveEmbed';
 import { fetchContentBundle, fetchProjectById } from '@/lib/api/client';
 import { resolveProjectImageUrl } from '@/lib/media';
+import { buildAlternates, buildOpenGraph, buildTwitterCard, getSiteUrl } from '@/lib/seo';
 import type { AppLocale } from '@/i18n/routing';
 
 const statusStyles: Record<string, string> = {
@@ -12,6 +14,43 @@ const statusStyles: Record<string, string> = {
   staging: 'text-dracula-orange border-dracula-orange/30 bg-dracula-orange/10',
   archived: 'text-on-surface-variant border-outline-variant bg-surface-container',
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale; id: string }>;
+}): Promise<Metadata> {
+  const { locale, id } = await params;
+  const [content, project] = await Promise.all([
+    fetchContentBundle(locale).catch(() => null),
+    fetchProjectById(locale, id).catch(() => null),
+  ]);
+
+  if (!project) return {};
+
+  const siteTitle = content?.siteSettings?.siteTitle ?? 'Emre Kılıç | Portfolio';
+  const imageUrl = resolveProjectImageUrl(project);
+
+  return {
+    title: `${project.title} | ${siteTitle}`,
+    description: project.description.slice(0, 160),
+    metadataBase: new URL(getSiteUrl()),
+    alternates: buildAlternates(locale, `/projects/${id}`),
+    openGraph: buildOpenGraph(
+      locale,
+      `${project.title} | ${siteTitle}`,
+      project.description.slice(0, 160),
+      `/projects/${id}`,
+      imageUrl,
+    ),
+    twitter: buildTwitterCard(
+      `${project.title} | ${siteTitle}`,
+      project.description.slice(0, 160),
+      imageUrl,
+    ),
+    robots: { index: true, follow: true },
+  };
+}
 
 export default async function ProjectDetailPage({
   params,

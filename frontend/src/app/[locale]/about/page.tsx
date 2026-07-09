@@ -1,9 +1,32 @@
+import type { Metadata } from 'next';
 import { PageShell } from '@/components/layout/PageShell';
 import { CvHero } from '@/components/cv/CvHero';
 import { fetchContentBundle } from '@/lib/api/client';
+import { buildSiteMetadata } from '@/lib/seo';
 import type { AppLocale } from '@/i18n/routing';
 
 const accentDot = ['bg-dracula-green', 'bg-secondary', 'bg-primary-container', 'bg-tertiary'];
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const content = await fetchContentBundle(locale).catch(() => null);
+  const siteTitle = content?.siteSettings?.siteTitle ?? 'Emre Kılıç | Portfolio';
+  const description =
+    content?.about?.summary ??
+    (locale === 'tr' ? 'Hakkımda, uzmanlık alanlarım ve özgeçmiş' : 'About me, expertise areas and resume');
+
+  return buildSiteMetadata(locale, {
+    siteTitle,
+    description: description.slice(0, 160),
+    path: '/about',
+    pageKey: 'about',
+    imageUrl: content?.about?.imageUrl ?? content?.profile?.imageUrl,
+  });
+}
 
 /** Hakkımda / özgeçmiş özeti */
 export default async function AboutPage({

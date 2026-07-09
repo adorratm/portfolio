@@ -377,7 +377,7 @@ async function main(): Promise<void> {
     for (const project of trProjects) {
       await em.save(Project, {
         locale: 'en',
-        title: project.title,
+        title: await translateText(project.title),
         description: await translateText(project.description),
         category: await translateText(project.category),
         technologies: project.technologies,

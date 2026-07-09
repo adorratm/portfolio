@@ -1,0 +1,148 @@
+# Portfolio — production stack (Hetzner)
+# Host portları 3000/4000 dışında tutulur (TTEN Games ile çakışmaz)
+# Kullanım: docker compose -f docker-compose.prod.yml --env-file deploy/.env up -d --build
+
+name: portfolio-prod
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: portfolio-prod-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DATABASE_USER:-portfolio}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME:-portfolio}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      - portfolio_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-portfolio} -d ${DATABASE_NAME:-portfolio}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - portfolio
+
+  pgbouncer:
+    image: edoburu/pgbouncer:1.22.1-p0
+    container_name: portfolio-prod-pgbouncer
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${DATABASE_USER:-portfolio}:${DATABASE_PASSWORD}@postgres:5432/${DATABASE_NAME:-portfolio}
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 200
+      DEFAULT_POOL_SIZE: 20
+      AUTH_TYPE: scram-sha-256
+    networks:
+      - portfolio
+
+  redis:
+    image: redis:7-alpine
+    container_name: portfolio-prod-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "${REDIS_HOST_PORT:-6380}:6379"
+    volumes:
+      - portfolio_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks:
+      - portfolio
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: portfolio-prod-backend
+    restart: unless-stopped
+    depends_on:
+      pgbouncer:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      API_PREFIX: ${API_PREFIX:-api/v1}
+      DATABASE_HOST: pgbouncer
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${DATABASE_USER:-portfolio}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME:-portfolio}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
+      ALLOWED_ADMIN_EMAIL: ${ALLOWED_ADMIN_EMAIL}
+      ADMIN_URL: ${ADMIN_URL}
+      FRONTEND_URL: ${FRONTEND_URL}
+      AWS_REGION: ${AWS_REGION:-eu-north-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-portfolio-media}
+      BULL_BOARD_PATH: ${BULL_BOARD_PATH:-/admin/queues}
+    ports:
+      - "${API_HOST_PORT:-3102}:3001"
+    volumes:
+      - portfolio_uploads:/app/uploads
+    networks:
+      - portfolio
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+    container_name: portfolio-prod-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "${FRONTEND_HOST_PORT:-3100}:3000"
+    networks:
+      - portfolio
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL}
+    container_name: portfolio-prod-admin
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "${ADMIN_HOST_PORT:-3101}:3000"
+    networks:
+      - portfolio
+
+volumes:
+  portfolio_postgres_data:
+  portfolio_redis_data:
+  portfolio_uploads:
+
+networks:
+  portfolio:
+    driver: bridge
