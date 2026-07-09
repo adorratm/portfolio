@@ -14,6 +14,22 @@ if [[ "${EUID}" -ne 0 ]]; then
   exit 1
 fi
 
+port_in_use() {
+  ss -tlnH "sport = :${1}" 2>/dev/null | grep -q .
+}
+
+if port_in_use 80 && ! systemctl is-active --quiet nginx 2>/dev/null; then
+  echo "HATA: Port 80 başka bir süreç tarafından kullanılıyor (muhtemelen TTEN Docker nginx)."
+  ss -tlnpH "sport = :80" 2>/dev/null || true
+  echo ""
+  echo "İkinci bir host nginx başlatılamaz. Bunun yerine:"
+  echo "  sudo CERTBOT_EMAIL=senin@email.com ./deploy/setup-shared-nginx.sh"
+  echo ""
+  echo "Docker nginx container adını biliyorsanız:"
+  echo "  sudo NGINX_CONTAINER=<ad> CERTBOT_EMAIL=... ./deploy/setup-shared-nginx.sh"
+  exit 1
+fi
+
 install_configs() {
   local source_dir="$1"
   for conf in "${SITES[@]}"; do
