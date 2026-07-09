@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "yarn@4.17.0",
+  "packageManager": "yarn@4.17.1",
   "scripts": {
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true}); require('fs').rmSync('tsconfig.build.tsbuildinfo',{force:true})\"",
     "build": "nest build && tsc-alias -p tsconfig.build.json",

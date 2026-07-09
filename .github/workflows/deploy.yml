@@ -23,7 +23,7 @@ jobs:
       - name: Enable Yarn 4 (Corepack)
         run: |
           corepack enable
-          corepack prepare yarn@4.17.0 --activate
+          corepack prepare yarn@4.17.1 --activate
           yarn --version
 
       - name: Build backend
@@ -37,8 +37,9 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: https://api.emrekilic.web.tr/api/v1
           NEXT_PUBLIC_SITE_URL: https://emrekilic.web.tr
+          YARN_ENABLE_IMMUTABLE_INSTALLS: 'false'
         run: |
-          yarn install --immutable
+          yarn install
           yarn build
 
       - name: Build admin
@@ -46,8 +47,9 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: https://api.emrekilic.web.tr/api/v1
           NEXT_PUBLIC_WS_URL: https://api.emrekilic.web.tr
+          YARN_ENABLE_IMMUTABLE_INSTALLS: 'false'
         run: |
-          yarn install --immutable
+          yarn install
           yarn build
 
   deploy:
