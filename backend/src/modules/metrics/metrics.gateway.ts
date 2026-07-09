@@ -12,7 +12,10 @@ import { MetricsCollectorService } from '@modules/metrics/metrics-collector.serv
  */
 @WebSocketGateway({
   namespace: '/metrics',
-  cors: { origin: '*' },
+  cors: {
+    origin: true,
+    credentials: true,
+  },
 })
 export class MetricsGateway implements OnGatewayInit {
   @WebSocketServer()

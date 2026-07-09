@@ -70,6 +70,9 @@ fi
 
 ensure_portfolio_on_tten_network || exit 0
 
+echo "==> portfolio.conf güncelleniyor (repo template)..."
+bash "${ROOT_DIR}/deploy/render-portfolio-conf.sh" https
+
 echo "==> Nginx portfolio merge + reload..."
 docker exec "${NGINX_CONTAINER}" sh -c '
   line=$(grep -n -E "^upstream portfolio_|^# Portfolio|^map \\$http_upgrade|server_name emrekilic|server_name admin\.emrekilic|server_name api\.emrekilic" \
@@ -96,13 +99,38 @@ fi
 for attempt in $(seq 1 10); do
   if curl -fsSI --resolve emrekilic.web.tr:443:127.0.0.1 https://emrekilic.web.tr/tr -k 2>/dev/null | head -1 | grep -qE 'HTTP/2 200|HTTP/1.1 200|301|302'; then
     echo "  OK  https://emrekilic.web.tr/tr"
-    echo "Nginx sync tamam."
-    exit 0
+    break
+  fi
+  if [[ "${attempt}" -eq 10 ]]; then
+    echo "  HATA: HTTPS frontend testi başarısız."
+    docker exec "${NGINX_CONTAINER}" tail -10 /var/log/nginx/error.log 2>/dev/null || true
+    exit 1
   fi
   echo "  Bekleniyor... HTTPS site (${attempt}/10)"
   sleep 2
 done
 
-echo "  HATA: HTTPS site testi başarısız (502 olabilir)."
-docker exec "${NGINX_CONTAINER}" tail -10 /var/log/nginx/error.log 2>/dev/null || true
+echo "==> Socket.IO testi (admin metrikleri)..."
+for attempt in $(seq 1 10); do
+  if curl -fsS --resolve api.emrekilic.web.tr:443:127.0.0.1 \
+    'https://api.emrekilic.web.tr/socket.io/?EIO=4&transport=polling' -k 2>/dev/null \
+    | head -c 80 | grep -qE 'sid|0\{|opened'; then
+    echo "  OK  https://api.emrekilic.web.tr/socket.io (polling)"
+    echo "Nginx sync tamam."
+    exit 0
+  fi
+  if docker exec "${NGINX_CONTAINER}" wget -qO- --timeout=3 \
+    'http://portfolio-prod-backend:3001/socket.io/?EIO=4&transport=polling' 2>/dev/null \
+    | head -c 80 | grep -qE 'sid|0\{|opened'; then
+    echo "  OK  backend socket.io (doğrudan)"
+    echo "  UYARI: HTTPS socket.io başarısız — portfolio.conf merge kontrol edin."
+    docker exec "${NGINX_CONTAINER}" nginx -T 2>/dev/null | grep -A2 'location /socket.io' || true
+    exit 1
+  fi
+  echo "  Bekleniyor... socket.io (${attempt}/10)"
+  sleep 2
+done
+
+echo "  HATA: Socket.IO erişilemedi."
+docker exec "${NGINX_CONTAINER}" nginx -T 2>/dev/null | grep -E 'socket.io|api.emrekilic' | head -10 || true
 exit 1
