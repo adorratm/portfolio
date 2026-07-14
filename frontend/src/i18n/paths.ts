@@ -5,12 +5,19 @@ type LocalizedHref =
   | AppPathname
   | { pathname: AppPathname; params?: Record<string, string> };
 
-/** Yerelleştirilmiş path (locale prefix yok): /projeler, /projects/foo */
+/**
+ * next-intl getPathname localePrefix: 'always' ile zaten /tr/... veya /en/... döner.
+ * Bu yardımcı, öneki temizler: /projeler, /projects/foo
+ */
 export function localizedPathname(
   locale: AppLocale,
   href: LocalizedHref,
 ): string {
-  return getPathname({ locale, href: href as never });
+  const full = getPathname({ locale, href: href as never });
+  const prefix = `/${locale}`;
+  if (full === prefix) return '/';
+  if (full.startsWith(`${prefix}/`)) return full.slice(prefix.length);
+  return full;
 }
 
 /** Tam site-relative href: /tr/projeler */
@@ -20,7 +27,7 @@ export function localizedHref(
     | AppPathname
     | { pathname: AppPathname; params?: Record<string, string> },
 ): string {
-  return `/${locale}${localizedPathname(locale, href)}`;
+  return getPathname({ locale, href: href as never });
 }
 
 /** Eski İngilizce TR segment → yeni TR segment (301 map). */

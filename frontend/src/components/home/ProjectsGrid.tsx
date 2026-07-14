@@ -1,5 +1,4 @@
 import { Link } from '@/i18n/navigation';
-import NextLink from 'next/link';
 import { ProjectCardImage } from '@/components/projects/ProjectCardImage';
 import type { AppLocale } from '@/i18n/routing';
 import { resolveProjectImageUrl } from '@/lib/media';
@@ -22,7 +21,7 @@ interface ProjectsGridProps {
   title: string;
   locale: AppLocale | string;
   viewAllLabel?: string;
-  viewAllHref?: string;
+  viewAllHref?: '/projects';
 }
 
 const floatClasses = ['float-animation', 'float-delayed'] as const;
@@ -35,7 +34,7 @@ export function ProjectsGrid({
   title,
   locale,
   viewAllLabel,
-  viewAllHref,
+  viewAllHref = '/projects',
 }: ProjectsGridProps) {
   return (
     <section className="mb-24">
@@ -45,13 +44,13 @@ export function ProjectsGrid({
             <h2 className="mb-2 text-3xl font-semibold">{title}</h2>
             <div className="h-1 w-20 bg-tertiary" />
           </div>
-          {viewAllLabel && viewAllHref && (
-            <NextLink
+          {viewAllLabel && (
+            <Link
               href={viewAllHref}
               className="hover-bounce flex items-center gap-2 font-mono text-sm text-tertiary transition-transform hover:translate-x-1 active:scale-95"
             >
               {viewAllLabel} →
-            </NextLink>
+            </Link>
           )}
         </div>
       )}

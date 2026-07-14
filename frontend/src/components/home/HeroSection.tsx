@@ -49,7 +49,9 @@ export function HeroSection({
         <span className="text-primary">{headlineHighlight}</span>
       </h1>
 
-      <p className="mb-12 max-w-2xl text-lg text-on-surface-variant">{bio}</p>
+      <p id="hero-bio" className="mb-12 max-w-2xl text-lg text-on-surface-variant">
+        {bio}
+      </p>
 
       <div className="glass-card terminal-shadow float-animation w-full max-w-3xl overflow-hidden rounded-xl">
         <div className="flex items-center gap-2 bg-surface-container-highest px-4 py-2">

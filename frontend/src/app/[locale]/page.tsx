@@ -12,7 +12,6 @@ import {
   buildProfilePageJsonLd,
   buildWebSiteJsonLd,
 } from '@/lib/json-ld';
-import { localizedHref } from '@/i18n/paths';
 import type { AppLocale } from '@/i18n/routing';
 
 const pillarDot: Record<string, string> = {
@@ -44,6 +43,13 @@ export default async function HomePage({
     siteSettings?.projectsSectionTitle ??
     label(ui.frontend, 'projects.title', 'Projects');
   const siteTitle = siteSettings?.siteTitle ?? 'Emre Kılıç | Portfolio';
+  const homeProjects = projects.slice(0, 4).map((project) => ({
+    ...project,
+    description:
+      project.description.length > 160
+        ? `${project.description.slice(0, 157).trimEnd()}…`
+        : project.description,
+  }));
 
   return (
     <>
@@ -73,19 +79,19 @@ export default async function HomePage({
           )}
 
           <ProjectsGrid
-            projects={projects}
+            projects={homeProjects}
             title={projectsTitle}
             locale={locale}
             viewAllLabel={siteSettings?.projectsViewAllLabel ?? undefined}
-            viewAllHref={localizedHref(locale, '/projects')}
+            viewAllHref="/projects"
           />
 
           {siteSettings && (
             <section className="mb-24 grid grid-cols-1 gap-6 md:grid-cols-3">
               <div className="glass-card scanline-container col-span-2 min-h-75 rounded-xl p-8">
-                <h4 className="mb-2 text-2xl font-semibold">
+                <h2 className="mb-2 text-2xl font-semibold">
                   {siteSettings.philosophyTitle}
-                </h4>
+                </h2>
                 <p className="text-on-surface-variant">{siteSettings.philosophyBody}</p>
                 {siteSettings.philosophyPillars?.length > 0 && (
                   <div className="mt-8 flex flex-wrap gap-4">
@@ -120,6 +126,65 @@ export default async function HomePage({
               </div>
             </section>
           )}
+
+          <section className="mb-24 max-w-3xl" aria-labelledby="expertise-heading">
+            <h2 id="expertise-heading" className="mb-4 text-2xl font-semibold">
+              {locale === 'tr' ? 'Uzmanlık ve yaklaşım' : 'Expertise and approach'}
+            </h2>
+            <div className="space-y-4 text-on-surface-variant">
+              {locale === 'tr' ? (
+                <>
+                  <p>
+                    Ölçeklenebilir API tasarımı, veri odaklı uygulamalar ve yapay zekâ
+                    destekli sistemler üzerine çalışıyorum. NestJS ve Node.js ile temiz
+                    domain katmanları, TypeORM/PostgreSQL ile güvenilir veri modelleri,
+                    Redis, RabbitMQ ve BullMQ ile asenkron iş kuyrukları kuruyorum.
+                  </p>
+                  <p>
+                    Üretim ortamlarında Docker tabanlı dağıtım, gözlemlenebilirlik ve
+                    sürdürülebilir mimari önceliğim. Bu portfolyo; canlı sistemler,
+                    deneyim geçmişi, eğitim ve teknoloji yığınını TR/EN olarak
+                    sunar — işbirliği veya proje görüşmesi için iletişime geçebilirsiniz.
+                  </p>
+                  {techStack.length > 0 && (
+                    <p>
+                      Sık kullandığım teknolojiler:{' '}
+                      {techStack
+                        .slice(0, 14)
+                        .map((t) => t.name)
+                        .join(', ')}
+                      {techStack.length > 14 ? ' ve diğerleri.' : '.'}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p>
+                    I design scalable APIs, data-driven applications, and AI-assisted
+                    systems. With NestJS and Node.js I keep domain layers clear; with
+                    TypeORM and PostgreSQL I model reliable data; with Redis, RabbitMQ,
+                    and BullMQ I orchestrate asynchronous job queues.
+                  </p>
+                  <p>
+                    In production I prioritize Docker-based delivery, observability, and
+                    maintainable architecture. This portfolio presents live systems,
+                    experience, education, and tech stack in TR/EN — reach out for
+                    collaboration or project discussions.
+                  </p>
+                  {techStack.length > 0 && (
+                    <p>
+                      Technologies I use most:{' '}
+                      {techStack
+                        .slice(0, 14)
+                        .map((t) => t.name)
+                        .join(', ')}
+                      {techStack.length > 14 ? ', and more.' : '.'}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          </section>
 
           {(siteSettings?.footerTagline || (siteSettings?.socialLinks?.length ?? 0) > 0) && (
             <footer className="border-t border-outline-variant pt-12 pb-24 text-center">

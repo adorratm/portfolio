@@ -57,6 +57,10 @@ export function buildProfilePageJsonLd(locale: AppLocale): Record<string, unknow
     url: `${base}/${locale}`,
     mainEntity: { '@id': `${base}/#person` },
     inLanguage: locale === 'tr' ? 'tr-TR' : 'en-US',
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['h1', '#hero-bio', '#expertise-heading'],
+    },
   };
 }
 

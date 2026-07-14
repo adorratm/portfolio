@@ -1,0 +1,5 @@
+Contact: https://emrekilic.web.tr/tr
+Contact: https://linkedin.com/in/emrekilic98
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: tr, en
+Canonical: https://emrekilic.web.tr/.well-known/security.txt

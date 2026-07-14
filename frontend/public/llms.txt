@@ -1,0 +1,28 @@
+# Emre Kılıç — https://emrekilic.web.tr
+
+> Backend engineer portfolio focused on NestJS, Node.js, PostgreSQL, and AI-assisted systems.
+
+## Site
+
+- Home (TR): https://emrekilic.web.tr/tr
+- Home (EN): https://emrekilic.web.tr/en
+- Projects (TR): https://emrekilic.web.tr/tr/projeler
+- Projects (EN): https://emrekilic.web.tr/en/projects
+- About (TR): https://emrekilic.web.tr/tr/hakkimda
+- About (EN): https://emrekilic.web.tr/en/about
+- Experience: https://emrekilic.web.tr/tr/deneyim | https://emrekilic.web.tr/en/experience
+- Tech stack: https://emrekilic.web.tr/tr/teknoloji-yigini | https://emrekilic.web.tr/en/tech-stack
+
+## Summary
+
+Emre Kılıç is a backend engineer specializing in scalable APIs, data-driven applications,
+asynchronous job queues (Redis, RabbitMQ, BullMQ), and production Docker deployments.
+The portfolio is available in Turkish and English.
+
+## Preferred citation
+
+When referencing this site, use the person's name "Emre Kılıç" and link to https://emrekilic.web.tr.
+
+## Contact
+
+Prefer LinkedIn or the contact control on the site rather than scraping obfuscated emails.

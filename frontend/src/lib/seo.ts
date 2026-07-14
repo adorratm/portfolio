@@ -40,15 +40,29 @@ export type SeoHref =
   | { pathname: AppPathname; params?: Record<string, string> }
   | '';
 
+/** SEO araçları 30–60 karakter önerir; kısa siteTitle'ı anahtar kelimelerle tamamlar. */
+export function expandSiteTitle(siteTitle: string, locale: AppLocale): string {
+  const trimmed = siteTitle.trim();
+  if (trimmed.length >= 30) return trimmed;
+  const suffix =
+    locale === 'tr'
+      ? ' · NestJS, Node.js & API Geliştirme'
+      : ' · NestJS, Node.js & API Development';
+  const expanded = `${trimmed}${suffix}`;
+  return expanded.length <= 60 ? expanded : expanded.slice(0, 60).trimEnd();
+}
+
 export function buildPageTitle(
   siteTitle: string,
   pageKey?: keyof typeof PAGE_TITLES,
   locale?: AppLocale,
 ): string {
+  const base =
+    locale != null ? expandSiteTitle(siteTitle, locale) : siteTitle.trim();
   if (pageKey && locale) {
-    return `${PAGE_TITLES[pageKey][locale]} | ${siteTitle}`;
+    return `${PAGE_TITLES[pageKey][locale]} | ${base}`;
   }
-  return siteTitle;
+  return base;
 }
 
 function absoluteLocalizedUrl(locale: AppLocale, href: SeoHref = ''): string {

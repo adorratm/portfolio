@@ -22,7 +22,23 @@ function redirectLegacyTrPaths(request: NextRequest): NextResponse | null {
   return NextResponse.redirect(url, 301);
 }
 
+/** /en/en/projects, /tr/tr/projeler gibi çift locale URL'lerini düzelt. */
+function redirectDoubledLocale(request: NextRequest): NextResponse | null {
+  const { pathname } = request.nextUrl;
+  const match = pathname.match(/^\/(tr|en)\/\1(\/.*)?$/);
+  if (!match) return null;
+
+  const locale = match[1];
+  const rest = match[2] ?? '';
+  const url = request.nextUrl.clone();
+  url.pathname = `/${locale}${rest}` || `/${locale}`;
+  return NextResponse.redirect(url, 301);
+}
+
 export default function proxy(request: NextRequest) {
+  const doubled = redirectDoubledLocale(request);
+  if (doubled) return doubled;
+
   const legacy = redirectLegacyTrPaths(request);
   if (legacy) return legacy;
   return intlMiddleware(request);
