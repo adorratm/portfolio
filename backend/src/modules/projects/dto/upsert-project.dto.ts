@@ -18,6 +18,10 @@ export class UpsertProjectDto {
   @IsIn(['tr', 'en'])
   locale!: Locale;
 
+  @IsOptional()
+  @IsString()
+  slug?: string;
+
   @IsString()
   title!: string;
 

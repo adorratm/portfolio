@@ -1,11 +1,20 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { PageShell } from '@/components/layout/PageShell';
+import { Link } from '@/i18n/navigation';
+import { localizedHref } from '@/i18n/paths';
+import type { AppLocale } from '@/i18n/routing';
 import { fetchContentBundle, fetchTechStackById } from '@/lib/api/client';
 import { buildSiteMetadata } from '@/lib/seo';
-import type { AppLocale } from '@/i18n/routing';
+import { contentPathId, isUuid } from '@/lib/slug';
+
+function techHref(slugOrId: string) {
+  return {
+    pathname: '/tech-stack/[id]' as const,
+    params: { id: slugOrId },
+  };
+}
 
 export async function generateMetadata({
   params,
@@ -30,7 +39,7 @@ export async function generateMetadata({
   return buildSiteMetadata(locale, {
     siteTitle: `${item.name} | ${siteTitle}`,
     description,
-    path: `/tech-stack/${id}`,
+    href: techHref(contentPathId(item)),
     imageUrl: item.imageUrl ?? content?.profile?.imageUrl,
   });
 }
@@ -48,12 +57,16 @@ export default async function TechStackDetailPage({
 
   if (!content || !item) notFound();
 
+  if (isUuid(id) && item.slug && item.slug !== id) {
+    permanentRedirect(localizedHref(locale, techHref(item.slug)));
+  }
+
   const backLabel = locale === 'tr' ? '← Tech Stack' : '← Tech Stack';
 
   return (
     <PageShell locale={locale} settings={content.siteSettings} profile={content.profile}>
       <Link
-        href={`/${locale}/tech-stack`}
+        href="/tech-stack"
         className="hover-bounce mb-8 inline-flex font-mono text-sm text-secondary transition-colors hover:text-primary active:scale-95"
       >
         {backLabel}

@@ -20,7 +20,7 @@ export async function generateMetadata({
       locale === 'tr'
         ? 'Akademik geçmişim, eğitim yolculuğum ve sertifikalarım.'
         : 'My academic background, educational journey, and certifications.',
-    path: '/education',
+    href: '/education',
     pageKey: 'education',
     imageUrl: content?.profile?.imageUrl,
   });

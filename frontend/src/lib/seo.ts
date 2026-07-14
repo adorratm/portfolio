@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import type { AppLocale } from '@/i18n/routing';
+import { localizedHref, localizedPathname } from '@/i18n/paths';
+import type { AppLocale, AppPathname } from '@/i18n/routing';
 
 export function getDefaultOgImageUrl(): string {
   return `${getSiteUrl()}/og-image.jpg`;
@@ -34,6 +35,11 @@ const PAGE_TITLES: Record<string, Record<AppLocale, string>> = {
   projects: { tr: 'Projeler', en: 'Projects' },
 };
 
+export type SeoHref =
+  | AppPathname
+  | { pathname: AppPathname; params?: Record<string, string> }
+  | '';
+
 export function buildPageTitle(
   siteTitle: string,
   pageKey?: keyof typeof PAGE_TITLES,
@@ -45,19 +51,33 @@ export function buildPageTitle(
   return siteTitle;
 }
 
+function absoluteLocalizedUrl(locale: AppLocale, href: SeoHref = ''): string {
+  const base = getSiteUrl();
+  if (!href || href === '/') {
+    return `${base}/${locale}`;
+  }
+  return `${base}${localizedHref(locale, href)}`;
+}
+
+/** Yerelleştirilmiş path (locale prefix'siz) — OG/breadcrumb için. */
+export function seoPath(
+  locale: AppLocale,
+  href: SeoHref = '',
+): string {
+  if (!href || href === '/') return '';
+  return localizedPathname(locale, href);
+}
+
 export function buildAlternates(
   locale: AppLocale,
-  path = '',
+  href: SeoHref = '',
 ): NonNullable<Metadata['alternates']> {
-  const base = getSiteUrl();
-  const normalizedPath = path.startsWith('/') ? path : path ? `/${path}` : '';
-
   return {
-    canonical: `${base}/${locale}${normalizedPath}`,
+    canonical: absoluteLocalizedUrl(locale, href),
     languages: {
-      tr: `${base}/tr${normalizedPath}`,
-      en: `${base}/en${normalizedPath}`,
-      'x-default': `${base}/tr${normalizedPath}`,
+      tr: absoluteLocalizedUrl('tr', href),
+      en: absoluteLocalizedUrl('en', href),
+      'x-default': absoluteLocalizedUrl('tr', href),
     },
   };
 }
@@ -66,12 +86,10 @@ export function buildOpenGraph(
   locale: AppLocale,
   title: string,
   description: string,
-  path = '',
+  href: SeoHref = '',
   imageUrl?: string | null,
 ): NonNullable<Metadata['openGraph']> {
-  const base = getSiteUrl();
-  const normalizedPath = path.startsWith('/') ? path : path ? `/${path}` : '';
-  const url = `${base}/${locale}${normalizedPath}`;
+  const url = absoluteLocalizedUrl(locale, href);
 
   return {
     type: 'website',
@@ -115,23 +133,28 @@ export function buildSiteMetadata(
   options: {
     siteTitle: string;
     description: string;
+    href?: SeoHref;
+    /** @deprecated Use href instead */
     path?: string;
     pageKey?: keyof typeof PAGE_TITLES;
     imageUrl?: string | null;
   },
 ): Metadata {
   const title = buildPageTitle(options.siteTitle, options.pageKey, locale);
-
   const ogImage = resolveOgImageUrl(options.imageUrl);
-
   const description = truncateMetaDescription(options.description);
+  const href =
+    options.href ??
+    (options.path
+      ? (options.path as AppPathname)
+      : ('' as const));
 
   return {
     title,
     description,
     metadataBase: new URL(getSiteUrl()),
-    alternates: buildAlternates(locale, options.path),
-    openGraph: buildOpenGraph(locale, title, description, options.path, ogImage),
+    alternates: buildAlternates(locale, href === '' ? '' : href),
+    openGraph: buildOpenGraph(locale, title, description, href === '' ? '' : href, ogImage),
     twitter: buildTwitterCard(title, description, ogImage),
     robots: { index: true, follow: true },
   };

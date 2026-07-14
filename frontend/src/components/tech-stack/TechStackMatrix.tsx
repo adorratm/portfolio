@@ -1,11 +1,13 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
+import type { AppLocale } from '@/i18n/routing';
 import type { SiteSettings, TechStackItem } from '@/lib/api/types';
+import { contentPathId } from '@/lib/slug';
 
 interface TechStackMatrixProps {
   items: TechStackItem[];
   settings: SiteSettings | null;
-  locale: string;
+  locale: AppLocale | string;
 }
 
 const CATEGORY_ORDER = [
@@ -101,7 +103,10 @@ function ProgressBar({
 
   return (
     <Link
-      href={`/${locale}/tech-stack/${item.id}`}
+      href={{
+        pathname: '/tech-stack/[id]',
+        params: { id: contentPathId(item) },
+      }}
       className="group block space-y-2 rounded-lg p-2 transition-all hover:bg-surface-container-highest/50 active:scale-[0.99]"
     >
       <div className="flex items-start justify-between gap-3 font-mono text-sm">

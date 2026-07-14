@@ -20,7 +20,7 @@ export async function generateMetadata({
       locale === 'tr'
         ? 'Kullandığım diller, çerçeveler, araçlar ve altyapı teknolojileri.'
         : 'Languages, frameworks, tools, and infrastructure I work with.',
-    path: '/tech-stack',
+    href: '/tech-stack',
     pageKey: 'tech-stack',
     imageUrl: content?.profile?.imageUrl,
   });

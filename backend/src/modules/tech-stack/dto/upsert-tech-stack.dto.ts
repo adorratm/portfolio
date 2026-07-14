@@ -9,6 +9,10 @@ export class UpsertTechStackDto {
   @IsIn(['tr', 'en'])
   locale!: Locale;
 
+  @IsOptional()
+  @IsString()
+  slug?: string;
+
   @IsString()
   name!: string;
 

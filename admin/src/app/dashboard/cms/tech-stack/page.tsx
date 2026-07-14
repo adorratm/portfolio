@@ -16,6 +16,7 @@ import type { TechStackItem } from '@/lib/api/types';
 import { useLocaleContent } from '@/providers/LocaleProvider';
 
 const emptyItem = (): Partial<TechStackItem> => ({
+  slug: '',
   name: '',
   description: '',
   category: 'Backend',
@@ -55,6 +56,7 @@ export default function TechStackCmsPage() {
       await adminApi.upsertTechStack({
         locale,
         id: editing.id,
+        slug: editing.slug?.trim() || undefined,
         name: editing.name ?? '',
         category: editing.category ?? '',
         description: editing.description || undefined,
@@ -187,6 +189,16 @@ export default function TechStackCmsPage() {
                   value={editing.name ?? ''}
                   onChange={(e) =>
                     setEditing({ ...editing, name: e.target.value })
+                  }
+                />
+              </FormField>
+              <FormField label="Slug (SEO URL, boşsa isimden üretilir)">
+                <input
+                  className={inputClass}
+                  placeholder="nestjs"
+                  value={editing.slug ?? ''}
+                  onChange={(e) =>
+                    setEditing({ ...editing, slug: e.target.value })
                   }
                 />
               </FormField>

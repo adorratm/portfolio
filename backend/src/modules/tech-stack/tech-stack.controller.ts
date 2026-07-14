@@ -13,12 +13,12 @@ export class TechStackController {
     return this.techStackService.findPublished(locale);
   }
 
-  @Get('public/:locale/:id')
+  @Get('public/:locale/:idOrSlug')
   findOnePublic(
     @Param('locale') locale: Locale,
-    @Param('id') id: string,
+    @Param('idOrSlug') idOrSlug: string,
   ) {
-    return this.techStackService.findPublicById(locale, id);
+    return this.techStackService.findPublicByIdOrSlug(locale, idOrSlug);
   }
 
   @Get()

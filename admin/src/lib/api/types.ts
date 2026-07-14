@@ -40,6 +40,7 @@ export type ProjectStatus = 'active' | 'staging' | 'archived';
 export interface Project {
   id: string;
   locale: Locale;
+  slug: string;
   title: string;
   description: string;
   category: string;
@@ -57,6 +58,7 @@ export interface Project {
 export interface TechStackItem {
   id: string;
   locale: Locale;
+  slug: string;
   name: string;
   description: string | null;
   category: string;

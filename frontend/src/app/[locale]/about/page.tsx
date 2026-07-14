@@ -22,7 +22,7 @@ export async function generateMetadata({
   return buildSiteMetadata(locale, {
     siteTitle,
     description,
-    path: '/about',
+    href: '/about',
     pageKey: 'about',
     imageUrl: content?.about?.imageUrl ?? content?.profile?.imageUrl,
   });

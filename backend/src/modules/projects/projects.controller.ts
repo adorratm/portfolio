@@ -26,12 +26,12 @@ export class ProjectsController {
     return this.projectsService.findPublished(locale);
   }
 
-  @Get('public/:locale/:id')
+  @Get('public/:locale/:idOrSlug')
   findOnePublic(
     @Param('locale') locale: Locale,
-    @Param('id') id: string,
+    @Param('idOrSlug') idOrSlug: string,
   ) {
-    return this.projectsService.findPublicById(locale, id);
+    return this.projectsService.findPublicByIdOrSlug(locale, idOrSlug);
   }
 
   @Get()

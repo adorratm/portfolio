@@ -1,12 +1,13 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import NextLink from 'next/link';
 import { useEffect, useState } from 'react';
+import { Link, usePathname } from '@/i18n/navigation';
 import type { AppLocale } from '@/i18n/routing';
 import { SocialLinks } from '@/components/layout/SocialLinks';
 import type { ProfileContent, SiteSettings } from '@/lib/api/types';
+import { useParams, usePathname as useNextPathname } from 'next/navigation';
 
 interface SiteNavProps {
   locale: AppLocale;
@@ -68,7 +69,7 @@ function ProfileBadge({
  * < lg: hamburger + sol çekmece; lg+: sabit sidebar.
  */
 export function SiteNav({ locale, settings, profile }: SiteNavProps) {
-  const pathname = usePathname();
+  const pathname = useNextPathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const brandName = settings?.brandName ?? 'Root@Portfolio';
@@ -118,9 +119,9 @@ export function SiteNav({ locale, settings, profile }: SiteNavProps) {
         <ul className="space-y-1">
           {navItems.map((item) => (
             <li key={item.href}>
-              <Link href={item.href} className={sideLinkClass(item.href)}>
+              <NextLink href={item.href} className={sideLinkClass(item.href)}>
                 {item.label}
-              </Link>
+              </NextLink>
             </li>
           ))}
         </ul>
@@ -132,7 +133,7 @@ export function SiteNav({ locale, settings, profile }: SiteNavProps) {
     <>
       <header className="fixed inset-x-0 top-0 z-50 flex h-16 items-center justify-between gap-4 border-b border-outline-variant bg-background/80 px-4 backdrop-blur-md md:px-6 lg:px-8">
         <Link
-          href={`/${locale}`}
+          href="/"
           className="min-w-0 truncate font-mono text-sm font-bold text-secondary transition-colors hover:text-primary"
         >
           {brandName}
@@ -175,12 +176,21 @@ export function SiteNav({ locale, settings, profile }: SiteNavProps) {
 
 function LocaleSwitcher({ current }: { current: AppLocale }) {
   const pathname = usePathname();
+  const params = useParams();
   const other: AppLocale = current === 'tr' ? 'en' : 'tr';
-  const href = pathname.replace(`/${current}`, `/${other}`);
+
+  const href =
+    pathname === '/projects/[id]' || pathname === '/tech-stack/[id]'
+      ? {
+          pathname,
+          params: { id: String(params.id ?? '') },
+        }
+      : pathname;
 
   return (
     <Link
       href={href}
+      locale={other}
       className="rounded border border-outline-variant px-3 py-1 font-mono text-xs uppercase text-on-surface-variant transition-colors hover:text-secondary"
     >
       {other}

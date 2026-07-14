@@ -12,6 +12,7 @@ import {
   buildProfilePageJsonLd,
   buildWebSiteJsonLd,
 } from '@/lib/json-ld';
+import { localizedHref } from '@/i18n/paths';
 import type { AppLocale } from '@/i18n/routing';
 
 const pillarDot: Record<string, string> = {
@@ -76,7 +77,7 @@ export default async function HomePage({
             title={projectsTitle}
             locale={locale}
             viewAllLabel={siteSettings?.projectsViewAllLabel ?? undefined}
-            viewAllHref={`/${locale}/projects`}
+            viewAllHref={localizedHref(locale, '/projects')}
           />
 
           {siteSettings && (

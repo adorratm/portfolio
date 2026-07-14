@@ -180,8 +180,28 @@ async function translateLabels(
   return Object.fromEntries(entries);
 }
 
+const TR_TO_EN_SEGMENTS: Record<string, string> = {
+  hakkimda: 'about',
+  deneyim: 'experience',
+  egitim: 'education',
+  'teknoloji-yigini': 'tech-stack',
+  projeler: 'projects',
+  // legacy English segments under /tr
+  about: 'about',
+  experience: 'experience',
+  education: 'education',
+  'tech-stack': 'tech-stack',
+  projects: 'projects',
+};
+
 function localizeHref(href: string): string {
-  return href.replace(/^\/tr(\/|$)/, '/en$1');
+  const match = href.match(/^\/tr(?:\/(.*))?$/);
+  if (!match) return href.replace(/^\/tr(\/|$)/, '/en$1');
+  const rest = match[1] ?? '';
+  if (!rest) return '/en';
+  const [first, ...tail] = rest.split('/');
+  const mapped = TR_TO_EN_SEGMENTS[first ?? ''] ?? first;
+  return `/en/${[mapped, ...tail].filter(Boolean).join('/')}`;
 }
 
 function createDataSource(): DataSource {
@@ -377,6 +397,7 @@ async function main(): Promise<void> {
     for (const project of trProjects) {
       await em.save(Project, {
         locale: 'en',
+        slug: project.slug,
         title: await translateText(project.title),
         description: await translateText(project.description),
         category: await translateText(project.category),
@@ -400,6 +421,7 @@ async function main(): Promise<void> {
     for (const item of trTechStack) {
       await em.save(TechStackItem, {
         locale: 'en',
+        slug: item.slug,
         name: item.name,
         description: item.description
           ? await translateText(item.description)

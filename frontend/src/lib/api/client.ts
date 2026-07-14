@@ -38,17 +38,17 @@ export function fetchAllProjects(locale: Locale) {
   return apiFetch<ContentBundle['projects']>(`/projects/public/${locale}/all`);
 }
 
-/** Tek proje detayı */
-export function fetchProjectById(locale: Locale, id: string) {
+/** Tek proje detayı (UUID veya slug) */
+export function fetchProjectById(locale: Locale, idOrSlug: string) {
   return apiFetch<ContentBundle['projects'][number]>(
-    `/projects/public/${locale}/${id}`,
+    `/projects/public/${locale}/${encodeURIComponent(idOrSlug)}`,
   );
 }
 
-/** Tek teknoloji detayı */
-export function fetchTechStackById(locale: Locale, id: string) {
+/** Tek teknoloji detayı (UUID veya slug) */
+export function fetchTechStackById(locale: Locale, idOrSlug: string) {
   return apiFetch<ContentBundle['techStack'][number]>(
-    `/tech-stack/public/${locale}/${id}`,
+    `/tech-stack/public/${locale}/${encodeURIComponent(idOrSlug)}`,
   );
 }
 

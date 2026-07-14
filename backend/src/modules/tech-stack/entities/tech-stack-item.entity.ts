@@ -3,10 +3,14 @@ import { BaseEntity } from '@database/base.entity';
 import type { Locale } from '@common/types/locale';
 
 @Entity('tech_stack_items')
+@Index(['locale', 'slug'], { unique: true })
 export class TechStackItem extends BaseEntity {
   @Column({ type: 'varchar', length: 5 })
   @Index()
   locale!: Locale;
+
+  @Column({ type: 'varchar' })
+  slug!: string;
 
   @Column({ type: 'varchar' })
   name!: string;

@@ -20,7 +20,7 @@ export async function generateMetadata({
       locale === 'tr'
         ? 'Üzerinde çalıştığım sistemler, üstlendiğim roller ve ürettiğim etki.'
         : 'The systems I have built, the roles I have held, and the impact I have delivered.',
-    path: '/experience',
+    href: '/experience',
     pageKey: 'experience',
     imageUrl: content?.profile?.imageUrl,
   });

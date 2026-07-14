@@ -1,21 +1,38 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PageShell } from '@/components/layout/PageShell';
 import { ProjectLiveEmbed } from '@/components/projects/ProjectLiveEmbed';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { Link } from '@/i18n/navigation';
+import { localizedHref } from '@/i18n/paths';
+import type { AppLocale } from '@/i18n/routing';
 import { fetchContentBundle, fetchProjectById } from '@/lib/api/client';
 import { buildBreadcrumbJsonLd, buildProjectJsonLd } from '@/lib/json-ld';
 import { resolveProjectImageUrl } from '@/lib/media';
-import { buildAlternates, buildOpenGraph, buildTwitterCard, getSiteUrl, truncateMetaDescription } from '@/lib/seo';
-import type { AppLocale } from '@/i18n/routing';
+import {
+  buildAlternates,
+  buildOpenGraph,
+  buildTwitterCard,
+  getSiteUrl,
+  seoPath,
+  truncateMetaDescription,
+} from '@/lib/seo';
+import { contentPathId, isUuid } from '@/lib/slug';
+import { permanentRedirect } from 'next/navigation';
 
 const statusStyles: Record<string, string> = {
   active: 'text-dracula-green border-dracula-green/30 bg-dracula-green/10',
   staging: 'text-dracula-orange border-dracula-orange/30 bg-dracula-orange/10',
   archived: 'text-on-surface-variant border-outline-variant bg-surface-container',
 };
+
+function projectHref(slugOrId: string) {
+  return {
+    pathname: '/projects/[id]' as const,
+    params: { id: slugOrId },
+  };
+}
 
 export async function generateMetadata({
   params,
@@ -34,13 +51,14 @@ export async function generateMetadata({
   const imageUrl = resolveProjectImageUrl(project);
   const title = `${project.title} | ${siteTitle}`;
   const description = truncateMetaDescription(project.description);
+  const href = projectHref(contentPathId(project));
 
   return {
     title,
     description,
     metadataBase: new URL(getSiteUrl()),
-    alternates: buildAlternates(locale, `/projects/${id}`),
-    openGraph: buildOpenGraph(locale, title, description, `/projects/${id}`, imageUrl),
+    alternates: buildAlternates(locale, href),
+    openGraph: buildOpenGraph(locale, title, description, href, imageUrl),
     twitter: buildTwitterCard(title, description, imageUrl),
     robots: { index: true, follow: true },
   };
@@ -59,6 +77,11 @@ export default async function ProjectDetailPage({
 
   if (!content || !project) notFound();
 
+  const slug = contentPathId(project);
+  if (isUuid(id) && project.slug && project.slug !== id) {
+    permanentRedirect(localizedHref(locale, projectHref(project.slug)));
+  }
+
   const backLabel = locale === 'tr' ? '← Tüm Projeler' : '← All Projects';
   const heroImage = resolveProjectImageUrl(project);
   const projectsLabel = locale === 'tr' ? 'Projeler' : 'Projects';
@@ -69,18 +92,22 @@ export default async function ProjectDetailPage({
         data={[
           buildProjectJsonLd(locale, {
             ...project,
+            slug,
             imageUrl: heroImage,
           }),
           buildBreadcrumbJsonLd(locale, [
             { name: locale === 'tr' ? 'Ana Sayfa' : 'Home', path: '' },
-            { name: projectsLabel, path: '/projects' },
-            { name: project.title, path: `/projects/${id}` },
+            { name: projectsLabel, path: seoPath(locale, '/projects') },
+            {
+              name: project.title,
+              path: seoPath(locale, projectHref(slug)),
+            },
           ]),
         ]}
       />
 
       <Link
-        href={`/${locale}/projects`}
+        href="/projects"
         className="mb-8 inline-flex font-mono text-sm text-secondary transition-colors hover:text-primary"
       >
         {backLabel}

@@ -21,7 +21,7 @@ export async function generateMetadata({
   return buildSiteMetadata(locale, {
     siteTitle,
     description,
-    path: '/projects',
+    href: '/projects',
     pageKey: 'projects',
   });
 }

@@ -1,6 +1,8 @@
 import type { ContentBundle } from '@/lib/api/types';
+import { localizedHref } from '@/i18n/paths';
 import type { AppLocale } from '@/i18n/routing';
 import { getSiteUrl } from '@/lib/seo';
+import { contentPathId } from '@/lib/slug';
 
 export function getDefaultOgImageUrl(): string {
   return `${getSiteUrl()}/og-image.jpg`;
@@ -62,6 +64,7 @@ export function buildProjectJsonLd(
   locale: AppLocale,
   project: {
     id: string;
+    slug?: string;
     title: string;
     description: string;
     category: string;
@@ -71,7 +74,11 @@ export function buildProjectJsonLd(
   },
 ): Record<string, unknown> {
   const base = getSiteUrl();
-  const url = `${base}/${locale}/projects/${project.id}`;
+  const id = contentPathId(project);
+  const url = `${base}${localizedHref(locale, {
+    pathname: '/projects/[id]',
+    params: { id },
+  })}`;
 
   return {
     '@context': 'https://schema.org',
@@ -101,7 +108,9 @@ export function buildBreadcrumbJsonLd(
       '@type': 'ListItem',
       position: index + 1,
       name: item.name,
-      item: `${base}/${locale}${item.path}`,
+      item: item.path
+        ? `${base}/${locale}${item.path.startsWith('/') ? item.path : `/${item.path}`}`
+        : `${base}/${locale}`,
     })),
   };
 }

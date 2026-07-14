@@ -34,6 +34,7 @@ export interface SiteSettings {
 
 export interface Project {
   id: string;
+  slug: string;
   title: string;
   description: string;
   category: string;
@@ -49,6 +50,7 @@ export interface Project {
 
 export interface TechStackItem {
   id: string;
+  slug: string;
   name: string;
   description: string | null;
   category: string;

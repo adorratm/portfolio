@@ -5,10 +5,14 @@ import type { Locale } from '@common/types/locale';
 export type ProjectStatus = 'active' | 'staging' | 'archived';
 
 @Entity('projects')
+@Index(['locale', 'slug'], { unique: true })
 export class Project extends BaseEntity {
   @Column({ type: 'varchar', length: 5 })
   @Index()
   locale!: Locale;
+
+  @Column({ type: 'varchar' })
+  slug!: string;
 
   @Column({ type: 'varchar' })
   title!: string;

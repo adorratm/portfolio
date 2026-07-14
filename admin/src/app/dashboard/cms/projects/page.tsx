@@ -22,6 +22,7 @@ import {
 import { useLocaleContent } from '@/providers/LocaleProvider';
 
 const emptyProject = (): Partial<Project> => ({
+  slug: '',
   title: '',
   description: '',
   category: '',
@@ -82,6 +83,7 @@ export default function ProjectsCmsPage() {
       await adminApi.upsertProject({
         locale,
         id: editing.id,
+        slug: editing.slug?.trim() || undefined,
         title: editing.title ?? '',
         description: editing.description ?? '',
         category: editing.category ?? '',
@@ -225,6 +227,16 @@ export default function ProjectsCmsPage() {
                   value={editing.title ?? ''}
                   onChange={(e) =>
                     setEditing({ ...editing, title: e.target.value })
+                  }
+                />
+              </FormField>
+              <FormField label="Slug (SEO URL, boşsa başlıktan üretilir)">
+                <input
+                  className={inputClass}
+                  placeholder="cartech-ai"
+                  value={editing.slug ?? ''}
+                  onChange={(e) =>
+                    setEditing({ ...editing, slug: e.target.value })
                   }
                 />
               </FormField>

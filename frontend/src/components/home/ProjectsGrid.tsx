@@ -1,9 +1,13 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
+import NextLink from 'next/link';
 import { ProjectCardImage } from '@/components/projects/ProjectCardImage';
+import type { AppLocale } from '@/i18n/routing';
 import { resolveProjectImageUrl } from '@/lib/media';
+import { contentPathId } from '@/lib/slug';
 
 export interface ProjectCardData {
   id: string;
+  slug?: string;
   title: string;
   description: string;
   category: string;
@@ -16,7 +20,7 @@ export interface ProjectCardData {
 interface ProjectsGridProps {
   projects: ProjectCardData[];
   title: string;
-  locale: string;
+  locale: AppLocale | string;
   viewAllLabel?: string;
   viewAllHref?: string;
 }
@@ -42,12 +46,12 @@ export function ProjectsGrid({
             <div className="h-1 w-20 bg-tertiary" />
           </div>
           {viewAllLabel && viewAllHref && (
-            <Link
+            <NextLink
               href={viewAllHref}
               className="hover-bounce flex items-center gap-2 font-mono text-sm text-tertiary transition-transform hover:translate-x-1 active:scale-95"
             >
               {viewAllLabel} →
-            </Link>
+            </NextLink>
           )}
         </div>
       )}
@@ -55,11 +59,12 @@ export function ProjectsGrid({
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {projects.map((project, index) => {
           const imageSrc = resolveProjectImageUrl(project);
+          const pathId = contentPathId(project);
 
           return (
           <Link
             key={project.id}
-            href={`/${locale}/projects/${project.id}`}
+            href={{ pathname: '/projects/[id]', params: { id: pathId } }}
             className={`glass-card group block cursor-pointer overflow-hidden rounded-xl transition-all hover:shadow-[0_0_20px_rgba(255,121,198,0.2)] active:scale-[0.99] ${floatClasses[index % 2]}`}
           >
             {imageSrc ? (

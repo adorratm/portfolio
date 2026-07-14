@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
+import { slugify } from '@common/utils/slugify';
 import { ProfileContent } from '@modules/profile/entities/profile-content.entity';
 import { Project } from '@modules/projects/entities/project.entity';
 import { SiteSettings } from '@modules/site-settings/entities/site-settings.entity';
@@ -35,6 +36,8 @@ export class SeedService implements OnModuleInit {
         this.logger.log('CV / özgeçmiş içeriği ekleniyor...');
         await this.seedCv();
       }
+      await this.ensureLocalizedNavHrefs();
+      await this.ensureContentSlugs();
     } catch (error) {
       this.logger.error(
         'Seed atlanamadı — veritabanı şeması hazır mı? DATABASE_SYNCHRONIZE=true kontrol edin.',
@@ -83,11 +86,11 @@ export class SeedService implements OnModuleInit {
         brandSubtitle: 'Backend Mimarı',
         navItems: [
           { label: 'Ana Sayfa', href: '/tr' },
-          { label: 'Hakkımda', href: '/tr/about' },
-          { label: 'Deneyim', href: '/tr/experience' },
-          { label: 'Eğitim', href: '/tr/education' },
-          { label: 'Teknoloji Yığını', href: '/tr/tech-stack' },
-          { label: 'Projeler', href: '/tr/projects' },
+          { label: 'Hakkımda', href: '/tr/hakkimda' },
+          { label: 'Deneyim', href: '/tr/deneyim' },
+          { label: 'Eğitim', href: '/tr/egitim' },
+          { label: 'Teknoloji Yığını', href: '/tr/teknoloji-yigini' },
+          { label: 'Projeler', href: '/tr/projeler' },
         ],
         philosophyTitle: 'Teknik Felsefe',
         philosophyBody:
@@ -137,6 +140,7 @@ export class SeedService implements OnModuleInit {
     await this.em.save(Project, [
       {
         locale: 'tr',
+        slug: 'cartech-ai',
         title: 'Cartech AI',
         description:
           'Filo yönetimi için akıllı teşhis motoru. Dağıtık mikroservisler ile gerçek zamanlı sensör verisi işleme.',
@@ -148,6 +152,7 @@ export class SeedService implements OnModuleInit {
       },
       {
         locale: 'tr',
+        slug: 'logexpo',
         title: 'LogExpo',
         description:
           'Merkezi loglama ve gözlemlenebilirlik hattı. Terabaytlarca log için saniye altı sorgu gecikmesi.',
@@ -159,6 +164,7 @@ export class SeedService implements OnModuleInit {
       },
       {
         locale: 'en',
+        slug: 'cartech-ai',
         title: 'Cartech AI',
         description:
           'Intelligent diagnostics engine for fleet management. Distributed microservices processing real-time sensor data.',
@@ -170,6 +176,7 @@ export class SeedService implements OnModuleInit {
       },
       {
         locale: 'en',
+        slug: 'logexpo',
         title: 'LogExpo',
         description:
           'Centralized logging and observability pipeline. Sub-second query latency for terabytes of log data.',
@@ -182,12 +189,12 @@ export class SeedService implements OnModuleInit {
     ]);
 
     await this.em.save(TechStackItem, [
-      { locale: 'tr', name: 'NestJS', category: 'Backend', proficiencyLevel: 90, sortOrder: 1 },
-      { locale: 'tr', name: 'PostgreSQL', category: 'Database', proficiencyLevel: 85, sortOrder: 2 },
-      { locale: 'tr', name: 'Redis', category: 'Cache', proficiencyLevel: 80, sortOrder: 3 },
-      { locale: 'en', name: 'NestJS', category: 'Backend', proficiencyLevel: 90, sortOrder: 1 },
-      { locale: 'en', name: 'PostgreSQL', category: 'Database', proficiencyLevel: 85, sortOrder: 2 },
-      { locale: 'en', name: 'Redis', category: 'Cache', proficiencyLevel: 80, sortOrder: 3 },
+      { locale: 'tr', slug: 'nestjs', name: 'NestJS', category: 'Backend', proficiencyLevel: 90, sortOrder: 1 },
+      { locale: 'tr', slug: 'postgresql', name: 'PostgreSQL', category: 'Database', proficiencyLevel: 85, sortOrder: 2 },
+      { locale: 'tr', slug: 'redis', name: 'Redis', category: 'Cache', proficiencyLevel: 80, sortOrder: 3 },
+      { locale: 'en', slug: 'nestjs', name: 'NestJS', category: 'Backend', proficiencyLevel: 90, sortOrder: 1 },
+      { locale: 'en', slug: 'postgresql', name: 'PostgreSQL', category: 'Database', proficiencyLevel: 85, sortOrder: 2 },
+      { locale: 'en', slug: 'redis', name: 'Redis', category: 'Cache', proficiencyLevel: 80, sortOrder: 3 },
     ]);
   }
 
@@ -430,9 +437,9 @@ export class SeedService implements OnModuleInit {
   private async ensureCvNavItems(): Promise<void> {
     const cvNav: Record<'tr' | 'en', Array<{ label: string; href: string }>> = {
       tr: [
-        { label: 'Hakkımda', href: '/tr/about' },
-        { label: 'Deneyim', href: '/tr/experience' },
-        { label: 'Eğitim', href: '/tr/education' },
+        { label: 'Hakkımda', href: '/tr/hakkimda' },
+        { label: 'Deneyim', href: '/tr/deneyim' },
+        { label: 'Eğitim', href: '/tr/egitim' },
       ],
       en: [
         { label: 'About', href: '/en/about' },
@@ -460,6 +467,78 @@ export class SeedService implements OnModuleInit {
       next.splice(insertAt, 0, ...missing);
       settings.navItems = next;
       await this.em.save(SiteSettings, settings);
+    }
+  }
+
+  /** Eski İngilizce TR nav href'lerini yerelleştirilmiş path'lere taşır. */
+  private async ensureLocalizedNavHrefs(): Promise<void> {
+    const remap: Record<string, string> = {
+      '/tr/about': '/tr/hakkimda',
+      '/tr/experience': '/tr/deneyim',
+      '/tr/education': '/tr/egitim',
+      '/tr/tech-stack': '/tr/teknoloji-yigini',
+      '/tr/projects': '/tr/projeler',
+    };
+
+    const allSettings = await this.em.find(SiteSettings);
+    for (const settings of allSettings) {
+      if (settings.locale !== 'tr' || !settings.navItems?.length) continue;
+      let changed = false;
+      const next = settings.navItems.map((item) => {
+        const href = remap[item.href] ?? item.href;
+        if (href !== item.href) changed = true;
+        return { ...item, href };
+      });
+      if (!changed) continue;
+      settings.navItems = next;
+      await this.em.save(SiteSettings, settings);
+      this.logger.log('TR navItems yerelleştirilmiş path\'lere güncellendi.');
+    }
+  }
+
+  /** Eksik slug alanlarını title/name üzerinden doldurur. */
+  private async ensureContentSlugs(): Promise<void> {
+    try {
+      const projects = await this.em.find(Project);
+      for (const project of projects) {
+        if (project.slug) continue;
+        const base = slugify(project.title);
+        let candidate = base;
+        let n = 2;
+        for (;;) {
+          const clash = await this.em.findOne(Project, {
+            where: { locale: project.locale, slug: candidate },
+          });
+          if (!clash || clash.id === project.id) break;
+          candidate = `${base}-${n}`;
+          n += 1;
+        }
+        project.slug = candidate;
+        await this.em.save(Project, project);
+      }
+
+      const items = await this.em.find(TechStackItem);
+      for (const item of items) {
+        if (item.slug) continue;
+        const base = slugify(item.name);
+        let candidate = base;
+        let n = 2;
+        for (;;) {
+          const clash = await this.em.findOne(TechStackItem, {
+            where: { locale: item.locale, slug: candidate },
+          });
+          if (!clash || clash.id === item.id) break;
+          candidate = `${base}-${n}`;
+          n += 1;
+        }
+        item.slug = candidate;
+        await this.em.save(TechStackItem, item);
+      }
+    } catch (error) {
+      this.logger.warn(
+        'Slug backfill atlandı (slug kolonu henüz yok olabilir). backfill-slugs scriptini çalıştırın.',
+      );
+      this.logger.debug(String(error));
     }
   }
 
