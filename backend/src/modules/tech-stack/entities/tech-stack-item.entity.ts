@@ -9,8 +9,9 @@ export class TechStackItem extends BaseEntity {
   @Index()
   locale!: Locale;
 
-  @Column({ type: 'varchar' })
-  slug!: string;
+  /** Nullable: synchronize mevcut satırlara NOT NULL ekleyemez; boot'ta doldurulur. */
+  @Column({ type: 'varchar', nullable: true })
+  slug!: string | null;
 
   @Column({ type: 'varchar' })
   name!: string;

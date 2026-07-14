@@ -122,14 +122,13 @@ async function main(): Promise<void> {
   const t = await backfillTable(ds, TechStackItem, 'name');
   console.log(`Projects: ${p} güncellendi, Tech stack: ${t} güncellendi`);
 
-  // NOT NULL + unique index (boş slug kalmamalı)
-  await ds.query(`UPDATE "projects" SET "slug" = 'project-' || "id" WHERE "slug" IS NULL OR "slug" = ''`);
+  // Nullable bırakılır — TypeORM synchronize NOT NULL ekleyemez (mevcut satırlar).
+  // Boş kalanlar için id fallback; unique index NULL'ları kabul eder.
+  await ds.query(
+    `UPDATE "projects" SET "slug" = 'project-' || "id" WHERE "slug" IS NULL OR "slug" = ''`,
+  );
   await ds.query(
     `UPDATE "tech_stack_items" SET "slug" = 'tech-' || "id" WHERE "slug" IS NULL OR "slug" = ''`,
-  );
-  await ds.query(`ALTER TABLE "projects" ALTER COLUMN "slug" SET NOT NULL`);
-  await ds.query(
-    `ALTER TABLE "tech_stack_items" ALTER COLUMN "slug" SET NOT NULL`,
   );
   await ensureUniqueIndex(ds, 'projects', 'IDX_projects_locale_slug');
   await ensureUniqueIndex(

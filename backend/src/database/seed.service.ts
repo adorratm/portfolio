@@ -496,13 +496,14 @@ export class SeedService implements OnModuleInit {
     }
   }
 
-  /** Eksik slug alanlarını title/name üzerinden doldurur. */
+  /** Eksik slug alanlarını title/name üzerinden doldurur (nullable kolon sonrası boot). */
   private async ensureContentSlugs(): Promise<void> {
     try {
+      let projectCount = 0;
       const projects = await this.em.find(Project);
       for (const project of projects) {
-        if (project.slug) continue;
-        const base = slugify(project.title);
+        if (project.slug?.trim()) continue;
+        const base = slugify(project.title) || `project-${project.id}`;
         let candidate = base;
         let n = 2;
         for (;;) {
@@ -515,12 +516,14 @@ export class SeedService implements OnModuleInit {
         }
         project.slug = candidate;
         await this.em.save(Project, project);
+        projectCount += 1;
       }
 
+      let techCount = 0;
       const items = await this.em.find(TechStackItem);
       for (const item of items) {
-        if (item.slug) continue;
-        const base = slugify(item.name);
+        if (item.slug?.trim()) continue;
+        const base = slugify(item.name) || `tech-${item.id}`;
         let candidate = base;
         let n = 2;
         for (;;) {
@@ -533,10 +536,17 @@ export class SeedService implements OnModuleInit {
         }
         item.slug = candidate;
         await this.em.save(TechStackItem, item);
+        techCount += 1;
+      }
+
+      if (projectCount || techCount) {
+        this.logger.log(
+          `Slug backfill: ${projectCount} proje, ${techCount} tech-stack.`,
+        );
       }
     } catch (error) {
       this.logger.warn(
-        'Slug backfill atlandı (slug kolonu henüz yok olabilir). backfill-slugs scriptini çalıştırın.',
+        'Slug backfill atlandı (slug kolonu henüz yok olabilir). yarn backfill:slugs çalıştırın.',
       );
       this.logger.debug(String(error));
     }
