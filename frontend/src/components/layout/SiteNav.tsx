@@ -104,21 +104,32 @@ export function SiteNav({ locale, settings, profile }: SiteNavProps) {
     }`;
   };
 
-  const navList = (
-    <ul className="space-y-1">
-      {navItems.map((item) => (
-        <li key={item.href}>
-          <Link href={item.href} className={sideLinkClass(item.href)}>
-            {item.label}
-          </Link>
-        </li>
-      ))}
-    </ul>
+  const sidebarBody = (
+    <>
+      <div className="space-y-5 border-b border-outline-variant/40 px-5 py-6 lg:mb-10 lg:space-y-4 lg:border-0 lg:px-6 lg:py-0">
+        <ProfileBadge
+          profileImage={profileImage}
+          brandName={brandName}
+          subtitle={settings?.brandSubtitle}
+        />
+        <SocialLinks links={socialLinks} />
+      </div>
+      <nav className="flex-1 overflow-y-auto px-3 py-4 lg:grow lg:py-0" aria-label="Primary">
+        <ul className="space-y-1">
+          {navItems.map((item) => (
+            <li key={item.href}>
+              <Link href={item.href} className={sideLinkClass(item.href)}>
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </>
   );
 
   return (
     <>
-      {/* ——— Üst header ——— */}
       <header className="fixed inset-x-0 top-0 z-50 flex h-16 items-center justify-between gap-4 border-b border-outline-variant bg-background/80 px-4 backdrop-blur-md md:px-6 lg:px-8">
         <Link
           href={`/${locale}`}
@@ -141,43 +152,22 @@ export function SiteNav({ locale, settings, profile }: SiteNavProps) {
         </div>
       </header>
 
-      {/* ——— Mobil / tablet çekmece (< lg) ——— */}
       {drawerOpen && (
-        <button
-          type="button"
-          aria-label="Menüyü kapat"
-          onClick={() => setDrawerOpen(false)}
-          className="fixed inset-0 top-16 z-30 bg-background/50 backdrop-blur-sm lg:hidden"
-        />
+        <>
+          <button
+            type="button"
+            aria-label="Menüyü kapat"
+            onClick={() => setDrawerOpen(false)}
+            className="fixed inset-0 top-16 z-30 bg-background/50 backdrop-blur-sm lg:hidden"
+          />
+          <aside className="fixed top-16 left-0 z-40 flex h-[calc(100dvh-4rem)] w-72 max-w-[min(85vw,20rem)] flex-col border-r border-outline-variant bg-surface-container-low/95 shadow-xl backdrop-blur-md lg:hidden">
+            {sidebarBody}
+          </aside>
+        </>
       )}
-      <aside
-        aria-hidden={!drawerOpen}
-        className={`fixed top-16 left-0 z-40 flex h-[calc(100dvh-4rem)] w-72 max-w-[min(85vw,20rem)] flex-col border-r border-outline-variant bg-surface-container-low/95 shadow-xl backdrop-blur-md transition-transform duration-300 ease-in-out lg:hidden ${
-          drawerOpen ? 'translate-x-0' : 'pointer-events-none -translate-x-full'
-        }`}
-      >
-        <div className="space-y-5 border-b border-outline-variant/40 px-5 py-6">
-          <ProfileBadge
-            profileImage={profileImage}
-            brandName={brandName}
-            subtitle={settings?.brandSubtitle}
-          />
-          <SocialLinks links={socialLinks} />
-        </div>
-        <nav className="flex-1 overflow-y-auto px-3 py-4">{navList}</nav>
-      </aside>
 
-      {/* ——— Masaüstü sidebar (lg+) ——— */}
       <aside className="fixed top-16 left-0 z-40 hidden h-[calc(100dvh-4rem)] w-64 flex-col border-r border-outline-variant bg-surface-container-low py-8 lg:flex">
-        <div className="mb-10 space-y-4 px-6">
-          <ProfileBadge
-            profileImage={profileImage}
-            brandName={brandName}
-            subtitle={settings?.brandSubtitle}
-          />
-          <SocialLinks links={socialLinks} />
-        </div>
-        <nav className="grow overflow-y-auto px-3">{navList}</nav>
+        {sidebarBody}
       </aside>
     </>
   );

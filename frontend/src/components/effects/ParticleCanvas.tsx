@@ -29,10 +29,10 @@ function createParticle(w: number, h: number): Particle {
       this.x = Math.random() * cw;
       this.y = Math.random() * ch;
       this.size = Math.random() * 2 + 1;
-      this.speedX = (Math.random() - 0.5) * 0.5;
-      this.speedY = (Math.random() - 0.5) * 0.5;
+      this.speedX = (Math.random() - 0.5) * 0.4;
+      this.speedY = (Math.random() - 0.5) * 0.4;
       this.color = COLORS[Math.floor(Math.random() * COLORS.length)]!;
-      this.opacity = Math.random() * 0.5;
+      this.opacity = Math.random() * 0.45;
     },
     update(cw, ch) {
       this.x += this.speedX;
@@ -47,7 +47,7 @@ function createParticle(w: number, h: number): Particle {
 }
 
 /**
- * Arka plan parçacık sistemi — design/emre_k_l_portfolio_dracula_animated
+ * Arka plan parçacıkları — idle sonrası, düşük yoğunluk, sekme gizliyken durur.
  */
 export function ParticleCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -56,25 +56,37 @@ export function ParticleCanvas() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) return;
+
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
     let particles: Particle[] = [];
     let frameId = 0;
+    let running = false;
+    let cancelled = false;
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      const count = Math.floor((canvas.width * canvas.height) / 10000);
-      particles = Array.from({ length: count }, () =>
-        createParticle(canvas.width, canvas.height),
-      );
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const count = Math.min(90, Math.floor((w * h) / 18000));
+      particles = Array.from({ length: count }, () => createParticle(w, h));
     };
 
     const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!running || cancelled) return;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
       for (const p of particles) {
-        p.update(canvas.width, canvas.height);
+        p.update(w, h);
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
@@ -85,13 +97,43 @@ export function ParticleCanvas() {
       frameId = requestAnimationFrame(draw);
     };
 
-    resize();
-    draw();
+    const start = () => {
+      if (cancelled || running || document.hidden) return;
+      running = true;
+      resize();
+      draw();
+    };
+
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(frameId);
+    };
+
+    const onVisibility = () => {
+      if (document.hidden) stop();
+      else start();
+    };
+
+    let idleHandle: number | ReturnType<typeof setTimeout>;
+    if ('requestIdleCallback' in window) {
+      idleHandle = window.requestIdleCallback(() => start(), { timeout: 800 });
+    } else {
+      idleHandle = setTimeout(() => start(), 200);
+    }
+
     window.addEventListener('resize', resize);
+    document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
-      cancelAnimationFrame(frameId);
+      cancelled = true;
+      stop();
       window.removeEventListener('resize', resize);
+      document.removeEventListener('visibilitychange', onVisibility);
+      if ('cancelIdleCallback' in window && typeof idleHandle === 'number') {
+        window.cancelIdleCallback(idleHandle);
+      } else {
+        clearTimeout(idleHandle);
+      }
     };
   }, []);
 

@@ -93,7 +93,7 @@ export default async function ProjectDetailPage({
               src={heroImage}
               alt={project.title}
               fill
-              unoptimized
+              sizes="100vw"
               className="object-cover transition-transform duration-700 group-hover:scale-105"
               priority
             />

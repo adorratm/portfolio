@@ -15,7 +15,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
       'Content-Type': 'application/json',
       ...init?.headers,
     },
-    next: { revalidate: 60 },
+    next: { revalidate: 300 },
   });
 
   if (!response.ok) {

@@ -9,16 +9,14 @@ type ProjectCardImageProps = {
   category: string;
 };
 
-/**
- * Proje kartı görseli — S3 / backend URL'leri için unoptimized, hata durumunda placeholder.
- */
+/** Proje kartı görseli — Next Image optimize; hata durumunda placeholder. */
 export function ProjectCardImage({ src, alt, category }: ProjectCardImageProps) {
   const [failed, setFailed] = useState(false);
 
   if (failed) {
     return (
       <div className="flex h-56 items-center justify-center bg-surface-container">
-        <span className="pulse-animation rounded-full border border-tertiary/30 bg-tertiary/20 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-tertiary">
+        <span className="rounded-full border border-tertiary/30 bg-tertiary/20 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-tertiary">
           {category}
         </span>
       </div>
@@ -31,7 +29,6 @@ export function ProjectCardImage({ src, alt, category }: ProjectCardImageProps) 
         src={src}
         alt={alt}
         fill
-        unoptimized
         sizes="(max-width: 768px) 100vw, 50vw"
         className="object-cover transition-transform duration-500 group-hover:scale-110"
         onError={() => setFailed(true)}

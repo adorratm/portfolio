@@ -40,6 +40,7 @@ export function CvHero({
               src={imageUrl}
               alt={imageAlt ?? title}
               fill
+              sizes="144px"
               className="object-cover"
               priority
             />

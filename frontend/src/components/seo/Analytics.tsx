@@ -14,7 +14,7 @@ export function Analytics() {
         defer
         data-domain={plausibleDomain}
         src="https://plausible.io/js/script.js"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
       />
     );
   }
@@ -24,9 +24,9 @@ export function Analytics() {
       <>
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="ga4-init" strategy="afterInteractive">
+        <Script id="ga4-init" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}

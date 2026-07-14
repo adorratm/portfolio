@@ -33,6 +33,7 @@ export function HeroSection({
             src={imageUrl}
             alt={headlinePrefix}
             fill
+            sizes="112px"
             className="object-cover"
             priority
           />
@@ -74,9 +75,11 @@ export function HeroSection({
               <div className="relative hidden h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-outline-variant sm:block">
                 <Image
                   src={imageUrl}
-                  alt={`${headlinePrefix} profile`}
+                  alt=""
                   fill
+                  sizes="96px"
                   className="object-cover"
+                  loading="lazy"
                 />
               </div>
             )}

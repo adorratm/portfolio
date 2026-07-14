@@ -9,13 +9,16 @@ import { buildSiteMetadata, truncateMetaDescription } from '@/lib/seo';
 import { routing, type AppLocale } from '@/i18n/routing';
 
 const inter = Inter({
-  subsets: ['latin'],
+  subsets: ['latin', 'latin-ext'],
   variable: '--font-inter',
+  display: 'swap',
 });
 
 const jetbrains = JetBrains_Mono({
-  subsets: ['latin'],
+  subsets: ['latin', 'latin-ext'],
   variable: '--font-jetbrains',
+  display: 'swap',
+  preload: false,
 });
 
 export async function generateMetadata({

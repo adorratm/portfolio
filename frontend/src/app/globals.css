@@ -25,8 +25,8 @@
   --color-dracula-cyan: #8be9fd;
   --color-tertiary-container: #fe78c5;
   --color-surface-container-high: #26293b;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 }
 
 body {
@@ -80,7 +80,8 @@ body {
 
 .glass-card {
   background: rgba(49, 52, 70, 0.4);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(98, 114, 164, 0.2);
 }
 
