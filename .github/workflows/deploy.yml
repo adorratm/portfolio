@@ -37,6 +37,7 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: https://api.emrekilic.web.tr/api/v1
           NEXT_PUBLIC_SITE_URL: https://emrekilic.web.tr
+          NEXT_PUBLIC_GA_MEASUREMENT_ID: G-LX5ZQR64J0
           YARN_ENABLE_IMMUTABLE_INSTALLS: 'false'
         run: |
           yarn install
