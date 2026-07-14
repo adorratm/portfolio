@@ -21,7 +21,7 @@ export async function generateMetadata({
 
   return buildSiteMetadata(locale, {
     siteTitle,
-    description: description.slice(0, 160),
+    description,
     path: '/about',
     pageKey: 'about',
     imageUrl: content?.about?.imageUrl ?? content?.profile?.imageUrl,

@@ -54,7 +54,7 @@ function TechIcon({
       >
         <Image
           src={item.imageUrl}
-          alt=""
+          alt={item.name}
           fill
           sizes={imageSizes}
           className="object-contain p-1.5"

@@ -1,11 +1,22 @@
 import type { Metadata } from 'next';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { LangAttribute } from '@/components/seo/LangAttribute';
+import { Analytics } from '@/components/seo/Analytics';
 import { fetchContentBundle } from '@/lib/api/client';
-import { buildSiteMetadata } from '@/lib/seo';
+import { buildSiteMetadata, truncateMetaDescription } from '@/lib/seo';
 import { routing, type AppLocale } from '@/i18n/routing';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+});
+
+const jetbrains = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains',
+});
 
 export async function generateMetadata({
   params,
@@ -27,13 +38,13 @@ export async function generateMetadata({
 
   return buildSiteMetadata(locale as AppLocale, {
     siteTitle,
-    description: description.slice(0, 160),
+    description: truncateMetaDescription(description),
     imageUrl: content?.profile?.imageUrl,
   });
 }
 
 /**
- * Locale layout — çeviri sağlayıcısı ve sayfa sarmalayıcısı.
+ * Locale layout — html lang, fontlar, çeviri sağlayıcısı.
  */
 export default async function LocaleLayout({
   children,
@@ -51,9 +62,11 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider messages={messages}>
-      <LangAttribute locale={locale as AppLocale} />
-      {children}
-    </NextIntlClientProvider>
+    <html lang={locale} className="dark">
+      <body className={`${inter.variable} ${jetbrains.variable} antialiased`}>
+        <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+        <Analytics />
+      </body>
+    </html>
   );
 }

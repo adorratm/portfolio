@@ -14,8 +14,8 @@
     "translate:en": "tsx --env-file=.env -r tsconfig-paths/register src/scripts/translate-tr-to-en.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1085.0",
-    "@aws-sdk/s3-request-presigner": "^3.1085.0",
+    "@aws-sdk/client-s3": "^3.1086.0",
+    "@aws-sdk/s3-request-presigner": "^3.1086.0",
     "@bull-board/ui": "^8.1.2",
     "@nestjs/bull-shared": "^11.0.4",
     "@nestjs/bullmq": "^11.0.4",
@@ -40,7 +40,7 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "socket.io": "^4.8.3",
-    "typeorm": "^1.0.0"
+    "typeorm": "^1.1.0"
   },
   "devDependencies": {
     "@bull-board/api": "^8.1.2",
@@ -60,9 +60,9 @@
     "prettier": "^3.9.5",
     "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
-    "tsc-alias": "^1.9.0",
+    "tsc-alias": "^1.9.1",
     "tsconfig-paths": "^4.2.0",
-    "tsx": "^4.23.0",
+    "tsx": "^4.23.1",
     "typescript": "^6.0.3"
   },
   "volta": {

@@ -1,7 +1,30 @@
+import type { Metadata } from 'next';
 import { PageShell } from '@/components/layout/PageShell';
 import { TechStackMatrix } from '@/components/tech-stack/TechStackMatrix';
 import { fetchContentBundle } from '@/lib/api/client';
+import { buildSiteMetadata } from '@/lib/seo';
 import type { AppLocale } from '@/i18n/routing';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const content = await fetchContentBundle(locale).catch(() => null);
+  const siteTitle = content?.siteSettings?.siteTitle ?? 'Emre Kılıç | Portfolio';
+
+  return buildSiteMetadata(locale, {
+    siteTitle,
+    description:
+      locale === 'tr'
+        ? 'Kullandığım diller, çerçeveler, araçlar ve altyapı teknolojileri.'
+        : 'Languages, frameworks, tools, and infrastructure I work with.',
+    path: '/tech-stack',
+    pageKey: 'tech-stack',
+    imageUrl: content?.profile?.imageUrl,
+  });
+}
 
 /** Teknoloji yığını sayfası — design bento matris düzeni */
 export default async function TechStackPage({

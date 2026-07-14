@@ -1,7 +1,30 @@
+import type { Metadata } from 'next';
 import { PageShell } from '@/components/layout/PageShell';
 import { CvHero } from '@/components/cv/CvHero';
 import { fetchContentBundle } from '@/lib/api/client';
+import { buildSiteMetadata } from '@/lib/seo';
 import type { AppLocale } from '@/i18n/routing';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const content = await fetchContentBundle(locale).catch(() => null);
+  const siteTitle = content?.siteSettings?.siteTitle ?? 'Emre Kılıç | Portfolio';
+
+  return buildSiteMetadata(locale, {
+    siteTitle,
+    description:
+      locale === 'tr'
+        ? 'Üzerinde çalıştığım sistemler, üstlendiğim roller ve ürettiğim etki.'
+        : 'The systems I have built, the roles I have held, and the impact I have delivered.',
+    path: '/experience',
+    pageKey: 'experience',
+    imageUrl: content?.profile?.imageUrl,
+  });
+}
 
 /** İş deneyimi zaman çizelgesi */
 export default async function ExperiencePage({

@@ -72,7 +72,12 @@ export function HeroSection({
             </pre>
             {imageUrl && (
               <div className="relative hidden h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-outline-variant sm:block">
-                <Image src={imageUrl} alt="" fill className="object-cover" />
+                <Image
+                  src={imageUrl}
+                  alt={`${headlinePrefix} profile`}
+                  fill
+                  className="object-cover"
+                />
               </div>
             )}
             <div className="space-y-1">

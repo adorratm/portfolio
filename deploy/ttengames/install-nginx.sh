@@ -395,8 +395,9 @@ install_portfolio_conf() {
     -e "s|@ADMIN_PORT@|${UPSTREAM_ADMIN_PORT}|g" \
     -e "s|@API_HOST@|${UPSTREAM_API_HOST}|g" \
     -e "s|@API_PORT@|${UPSTREAM_API_PORT}|g" \
-    -e 's/\$\${/$/g' \
+    -e 's/\$\$/$/g' \
     "${src}" > "${dest}"
+  # $${var} → ${var}. Eski 's/\$\${/$/g' { yi yutup $var} bırakıyordu (www → /%7D).
   echo "  + ${dest} (${ssl_mode})"
   ensure_portfolio_entrypoint_hook
 }

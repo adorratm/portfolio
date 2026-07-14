@@ -1,7 +1,30 @@
+import type { Metadata } from 'next';
 import { PageShell } from '@/components/layout/PageShell';
 import { CvHero } from '@/components/cv/CvHero';
 import { fetchContentBundle } from '@/lib/api/client';
+import { buildSiteMetadata } from '@/lib/seo';
 import type { AppLocale } from '@/i18n/routing';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const content = await fetchContentBundle(locale).catch(() => null);
+  const siteTitle = content?.siteSettings?.siteTitle ?? 'Emre Kılıç | Portfolio';
+
+  return buildSiteMetadata(locale, {
+    siteTitle,
+    description:
+      locale === 'tr'
+        ? 'Akademik geçmişim, eğitim yolculuğum ve sertifikalarım.'
+        : 'My academic background, educational journey, and certifications.',
+    path: '/education',
+    pageKey: 'education',
+    imageUrl: content?.profile?.imageUrl,
+  });
+}
 
 /** Eğitim ve sertifikalar */
 export default async function EducationPage({
@@ -51,7 +74,7 @@ export default async function EducationPage({
       <section className="mb-14">
         <h2 className="mb-6 flex items-center gap-2 text-2xl font-semibold">
           <span className="text-primary">◧</span>
-          {locale === 'tr' ? 'Eğitim' : 'Education'}
+          {locale === 'tr' ? 'Akademik Kayıtlar' : 'Academic Records'}
         </h2>
         {education.length === 0 ? (
           <p className="font-mono text-on-surface-variant">

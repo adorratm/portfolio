@@ -8,7 +8,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { fetchContentBundle, fetchProjectById } from '@/lib/api/client';
 import { buildBreadcrumbJsonLd, buildProjectJsonLd } from '@/lib/json-ld';
 import { resolveProjectImageUrl } from '@/lib/media';
-import { buildAlternates, buildOpenGraph, buildTwitterCard, getSiteUrl } from '@/lib/seo';
+import { buildAlternates, buildOpenGraph, buildTwitterCard, getSiteUrl, truncateMetaDescription } from '@/lib/seo';
 import type { AppLocale } from '@/i18n/routing';
 
 const statusStyles: Record<string, string> = {
@@ -32,24 +32,16 @@ export async function generateMetadata({
 
   const siteTitle = content?.siteSettings?.siteTitle ?? 'Emre Kılıç | Portfolio';
   const imageUrl = resolveProjectImageUrl(project);
+  const title = `${project.title} | ${siteTitle}`;
+  const description = truncateMetaDescription(project.description);
 
   return {
-    title: `${project.title} | ${siteTitle}`,
-    description: project.description.slice(0, 160),
+    title,
+    description,
     metadataBase: new URL(getSiteUrl()),
     alternates: buildAlternates(locale, `/projects/${id}`),
-    openGraph: buildOpenGraph(
-      locale,
-      `${project.title} | ${siteTitle}`,
-      project.description.slice(0, 160),
-      `/projects/${id}`,
-      imageUrl,
-    ),
-    twitter: buildTwitterCard(
-      `${project.title} | ${siteTitle}`,
-      project.description.slice(0, 160),
-      imageUrl,
-    ),
+    openGraph: buildOpenGraph(locale, title, description, `/projects/${id}`, imageUrl),
+    twitter: buildTwitterCard(title, description, imageUrl),
     robots: { index: true, follow: true },
   };
 }

@@ -1,9 +1,39 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PageShell } from '@/components/layout/PageShell';
 import { fetchContentBundle, fetchTechStackById } from '@/lib/api/client';
+import { buildSiteMetadata } from '@/lib/seo';
 import type { AppLocale } from '@/i18n/routing';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale; id: string }>;
+}): Promise<Metadata> {
+  const { locale, id } = await params;
+  const [content, item] = await Promise.all([
+    fetchContentBundle(locale).catch(() => null),
+    fetchTechStackById(locale, id).catch(() => null),
+  ]);
+
+  if (!item) return {};
+
+  const siteTitle = content?.siteSettings?.siteTitle ?? 'Emre Kılıç | Portfolio';
+  const description =
+    item.description ??
+    (locale === 'tr'
+      ? `${item.name} teknoloji yetkinliği ve deneyim`
+      : `${item.name} technology proficiency and experience`);
+
+  return buildSiteMetadata(locale, {
+    siteTitle: `${item.name} | ${siteTitle}`,
+    description,
+    path: `/tech-stack/${id}`,
+    imageUrl: item.imageUrl ?? content?.profile?.imageUrl,
+  });
+}
 
 export default async function TechStackDetailPage({
   params,

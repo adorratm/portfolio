@@ -52,7 +52,7 @@ function ProfileBadge({
         </div>
       )}
       <div>
-        <h2 className="font-mono text-sm font-bold text-primary">{brandName}</h2>
+        <p className="font-mono text-sm font-bold text-primary">{brandName}</p>
         {subtitle && (
           <p className="text-[10px] uppercase tracking-widest text-on-surface-variant">
             {subtitle}

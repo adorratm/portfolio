@@ -98,13 +98,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-sdk/client-s3@npm:^3.1085.0":
-  version: 3.1085.0
-  resolution: "@aws-sdk/client-s3@npm:3.1085.0"
+"@aws-sdk/client-s3@npm:^3.1086.0":
+  version: 3.1086.0
+  resolution: "@aws-sdk/client-s3@npm:3.1086.0"
   dependencies:
     "@aws-sdk/checksums": "npm:^3.1000.16"
     "@aws-sdk/core": "npm:^3.975.1"
-    "@aws-sdk/credential-provider-node": "npm:^3.972.66"
+    "@aws-sdk/credential-provider-node": "npm:^3.972.67"
     "@aws-sdk/middleware-sdk-s3": "npm:^3.972.62"
     "@aws-sdk/signature-v4-multi-region": "npm:^3.996.39"
     "@aws-sdk/types": "npm:^3.974.0"
@@ -113,7 +113,7 @@ __metadata:
     "@smithy/node-http-handler": "npm:^4.9.4"
     "@smithy/types": "npm:^4.16.0"
     tslib: "npm:^2.6.2"
-  checksum: 10c0/4646de6cd67db5958d90ee9a692bb0d391c25b516ba44e7269a59e31e8b96e2381880f6e67040fc93eb67b4c79161219ef5dd89ff42931a97f805191ee5e2d2c
+  checksum: 10c0/1b8d5641119a200690370769ed2fcda252593dfd6c85e9891e07284eb38cb2b87276f27dd650e77048ef3480c088739ea06db24ba3292da518427ae791bba0d3
   languageName: node
   linkType: hard
 
@@ -196,9 +196,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-sdk/credential-provider-node@npm:^3.972.66":
-  version: 3.972.66
-  resolution: "@aws-sdk/credential-provider-node@npm:3.972.66"
+"@aws-sdk/credential-provider-node@npm:^3.972.67":
+  version: 3.972.67
+  resolution: "@aws-sdk/credential-provider-node@npm:3.972.67"
   dependencies:
     "@aws-sdk/credential-provider-env": "npm:^3.972.57"
     "@aws-sdk/credential-provider-http": "npm:^3.972.59"
@@ -211,7 +211,7 @@ __metadata:
     "@smithy/credential-provider-imds": "npm:^4.4.7"
     "@smithy/types": "npm:^4.16.0"
     tslib: "npm:^2.6.2"
-  checksum: 10c0/8d407f2a3f1ee549e60980a2064f104ec97bf4d137d9c22c9142a44639052d69b9a56d90d26c2d639ebb20909d9111534e3b0e888ccaa6fc6176e69e7cdb5b07
+  checksum: 10c0/bd0c7e6a56ef269d694782a539808579b1489aa2ef829f144ac5d71de056898cadc9c33c0433906dda7e37f8241707a4ed63c727bf5a4d11c53aee23bac6b689
   languageName: node
   linkType: hard
 
@@ -287,9 +287,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-sdk/s3-request-presigner@npm:^3.1085.0":
-  version: 3.1085.0
-  resolution: "@aws-sdk/s3-request-presigner@npm:3.1085.0"
+"@aws-sdk/s3-request-presigner@npm:^3.1086.0":
+  version: 3.1086.0
+  resolution: "@aws-sdk/s3-request-presigner@npm:3.1086.0"
   dependencies:
     "@aws-sdk/core": "npm:^3.975.1"
     "@aws-sdk/signature-v4-multi-region": "npm:^3.996.39"
@@ -297,7 +297,7 @@ __metadata:
     "@smithy/core": "npm:^3.29.2"
     "@smithy/types": "npm:^4.16.0"
     tslib: "npm:^2.6.2"
-  checksum: 10c0/132ebfebe64d7699ec6b72f079ddac3c84e38a5bbff56eda53337c628d415d02662349e8dfb3f7cd9948bc1abc5709e5398e8e12fadd05124ef4c91e3574cc3a
+  checksum: 10c0/fa7151e25fb1f4e80b08b8da2f0ddb8460a9d4453715d2a7eba43a82ba901d7f2d1b95beef6ddcc3d2519f854ee5ff4c617a298ed5f06f9ef8458185f28b48c1
   languageName: node
   linkType: hard
 
@@ -3165,7 +3165,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ansis@npm:^4.2.0":
+"ansis@npm:^4.3.1":
   version: 4.3.1
   resolution: "ansis@npm:4.3.1"
   checksum: 10c0/d1a48090f9c33b18f254a3496e5336a20391a51140b552a1c0bc38710ae7c8bc36a62658f28759797d7bce15e89b893e9ef1962ea1ea42a291d112263f6e593c
@@ -3320,8 +3320,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "backend@workspace:."
   dependencies:
-    "@aws-sdk/client-s3": "npm:^3.1085.0"
-    "@aws-sdk/s3-request-presigner": "npm:^3.1085.0"
+    "@aws-sdk/client-s3": "npm:^3.1086.0"
+    "@aws-sdk/s3-request-presigner": "npm:^3.1086.0"
     "@bull-board/api": "npm:^8.1.2"
     "@bull-board/express": "npm:^8.1.2"
     "@bull-board/nestjs": "npm:^8.1.2"
@@ -3363,10 +3363,10 @@ __metadata:
     socket.io: "npm:^4.8.3"
     ts-jest: "npm:^29.4.11"
     ts-node: "npm:^10.9.2"
-    tsc-alias: "npm:^1.9.0"
+    tsc-alias: "npm:^1.9.1"
     tsconfig-paths: "npm:^4.2.0"
-    tsx: "npm:^4.23.0"
-    typeorm: "npm:^1.0.0"
+    tsx: "npm:^4.23.1"
+    typeorm: "npm:^1.1.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft
@@ -4004,7 +4004,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:^1.11.20":
+"dayjs@npm:^1.11.21":
   version: 1.11.21
   resolution: "dayjs@npm:1.11.21"
   checksum: 10c0/bd97dfdc4bfea3c66268635690313828b386faa040fbc1f829ff42a2bd748b72c9d9b3c8f9616ce9e61fcb78923f1461a462c969c54b1084458ae1b715898fb0
@@ -7825,7 +7825,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tinyglobby@npm:^0.2.12, tinyglobby@npm:^0.2.16":
+"tinyglobby@npm:^0.2.12, tinyglobby@npm:^0.2.17":
   version: 0.2.17
   resolution: "tinyglobby@npm:0.2.17"
   dependencies:
@@ -7947,9 +7947,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsc-alias@npm:^1.9.0":
-  version: 1.9.0
-  resolution: "tsc-alias@npm:1.9.0"
+"tsc-alias@npm:^1.9.1":
+  version: 1.9.1
+  resolution: "tsc-alias@npm:1.9.1"
   dependencies:
     chokidar: "npm:^3.5.3"
     commander: "npm:^9.0.0"
@@ -7960,7 +7960,7 @@ __metadata:
     plimit-lit: "npm:^1.2.6"
   bin:
     tsc-alias: dist/bin/index.js
-  checksum: 10c0/229ef236f4ccd3145cbb7a003b805e5c1de7ecfb563ffe88ecccb7c0c596fb4d2baf06706b8ee0b66017141beb3e8505a1e6b5e5b1c8cd7a87a640cf13b40e41
+  checksum: 10c0/b696508a671fdcd3e10fe6d88a64da77397811dbb7fd701623b8def2ae41f0cb7b39607de403873f072088dea8c6c10fc88ea3e65b6bb8a69635c9d61a935f77
   languageName: node
   linkType: hard
 
@@ -7994,9 +7994,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsx@npm:^4.23.0":
-  version: 4.23.0
-  resolution: "tsx@npm:4.23.0"
+"tsx@npm:^4.23.1":
+  version: 4.23.1
+  resolution: "tsx@npm:4.23.1"
   dependencies:
     esbuild: "npm:~0.28.0"
     fsevents: "npm:~2.3.3"
@@ -8005,7 +8005,7 @@ __metadata:
       optional: true
   bin:
     tsx: dist/cli.mjs
-  checksum: 10c0/e4fade6bf8a4447424652da3a68f5ab7b927d1cbe5f697dba876c626c5fb7bf7663c4f71777992c9cbbdc8148c63ee1ddcf15536ff9d1863f9fbea25247ee0a9
+  checksum: 10c0/2f7393c09ffd161701342c87141c6158945967c0fdb6476f157a72e53554cbc983b8e516b441beafde27c9840d8ffd619802acce6b6be5e9e197d693e111a55d
   languageName: node
   linkType: hard
 
@@ -8067,18 +8067,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typeorm@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "typeorm@npm:1.0.0"
+"typeorm@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "typeorm@npm:1.1.0"
   dependencies:
     "@sqltools/formatter": "npm:^1.2.5"
-    ansis: "npm:^4.2.0"
-    dayjs: "npm:^1.11.20"
+    ansis: "npm:^4.3.1"
+    dayjs: "npm:^1.11.21"
     debug: "npm:^4.4.3"
     dedent: "npm:^1.7.2"
     reflect-metadata: "npm:^0.2.2"
     sql-highlight: "npm:^6.1.0"
-    tinyglobby: "npm:^0.2.16"
+    tinyglobby: "npm:^0.2.17"
     tslib: "npm:^2.8.1"
     yargs: "npm:^18.0.0"
   peerDependencies:
@@ -8089,11 +8089,11 @@ __metadata:
     mongodb: ^7.0.0
     mssql: ^12.0.0
     mysql2: ^3.15.3
-    oracledb: ^6.3.0
+    oracledb: ^6.3.0 || ^7.0.0
     pg: ^8.5.1
     pg-native: ^3.0.0
     pg-query-stream: ^4.0.0
-    redis: ^5.0.0
+    redis: ^5.0.0 || ^6.0.0
     sql.js: ^1.4.0
     ts-node: ^10.9.2
     typeorm-aurora-data-api-driver: ^3.0.0
@@ -8132,7 +8132,7 @@ __metadata:
     typeorm: cli.js
     typeorm-ts-node-commonjs: cli-ts-node-commonjs.js
     typeorm-ts-node-esm: cli-ts-node-esm.js
-  checksum: 10c0/c5245fae2997ac0a459aa21853a536e965f10807565061ad8b0dd4faece148054ca13bc3f5292b450cb84238e316eb507238cef3e243c31b6f71de14c535c7ab
+  checksum: 10c0/1457b3420d254aaef0dc037b43d0bf121061ad57501e48f40dd831fec885259ea041a1a0c5a594b305b79233c50953eca9f3fb4b576a1eaea50c1722e27f68e3
   languageName: node
   linkType: hard
 

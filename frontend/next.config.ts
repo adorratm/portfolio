@@ -5,6 +5,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  poweredByHeader: false,
   // Backend'den gelen S3 görsellerine izin ver
   images: {
     remotePatterns: [

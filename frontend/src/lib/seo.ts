@@ -15,6 +15,16 @@ export function getSiteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_SITE_URL).replace(/\/$/, '');
 }
 
+/** Pixel tabanlı SEO araçları için ~150 karakter (160 çoğu zaman sınırı aşar). */
+export function truncateMetaDescription(text: string, maxChars = 150): string {
+  const normalized = text.replace(/\s+/g, ' ').trim();
+  if (normalized.length <= maxChars) return normalized;
+  const cut = normalized.slice(0, maxChars - 1);
+  const lastSpace = cut.lastIndexOf(' ');
+  const base = lastSpace > maxChars * 0.6 ? cut.slice(0, lastSpace) : cut;
+  return `${base.trimEnd()}…`;
+}
+
 const PAGE_TITLES: Record<string, Record<AppLocale, string>> = {
   home: { tr: 'Ana Sayfa', en: 'Home' },
   about: { tr: 'Hakkımda', en: 'About' },
@@ -114,19 +124,15 @@ export function buildSiteMetadata(
 
   const ogImage = resolveOgImageUrl(options.imageUrl);
 
+  const description = truncateMetaDescription(options.description);
+
   return {
     title,
-    description: options.description,
+    description,
     metadataBase: new URL(getSiteUrl()),
     alternates: buildAlternates(locale, options.path),
-    openGraph: buildOpenGraph(
-      locale,
-      title,
-      options.description,
-      options.path,
-      ogImage,
-    ),
-    twitter: buildTwitterCard(title, options.description, ogImage),
+    openGraph: buildOpenGraph(locale, title, description, options.path, ogImage),
+    twitter: buildTwitterCard(title, description, ogImage),
     robots: { index: true, follow: true },
   };
 }
