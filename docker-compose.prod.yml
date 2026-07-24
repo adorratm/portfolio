@@ -123,6 +123,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      # SSR → Docker ağı (Cloudflare hairpin / bot challenge atlanır)
+      API_INTERNAL_URL: ${API_INTERNAL_URL:-http://backend:3001/api/v1}
     ports:
       - "${FRONTEND_HOST_PORT:-3100}:3000"
     networks:

@@ -1,18 +1,29 @@
 /**
  * Backend API istemcisi.
  * Tüm içerik tek bundle endpoint'inden çekilir — yerel JSON dosyası yok.
+ *
+ * SSR'da API_INTERNAL_URL tercih edilir (Docker ağı → backend).
+ * NEXT_PUBLIC_API_URL Cloudflare üzerinden hairpin / bot challenge'a düşebilir.
  */
 
 import type { ContentBundle, Locale } from '@/lib/api/types';
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
+function apiBase(): string {
+  if (typeof window === 'undefined') {
+    const internal = process.env.API_INTERNAL_URL?.trim();
+    if (internal) return internal.replace(/\/$/, '');
+  }
+  return (
+    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ??
+    'http://localhost:3001/api/v1'
+  );
+}
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await fetch(`${apiBase()}${path}`, {
     ...init,
     headers: {
-      'Content-Type': 'application/json',
+      Accept: 'application/json',
       ...init?.headers,
     },
     next: { revalidate: 300 },

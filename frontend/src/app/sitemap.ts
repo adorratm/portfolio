@@ -4,8 +4,11 @@ import type { AppLocale, AppPathname } from '@/i18n/routing';
 import { getSiteUrl } from '@/lib/seo';
 import { contentPathId } from '@/lib/slug';
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
+const API_BASE = (
+  process.env.API_INTERNAL_URL?.trim() ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  'http://localhost:3001/api/v1'
+).replace(/\/$/, '');
 
 const FETCH_TIMEOUT_MS = 5_000;
 
