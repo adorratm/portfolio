@@ -15,9 +15,9 @@
     "backfill:slugs": "tsx --env-file=.env -r tsconfig-paths/register src/scripts/backfill-slugs.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1096.0",
-    "@aws-sdk/s3-request-presigner": "^3.1096.0",
-    "@bull-board/ui": "^8.3.0",
+    "@aws-sdk/client-s3": "^3.1099.0",
+    "@aws-sdk/s3-request-presigner": "^3.1099.0",
+    "@bull-board/ui": "^8.4.0",
     "@nestjs/bull-shared": "^11.0.4",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.1.28",
@@ -29,7 +29,7 @@
     "@nestjs/platform-socket.io": "^11.1.28",
     "@nestjs/typeorm": "^11.0.3",
     "@nestjs/websockets": "^11.1.28",
-    "bullmq": "^5.81.2",
+    "bullmq": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "cookie-parser": "^1.4.7",
@@ -44,9 +44,9 @@
     "typeorm": "^1.1.0"
   },
   "devDependencies": {
-    "@bull-board/api": "^8.3.0",
-    "@bull-board/express": "^8.3.0",
-    "@bull-board/nestjs": "^8.3.0",
+    "@bull-board/api": "^8.4.0",
+    "@bull-board/express": "^8.4.0",
+    "@bull-board/nestjs": "^8.4.0",
     "@nestjs/cli": "^11.0.24",
     "@nestjs/schematics": "^11.1.0",
     "@nestjs/testing": "^11.1.28",
@@ -76,7 +76,7 @@
     "js-yaml@npm:^4.1.0": "4.3.0"
   },
   "volta": {
-    "node": "26.5.0",
-    "yarn": "4.17.1"
+    "node": "26.5.1",
+    "yarn": "4.18.0"
   }
 }
