@@ -2,14 +2,21 @@
 
 FROM node:25-alpine AS deps
 WORKDIR /app
-RUN corepack enable
+# Node 25+ no longer bundles Corepack; remove legacy Yarn 1.x shims first
+RUN rm -f /usr/local/bin/yarn /usr/local/bin/yarnpkg && \
+    npm install -g corepack@latest && \
+    corepack enable && \
+    corepack prepare yarn@4.17.1 --activate
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn ./.yarn
 RUN yarn install --immutable
 
 FROM node:25-alpine AS builder
 WORKDIR /app
-RUN corepack enable
+RUN rm -f /usr/local/bin/yarn /usr/local/bin/yarnpkg && \
+    npm install -g corepack@latest && \
+    corepack enable && \
+    corepack prepare yarn@4.17.1 --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN yarn build

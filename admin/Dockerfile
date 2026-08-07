@@ -4,7 +4,11 @@ FROM node:25-alpine AS builder
 WORKDIR /app
 
 RUN apk add --no-cache libc6-compat
-RUN corepack enable && corepack prepare yarn@4.17.1 --activate
+# Node 25+ no longer bundles Corepack; remove legacy Yarn 1.x shims first
+RUN rm -f /usr/local/bin/yarn /usr/local/bin/yarnpkg && \
+    npm install -g corepack@latest && \
+    corepack enable && \
+    corepack prepare yarn@4.17.1 --activate
 
 ENV YARN_NODE_LINKER=node-modules
 ENV YARN_ENABLE_SCRIPTS=1
