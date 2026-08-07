@@ -15,9 +15,9 @@
     "backfill:slugs": "tsx --env-file=.env -r tsconfig-paths/register src/scripts/backfill-slugs.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1099.0",
-    "@aws-sdk/s3-request-presigner": "^3.1099.0",
-    "@bull-board/ui": "^8.4.0",
+    "@aws-sdk/client-s3": "^3.1104.0",
+    "@aws-sdk/s3-request-presigner": "^3.1104.0",
+    "@bull-board/ui": "^8.6.0",
     "@nestjs/bull-shared": "^11.0.4",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.1.28",
@@ -29,11 +29,11 @@
     "@nestjs/platform-socket.io": "^11.1.28",
     "@nestjs/typeorm": "^11.0.3",
     "@nestjs/websockets": "^11.1.28",
-    "bullmq": "^6.0.0",
+    "bullmq": "^6.0.8",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "cookie-parser": "^1.4.7",
-    "ioredis": "^5.11.1",
+    "ioredis": "^6.0.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
@@ -44,9 +44,9 @@
     "typeorm": "^1.1.0"
   },
   "devDependencies": {
-    "@bull-board/api": "^8.4.0",
-    "@bull-board/express": "^8.4.0",
-    "@bull-board/nestjs": "^8.4.0",
+    "@bull-board/api": "^8.6.0",
+    "@bull-board/express": "^8.6.0",
+    "@bull-board/nestjs": "^8.6.0",
     "@nestjs/cli": "^11.0.24",
     "@nestjs/schematics": "^11.1.0",
     "@nestjs/testing": "^11.1.28",
@@ -63,7 +63,7 @@
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.9.1",
     "tsconfig-paths": "^4.2.0",
-    "tsx": "^4.23.1",
+    "tsx": "^4.23.9",
     "typescript": "^6.0.3"
   },
   "resolutions": {
@@ -76,7 +76,7 @@
     "js-yaml@npm:^4.1.0": "4.3.0"
   },
   "volta": {
-    "node": "26.5.1",
+    "node": "26.7.0",
     "yarn": "4.18.0"
   }
 }
