@@ -785,7 +785,7 @@
             "entity": "emrekilic.web.tr"
           },
           {
-            "url": "https://emrekilic.web.tr/_next/image?url=https%3A%2F%2Fportfolio-media-adorratm.s3.eu-north-1.amazonaws.com%2Fprofile%2F87c6a106-acaf-4a3e-b093-2396d9c077b2.jpg&w=750&q=75",
+            "url": "https://emrekilic.web.tr/_next/image?url=https%3A%2F%2Fportfolio-adorratm.s3.eu-central-1.amazonaws.com%2Fprofile%2F87c6a106-acaf-4a3e-b093-2396d9c077b2.jpg&w=750&q=75",
             "sessionTargetType": "page",
             "protocol": "h3",
             "rendererStartTime": 463.26199996471405,
@@ -1093,7 +1093,7 @@
             "entity": "emrekilic.web.tr"
           },
           {
-            "url": "https://emrekilic.web.tr/_next/image?url=https%3A%2F%2Fportfolio-media-adorratm.s3.eu-north-1.amazonaws.com%2Fprofile%2F87c6a106-acaf-4a3e-b093-2396d9c077b2.jpg&w=256&q=75",
+            "url": "https://emrekilic.web.tr/_next/image?url=https%3A%2F%2Fportfolio-adorratm.s3.eu-central-1.amazonaws.com%2Fprofile%2F87c6a106-acaf-4a3e-b093-2396d9c077b2.jpg&w=256&q=75",
             "sessionTargetType": "page",
             "protocol": "h3",
             "rendererStartTime": 679.5879999995232,
@@ -1110,7 +1110,7 @@
             "entity": "emrekilic.web.tr"
           },
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d462f1d4-80bc-4332-af5a-8527a5a2d7ad.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d462f1d4-80bc-4332-af5a-8527a5a2d7ad.png",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 679.6710000038147,
@@ -1127,7 +1127,7 @@
             "entity": "Amazon Web Services"
           },
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/f5baf65e-c681-4865-aa0c-7d5249b367e6.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/f5baf65e-c681-4865-aa0c-7d5249b367e6.png",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 679.7620000243187,
@@ -1144,7 +1144,7 @@
             "entity": "Amazon Web Services"
           },
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/1f87d8d9-b753-49e3-889f-db207424c1d7.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/1f87d8d9-b753-49e3-889f-db207424c1d7.png",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 679.8080000281334,
@@ -1161,7 +1161,7 @@
             "entity": "Amazon Web Services"
           },
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d7f558f9-61e0-4e4a-9d9b-1a5553aca568.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d7f558f9-61e0-4e4a-9d9b-1a5553aca568.png",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 679.9480000138283,
@@ -1178,7 +1178,7 @@
             "entity": "Amazon Web Services"
           },
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/2febee06-6f78-4521-bcc4-578bae1222a6.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/2febee06-6f78-4521-bcc4-578bae1222a6.png",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 680.0460000038147,
@@ -1499,7 +1499,7 @@
         ],
         "items": [
           {
-            "origin": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com",
+            "origin": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com",
             "rtt": 72.73899999999999
           },
           {
@@ -1546,7 +1546,7 @@
             "serverResponseTime": 57.63000000000001
           },
           {
-            "origin": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com",
+            "origin": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com",
             "serverResponseTime": 34.72000000000001
           },
           {
@@ -1812,35 +1812,35 @@
               "type": "subitems",
               "items": [
                 {
-                  "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/1f87d8d9-b753-49e3-889f-db207424c1d7.png",
+                  "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/1f87d8d9-b753-49e3-889f-db207424c1d7.png",
                   "mainThreadTime": 0,
                   "blockingTime": 0,
                   "transferSize": 1607519,
                   "tbtImpact": 0
                 },
                 {
-                  "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/2febee06-6f78-4521-bcc4-578bae1222a6.png",
+                  "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/2febee06-6f78-4521-bcc4-578bae1222a6.png",
                   "mainThreadTime": 0,
                   "blockingTime": 0,
                   "transferSize": 1410393,
                   "tbtImpact": 0
                 },
                 {
-                  "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d462f1d4-80bc-4332-af5a-8527a5a2d7ad.png",
+                  "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d462f1d4-80bc-4332-af5a-8527a5a2d7ad.png",
                   "mainThreadTime": 0,
                   "blockingTime": 0,
                   "transferSize": 1397869,
                   "tbtImpact": 0
                 },
                 {
-                  "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d7f558f9-61e0-4e4a-9d9b-1a5553aca568.png",
+                  "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d7f558f9-61e0-4e4a-9d9b-1a5553aca568.png",
                   "mainThreadTime": 0,
                   "blockingTime": 0,
                   "transferSize": 1184208,
                   "tbtImpact": 0
                 },
                 {
-                  "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/f5baf65e-c681-4865-aa0c-7d5249b367e6.png",
+                  "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/f5baf65e-c681-4865-aa0c-7d5249b367e6.png",
                   "mainThreadTime": 0,
                   "blockingTime": 0,
                   "transferSize": 1181489,
@@ -3011,35 +3011,35 @@
         ],
         "items": [
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/1f87d8d9-b753-49e3-889f-db207424c1d7.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/1f87d8d9-b753-49e3-889f-db207424c1d7.png",
             "cacheLifetimeMs": 0,
             "cacheHitProbability": 0,
             "totalBytes": 1607519,
             "wastedBytes": 1607519
           },
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/2febee06-6f78-4521-bcc4-578bae1222a6.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/2febee06-6f78-4521-bcc4-578bae1222a6.png",
             "cacheLifetimeMs": 0,
             "cacheHitProbability": 0,
             "totalBytes": 1410393,
             "wastedBytes": 1410393
           },
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d462f1d4-80bc-4332-af5a-8527a5a2d7ad.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d462f1d4-80bc-4332-af5a-8527a5a2d7ad.png",
             "cacheLifetimeMs": 0,
             "cacheHitProbability": 0,
             "totalBytes": 1397869,
             "wastedBytes": 1397869
           },
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d7f558f9-61e0-4e4a-9d9b-1a5553aca568.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d7f558f9-61e0-4e4a-9d9b-1a5553aca568.png",
             "cacheLifetimeMs": 0,
             "cacheHitProbability": 0,
             "totalBytes": 1184208,
             "wastedBytes": 1184208
           },
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/f5baf65e-c681-4865-aa0c-7d5249b367e6.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/f5baf65e-c681-4865-aa0c-7d5249b367e6.png",
             "cacheLifetimeMs": 0,
             "cacheHitProbability": 0,
             "totalBytes": 1181489,
@@ -3106,23 +3106,23 @@
         ],
         "items": [
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/1f87d8d9-b753-49e3-889f-db207424c1d7.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/1f87d8d9-b753-49e3-889f-db207424c1d7.png",
             "totalBytes": 1607519
           },
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/2febee06-6f78-4521-bcc4-578bae1222a6.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/2febee06-6f78-4521-bcc4-578bae1222a6.png",
             "totalBytes": 1410393
           },
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d462f1d4-80bc-4332-af5a-8527a5a2d7ad.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d462f1d4-80bc-4332-af5a-8527a5a2d7ad.png",
             "totalBytes": 1397869
           },
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d7f558f9-61e0-4e4a-9d9b-1a5553aca568.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d7f558f9-61e0-4e4a-9d9b-1a5553aca568.png",
             "totalBytes": 1184208
           },
           {
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/f5baf65e-c681-4865-aa0c-7d5249b367e6.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/f5baf65e-c681-4865-aa0c-7d5249b367e6.png",
             "totalBytes": 1181489
           },
           {
@@ -3130,7 +3130,7 @@
             "totalBytes": 847483
           },
           {
-            "url": "https://emrekilic.web.tr/_next/image?url=https%3A%2F%2Fportfolio-media-adorratm.s3.eu-north-1.amazonaws.com%2Fprofile%2F87c6a106-acaf-4a3e-b093-2396d9c077b2.jpg&w=750&q=75",
+            "url": "https://emrekilic.web.tr/_next/image?url=https%3A%2F%2Fportfolio-adorratm.s3.eu-central-1.amazonaws.com%2Fprofile%2F87c6a106-acaf-4a3e-b093-2396d9c077b2.jpg&w=750&q=75",
             "totalBytes": 109220
           },
           {
@@ -3416,10 +3416,10 @@
                 "width": 378,
                 "height": 224
               },
-              "snippet": "<img alt=\"Mutfak Yapım Dijital Reklam Ajansı\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/1f87…\">",
+              "snippet": "<img alt=\"Mutfak Yapım Dijital Reklam Ajansı\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/1f87…\">",
               "nodeLabel": "Mutfak Yapım Dijital Reklam Ajansı"
             },
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/1f87d8d9-b753-49e3-889f-db207424c1d7.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/1f87d8d9-b753-49e3-889f-db207424c1d7.png",
             "fromProtocol": true,
             "isCrossOrigin": true,
             "totalBytes": 1607101,
@@ -3440,10 +3440,10 @@
                 "width": 378,
                 "height": 224
               },
-              "snippet": "<img alt=\"Aldesa\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/2feb…\">",
+              "snippet": "<img alt=\"Aldesa\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/2feb…\">",
               "nodeLabel": "Aldesa"
             },
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/2febee06-6f78-4521-bcc4-578bae1222a6.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/2febee06-6f78-4521-bcc4-578bae1222a6.png",
             "fromProtocol": true,
             "isCrossOrigin": true,
             "totalBytes": 1409975,
@@ -3464,10 +3464,10 @@
                 "width": 378,
                 "height": 224
               },
-              "snippet": "<img alt=\"Futbo: Kulüp Yönetimi\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d462…\">",
+              "snippet": "<img alt=\"Futbo: Kulüp Yönetimi\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d462…\">",
               "nodeLabel": "Futbo: Kulüp Yönetimi"
             },
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d462f1d4-80bc-4332-af5a-8527a5a2d7ad.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d462f1d4-80bc-4332-af5a-8527a5a2d7ad.png",
             "fromProtocol": true,
             "isCrossOrigin": true,
             "totalBytes": 1397451,
@@ -3488,10 +3488,10 @@
                 "width": 378,
                 "height": 224
               },
-              "snippet": "<img alt=\"Cartech AI\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/f5ba…\">",
+              "snippet": "<img alt=\"Cartech AI\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/f5ba…\">",
               "nodeLabel": "Cartech AI"
             },
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/f5baf65e-c681-4865-aa0c-7d5249b367e6.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/f5baf65e-c681-4865-aa0c-7d5249b367e6.png",
             "fromProtocol": true,
             "isCrossOrigin": true,
             "totalBytes": 1181071,
@@ -3512,10 +3512,10 @@
                 "width": 378,
                 "height": 224
               },
-              "snippet": "<img alt=\"İzmir Mobilya\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d7f5…\">",
+              "snippet": "<img alt=\"İzmir Mobilya\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d7f5…\">",
               "nodeLabel": "İzmir Mobilya"
             },
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d7f558f9-61e0-4e4a-9d9b-1a5553aca568.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d7f558f9-61e0-4e4a-9d9b-1a5553aca568.png",
             "fromProtocol": true,
             "isCrossOrigin": true,
             "totalBytes": 1183790,
@@ -3655,10 +3655,10 @@
                 "width": 378,
                 "height": 224
               },
-              "snippet": "<img alt=\"Mutfak Yapım Dijital Reklam Ajansı\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/1f87…\">",
+              "snippet": "<img alt=\"Mutfak Yapım Dijital Reklam Ajansı\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/1f87…\">",
               "nodeLabel": "Mutfak Yapım Dijital Reklam Ajansı"
             },
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/1f87d8d9-b753-49e3-889f-db207424c1d7.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/1f87d8d9-b753-49e3-889f-db207424c1d7.png",
             "totalBytes": 1607101,
             "wastedBytes": 1477351,
             "wastedPercent": 91.92645674233705
@@ -3677,10 +3677,10 @@
                 "width": 378,
                 "height": 224
               },
-              "snippet": "<img alt=\"Aldesa\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/2feb…\">",
+              "snippet": "<img alt=\"Aldesa\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/2feb…\">",
               "nodeLabel": "Aldesa"
             },
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/2febee06-6f78-4521-bcc4-578bae1222a6.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/2febee06-6f78-4521-bcc4-578bae1222a6.png",
             "totalBytes": 1409975,
             "wastedBytes": 1296454,
             "wastedPercent": 91.94874180073114
@@ -3699,10 +3699,10 @@
                 "width": 378,
                 "height": 224
               },
-              "snippet": "<img alt=\"Futbo: Kulüp Yönetimi\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d462…\">",
+              "snippet": "<img alt=\"Futbo: Kulüp Yönetimi\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d462…\">",
               "nodeLabel": "Futbo: Kulüp Yönetimi"
             },
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d462f1d4-80bc-4332-af5a-8527a5a2d7ad.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d462f1d4-80bc-4332-af5a-8527a5a2d7ad.png",
             "totalBytes": 1397451,
             "wastedBytes": 1271723,
             "wastedPercent": 91.00301648135465
@@ -3721,10 +3721,10 @@
                 "width": 378,
                 "height": 224
               },
-              "snippet": "<img alt=\"İzmir Mobilya\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d7f5…\">",
+              "snippet": "<img alt=\"İzmir Mobilya\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d7f5…\">",
               "nodeLabel": "İzmir Mobilya"
             },
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/d7f558f9-61e0-4e4a-9d9b-1a5553aca568.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/d7f558f9-61e0-4e4a-9d9b-1a5553aca568.png",
             "totalBytes": 1183790,
             "wastedBytes": 1089225,
             "wastedPercent": 92.0117112770948
@@ -3743,10 +3743,10 @@
                 "width": 378,
                 "height": 224
               },
-              "snippet": "<img alt=\"Cartech AI\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/f5ba…\">",
+              "snippet": "<img alt=\"Cartech AI\" loading=\"lazy\" decoding=\"async\" data-nimg=\"fill\" class=\"object-cover transition-transform duration-500 group-hover:scale-110\" style=\"position: absolute; height: 100%; width: 100%; inset: 0px;\" src=\"https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/f5ba…\">",
               "nodeLabel": "Cartech AI"
             },
-            "url": "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com/projects/f5baf65e-c681-4865-aa0c-7d5249b367e6.png",
+            "url": "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com/projects/f5baf65e-c681-4865-aa0c-7d5249b367e6.png",
             "totalBytes": 1181071,
             "wastedBytes": 1075183,
             "wastedPercent": 91.03456478355693
@@ -5350,7 +5350,7 @@
       "name": "Amazon Web Services",
       "homepage": "https://aws.amazon.com/s3/",
       "origins": [
-        "https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com"
+        "https://portfolio-adorratm.s3.eu-central-1.amazonaws.com"
       ],
       "category": "other"
     }

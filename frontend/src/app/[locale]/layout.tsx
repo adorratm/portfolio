@@ -69,7 +69,7 @@ export default async function LocaleLayout({
       <head>
         <link
           rel="preconnect"
-          href="https://portfolio-media-adorratm.s3.eu-north-1.amazonaws.com"
+          href="https://portfolio-adorratm.s3.eu-central-1.amazonaws.com"
           crossOrigin="anonymous"
         />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />

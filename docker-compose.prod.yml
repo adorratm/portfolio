@@ -95,10 +95,10 @@ services:
       ADMIN_URL: ${ADMIN_URL}
       FRONTEND_URL: ${FRONTEND_URL}
       API_PUBLIC_URL: ${NEXT_PUBLIC_API_URL}
-      AWS_REGION: ${AWS_REGION:-eu-north-1}
+      AWS_REGION: ${AWS_REGION:-eu-central-1}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
-      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-portfolio-media}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-portfolio-adorratm}
       BULL_BOARD_PATH: ${BULL_BOARD_PATH:-/admin/queues}
     ports:
       - "${API_HOST_PORT:-3102}:3001"
