@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:25-alpine AS builder
+FROM node:26-alpine AS builder
 WORKDIR /app
 
 RUN apk add --no-cache libc6-compat
@@ -31,7 +31,7 @@ ENV NEXT_PUBLIC_PLAUSIBLE_DOMAIN=$NEXT_PUBLIC_PLAUSIBLE_DOMAIN
 
 RUN yarn build
 
-FROM node:25-alpine AS runner
+FROM node:26-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production

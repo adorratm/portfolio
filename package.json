@@ -2,7 +2,6 @@
   "name": "portfolio",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "yarn@4.17.1",
   "scripts": {
     "start:api": "yarn --cwd backend start:dev",
     "start:frontend": "yarn --cwd frontend dev",

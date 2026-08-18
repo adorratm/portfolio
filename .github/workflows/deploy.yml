@@ -18,7 +18,9 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 26
+          check-latest: true
+          package-manager-cache: false
 
       - name: Enable Yarn 4 (Corepack)
         run: |

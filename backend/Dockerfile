@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:25-alpine AS deps
+FROM node:26-alpine AS deps
 WORKDIR /app
 # Node 25+ no longer bundles Corepack; remove legacy Yarn 1.x shims first
 RUN rm -f /usr/local/bin/yarn /usr/local/bin/yarnpkg && \
@@ -11,7 +11,7 @@ COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn ./.yarn
 RUN yarn install --immutable
 
-FROM node:25-alpine AS builder
+FROM node:26-alpine AS builder
 WORKDIR /app
 RUN rm -f /usr/local/bin/yarn /usr/local/bin/yarnpkg && \
     npm install -g corepack@latest && \
@@ -21,7 +21,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN yarn build
 
-FROM node:25-alpine AS runner
+FROM node:26-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nestjs && adduser --system --uid 1001 nestjs
