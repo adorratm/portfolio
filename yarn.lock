@@ -10274,7 +10274,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"socket.io-parser@npm:^4.2.7":
+"socket.io-parser@npm:~4.2.4":
   version: 4.2.7
   resolution: "socket.io-parser@npm:4.2.7"
   dependencies:

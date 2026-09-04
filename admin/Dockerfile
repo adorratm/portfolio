@@ -28,7 +28,8 @@ ARG NEXT_PUBLIC_WS_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
 
-RUN yarn workspace admin build
+WORKDIR /app/admin
+RUN yarn run build
 
 FROM node:26-alpine AS runner
 WORKDIR /app

@@ -21,7 +21,9 @@ RUN rm -f /usr/local/bin/yarn /usr/local/bin/yarnpkg && \
     corepack prepare yarn@4.17.1 --activate
 COPY --from=deps /app /app
 COPY backend ./backend
-RUN yarn workspace backend build
+ENV YARN_ENABLE_IMMUTABLE_INSTALLS=false
+WORKDIR /app/backend
+RUN yarn run build
 
 FROM node:26-alpine AS runner
 WORKDIR /app
@@ -29,7 +31,7 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nestjs && adduser --system --uid 1001 nestjs
 COPY --from=builder /app/backend/dist ./dist
 COPY --from=builder /app/backend/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/backend/node_modules ./node_modules
 RUN mkdir -p uploads && chown -R nestjs:nestjs /app
 USER nestjs
 EXPOSE 3001
