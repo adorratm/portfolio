@@ -16,12 +16,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn ./.yarn
+COPY frontend ./frontend
 COPY backend/package.json ./backend/
-COPY frontend/package.json ./frontend/
 COPY admin/package.json ./admin/
 RUN yarn workspaces focus frontend
-
-COPY frontend ./frontend
 
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_SITE_URL
@@ -33,7 +31,9 @@ ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
 ENV NEXT_PUBLIC_PLAUSIBLE_DOMAIN=$NEXT_PUBLIC_PLAUSIBLE_DOMAIN
 
 WORKDIR /app/frontend
-RUN yarn run build
+RUN ./node_modules/.bin/next build \
+ || ../node_modules/.bin/next build \
+ || npx --no-install next build
 
 FROM node:26-alpine AS runner
 WORKDIR /app

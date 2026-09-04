@@ -75,7 +75,7 @@ jobs:
             --exclude='**/node_modules' \
             --exclude='**/.next' \
             --exclude='**/dist' \
-            package.json yarn.lock .yarnrc.yml .yarn \
+            package.json yarn.lock .yarnrc.yml .yarn .dockerignore \
             backend frontend admin deploy docker-compose.prod.yml
 
           ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" \

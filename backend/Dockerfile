@@ -8,22 +8,21 @@ RUN rm -f /usr/local/bin/yarn /usr/local/bin/yarnpkg && \
     corepack prepare yarn@4.17.1 --activate
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn ./.yarn
-COPY backend/package.json ./backend/
+# Kaynak focus'tan önce gelir; node_modules sonradan ezilmez
+COPY backend ./backend
 COPY frontend/package.json ./frontend/
 COPY admin/package.json ./admin/
 RUN yarn workspaces focus backend
 
 FROM node:26-alpine AS builder
 WORKDIR /app
-RUN rm -f /usr/local/bin/yarn /usr/local/bin/yarnpkg && \
-    npm install -g corepack@latest && \
-    corepack enable && \
-    corepack prepare yarn@4.17.1 --activate
 COPY --from=deps /app /app
-COPY backend ./backend
-ENV YARN_ENABLE_IMMUTABLE_INSTALLS=false
 WORKDIR /app/backend
-RUN yarn run build
+RUN if [ -x ./node_modules/.bin/nest ]; then \
+      ./node_modules/.bin/nest build; \
+    else \
+      ../node_modules/.bin/nest build; \
+    fi
 
 FROM node:26-alpine AS runner
 WORKDIR /app
