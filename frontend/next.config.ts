@@ -1,8 +1,10 @@
 import path from 'path';
 import type { NextConfig } from 'next';
+import withRspack from 'next-rspack';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+const i18nRequestConfig = path.resolve(__dirname, './src/i18n/request.ts');
 
 const securityHeaders = [
   {
@@ -47,10 +49,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  outputFileTracingRoot: path.join(__dirname),
   poweredByHeader: false,
-  turbopack: {
-    root: path.join(__dirname),
-  },
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60 * 60 * 24 * 30,
@@ -70,6 +70,21 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // next-intl, Next 16 + TURBOPACK ortamında yalnızca turbopack alias yazar.
+  // next-rspack webpack resolve kullandığı için alias'ı burada da tanımlıyoruz.
+  webpack(config) {
+    config.resolve ??= {};
+    const alias = config.resolve.alias;
+    if (Array.isArray(alias)) {
+      config.resolve.alias = [...alias, { name: 'next-intl/config', alias: i18nRequestConfig }];
+    } else {
+      config.resolve.alias = {
+        ...alias,
+        'next-intl/config': i18nRequestConfig,
+      };
+    }
+    return config;
+  },
 };
 
-export default withNextIntl(nextConfig);
+export default withRspack(withNextIntl(nextConfig));

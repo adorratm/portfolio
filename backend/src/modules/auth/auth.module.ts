@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -9,6 +9,8 @@ import { GoogleStrategy } from '@modules/auth/strategies/google.strategy';
 import { JwtStrategy } from '@modules/auth/strategies/jwt.strategy';
 import { AdminUser } from '@modules/auth/entities/admin-user.entity';
 
+/** JWT guard tüm feature modüllerinde kullanıldığı için Passport seçeneklerini global export eder */
+@Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([AdminUser]),
@@ -28,6 +30,6 @@ import { AdminUser } from '@modules/auth/entities/admin-user.entity';
   ],
   controllers: [AuthController],
   providers: [AuthService, GoogleStrategy, JwtStrategy],
-  exports: [AuthService, JwtModule],
+  exports: [AuthService, JwtModule, PassportModule],
 })
 export class AuthModule {}

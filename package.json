@@ -2,13 +2,43 @@
   "name": "portfolio",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "yarn@4.17.1",
+  "workspaces": [
+    "admin",
+    "backend",
+    "frontend"
+  ],
   "scripts": {
-    "start:api": "yarn --cwd backend start:dev",
-    "start:frontend": "yarn --cwd frontend dev",
-    "start:admin": "yarn --cwd admin dev"
+    "dev": "yarn workspaces foreach -A -pi --include backend --include frontend --include admin run start:dev",
+    "dev:backend": "yarn workspace backend start:dev",
+    "dev:frontend": "yarn workspace frontend start:dev",
+    "dev:admin": "yarn workspace admin start:dev",
+    "build": "yarn workspaces foreach -A -pt run build",
+    "build:backend": "yarn workspace backend build",
+    "build:frontend": "yarn workspace frontend build",
+    "build:admin": "yarn workspace admin build",
+    "lint": "yarn workspaces foreach -A -pt run lint",
+    "start:backend": "yarn workspace backend start:prod",
+    "start:frontend": "yarn workspace frontend start",
+    "start:admin": "yarn workspace admin start"
+  },
+  "resolutions": {
+    "tar": "^7.5.21",
+    "brace-expansion@npm:^1.1.7": "1.1.18",
+    "brace-expansion@npm:^2.0.2": "2.1.4",
+    "brace-expansion@npm:^5.0.5": "5.0.9",
+    "brace-expansion@npm:^5.0.8": "5.0.9",
+    "fast-uri": "^3.1.5",
+    "js-yaml@npm:^3.13.1": "3.15.1",
+    "js-yaml@npm:^4.1.0": "4.3.1",
+    "postcss": "^8.5.26",
+    "sharp": "^0.35.3",
+    "undici": "^6.28.0",
+    "socket.io-parser": "^4.2.7",
+    "nanoid": "^3.3.18"
   },
   "volta": {
-    "node": "26.7.0",
+    "node": "26.8.1",
     "yarn": "4.18.0"
   }
 }

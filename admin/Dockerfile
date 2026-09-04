@@ -4,7 +4,6 @@ FROM node:26-alpine AS builder
 WORKDIR /app
 
 RUN apk add --no-cache libc6-compat
-# Node 25+ no longer bundles Corepack; remove legacy Yarn 1.x shims first
 RUN rm -f /usr/local/bin/yarn /usr/local/bin/yarnpkg && \
     npm install -g corepack@latest && \
     corepack enable && \
@@ -16,16 +15,20 @@ ENV YARN_ENABLE_IMMUTABLE_INSTALLS=false
 ENV NEXT_TELEMETRY_DISABLED=1
 
 COPY package.json yarn.lock .yarnrc.yml ./
-RUN yarn install && test -d node_modules
+COPY .yarn ./.yarn
+COPY backend/package.json ./backend/
+COPY frontend/package.json ./frontend/
+COPY admin/package.json ./admin/
+RUN yarn workspaces focus admin
 
-COPY . .
+COPY admin ./admin
 
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_WS_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
 
-RUN yarn build
+RUN yarn workspace admin build
 
 FROM node:26-alpine AS runner
 WORKDIR /app
@@ -35,9 +38,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /app/admin/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/admin/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/admin/.next/static ./.next/static
 
 USER nextjs
 EXPOSE 3000

@@ -12,17 +12,27 @@ Agent'lar için: **[docs/AGENTS.md](./docs/AGENTS.md)**
 
 ```bash
 docker compose up -d
+yarn install
 
-cd backend && cp .env.example .env && yarn start:dev
-cd frontend && cp .env.example .env.local && yarn dev
-cd admin && cp .env.example .env.local && yarn dev
+# .env dosyalarını oluştur
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
+cp admin/.env.example admin/.env.local
+
+# Hepsi birden
+yarn dev
+
+# veya ayrı ayrı
+yarn dev:backend
+yarn dev:frontend
+yarn dev:admin
 ```
 
 ## Stack
 
 - **Backend:** NestJS, TypeORM (EntityManager), PostgreSQL, PgBouncer, Redis, BullMQ, Socket.io, AWS S3
-- **Frontend:** Next.js 15, Tailwind, next-intl (TR/EN)
-- **Admin:** Next.js 15, Google OAuth, canlı metrikler
+- **Frontend:** Next.js 16, Tailwind, next-intl (TR/EN), Rspack
+- **Admin:** Next.js 16, Google OAuth, canlı metrikler, Rspack
 
 ## Tasarım
 
