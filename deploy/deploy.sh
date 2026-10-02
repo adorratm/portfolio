@@ -4,11 +4,22 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="${ROOT_DIR}/deploy/.env"
 COMPOSE=(docker compose -f docker-compose.prod.yml --env-file "${ENV_FILE}")
+USE_REGISTRY="${PORTFOLIO_USE_REGISTRY:-0}"
 
 if [[ ! -f "${ENV_FILE}" ]]; then
   echo "Hata: deploy/.env bulunamadı. Önce deploy/.env.production.example dosyasını kopyalayın."
   exit 1
 fi
+
+DEPLOY_LOCK="${DEPLOY_LOCK:-/var/lock/hetzner-site-deploy.lock}"
+mkdir -p "$(dirname "$DEPLOY_LOCK")"
+exec 9>"$DEPLOY_LOCK"
+echo "==> waiting for shared deploy lock ($DEPLOY_LOCK)"
+if ! flock -w 3600 9; then
+  echo "ERROR: another site deploy still holds $DEPLOY_LOCK" >&2
+  exit 1
+fi
+echo "==> acquired deploy lock"
 
 postgres_logs() {
   docker logs portfolio-prod-postgres --tail 40 2>&1 || true
@@ -88,7 +99,7 @@ wait_for_health() {
 
 cd "${ROOT_DIR}"
 
-echo "==> Portfolio production deploy başlıyor: $(date -Is)"
+echo "==> Portfolio production deploy başlıyor: $(date -Is) (registry=${USE_REGISTRY})"
 
 export COMPOSE_PARALLEL_LIMIT=1
 export DOCKER_BUILDKIT=1
@@ -116,14 +127,19 @@ for i in $(seq 1 30); do
   sleep 2
 done
 
-echo "==> Servisler sırayla build ediliyor (RAM dostu)..."
-for service in backend frontend admin; do
-  echo "--- build: ${service} ($(date -Is))"
-  "${COMPOSE[@]}" build "${service}"
-done
+if [[ "${USE_REGISTRY}" == "1" ]]; then
+  echo "==> Pull prebuilt images (no VPS Next/Nest build)"
+  bash "${ROOT_DIR}/deploy/pull-prebuilt.sh"
+else
+  echo "==> Servisler sırayla build ediliyor (RAM dostu — last resort; prefer GHCR)..."
+  for service in backend frontend admin; do
+    echo "--- build: ${service} ($(date -Is))"
+    nice -n 15 ionice -c2 -n7 "${COMPOSE[@]}" build "${service}" \
+      || "${COMPOSE[@]}" build "${service}"
+  done
+fi
 
 echo "==> Uygulama container'ları ayağa kaldırılıyor..."
-# Ağ değişiklikleri (ttengames) için recreate gerekir
 "${COMPOSE[@]}" up -d --no-build --force-recreate backend frontend admin
 
 echo "==> Frontend hazır bekleniyor..."
@@ -149,7 +165,6 @@ API_PORT="${API_PORT:-3102}"
 echo "==> Backend health check..."
 wait_for_health "${API_PORT}" "/api/v1/health" 40
 
-# TTEN nginx — portfolio routing (compose ttengames ağı + merge/reload)
 if docker network inspect "${PORTFOLIO_TTEN_NETWORK:-ttengamesstudio_ttengamesstudio-network}" >/dev/null 2>&1; then
   bash "${ROOT_DIR}/deploy/sync-tten-nginx.sh" || {
     echo "Nginx sync başarısız — manuel:"

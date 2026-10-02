@@ -1,5 +1,8 @@
 name: Deploy Portfolio
 
+# Build images on GitHub runners → GHCR, then SSH pull + recreate.
+# Never docker-build Next/Nest on the shared Hetzner VPS (causes sibling 502).
+
 on:
   push:
     branches: [main]
@@ -7,56 +10,83 @@ on:
 
 concurrency:
   group: portfolio-deploy
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/portfolio
 
 jobs:
   build:
-    name: Build & Verify
+    name: Build images (GHCR)
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - service: backend
+            dockerfile: backend/Dockerfile
+            build_args: ""
+          - service: frontend
+            dockerfile: frontend/Dockerfile
+            build_args: |
+              NEXT_PUBLIC_API_URL=https://api.emrekilic.web.tr/api/v1
+              NEXT_PUBLIC_SITE_URL=https://emrekilic.web.tr
+              NEXT_PUBLIC_GA_MEASUREMENT_ID=G-LX5ZQR64J0
+          - service: admin
+            dockerfile: admin/Dockerfile
+            build_args: |
+              NEXT_PUBLIC_API_URL=https://api.emrekilic.web.tr/api/v1
+              NEXT_PUBLIC_WS_URL=https://api.emrekilic.web.tr
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tag }}
+      image_prefix: ${{ env.IMAGE_PREFIX }}
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v5
+      - name: Image tag
+        id: meta
+        run: echo "tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
-          node-version: 26
-          check-latest: true
-          package-manager-cache: false
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Enable Yarn 4 (Corepack)
-        run: |
-          corepack enable
-          corepack prepare yarn@4.17.1 --activate
-          yarn --version
-
-      - name: Install workspaces
-        run: yarn install --immutable
-
-      - name: Build backend
-        run: yarn build:backend
-
-      - name: Build frontend
-        env:
-          NEXT_PUBLIC_API_URL: https://api.emrekilic.web.tr/api/v1
-          NEXT_PUBLIC_SITE_URL: https://emrekilic.web.tr
-          NEXT_PUBLIC_GA_MEASUREMENT_ID: G-LX5ZQR64J0
-        run: yarn build:frontend
-
-      - name: Build admin
-        env:
-          NEXT_PUBLIC_API_URL: https://api.emrekilic.web.tr/api/v1
-          NEXT_PUBLIC_WS_URL: https://api.emrekilic.web.tr
-        run: yarn build:admin
+      - name: Build + push ${{ matrix.service }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ steps.meta.outputs.tag }}
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:latest
+          build-args: ${{ matrix.build_args }}
+          cache-from: type=gha,scope=portfolio-${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=portfolio-${{ matrix.service }}
+          provenance: false
 
   deploy:
     name: Deploy to Hetzner
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v5
 
-      - name: Upload project archive to server
+      - name: Sync deploy scripts + compose to server
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
@@ -76,7 +106,8 @@ jobs:
             --exclude='**/.next' \
             --exclude='**/dist' \
             package.json yarn.lock .yarnrc.yml .yarn .dockerignore \
-            backend frontend admin deploy docker-compose.prod.yml
+            backend/Dockerfile frontend/Dockerfile admin/Dockerfile \
+            deploy docker-compose.prod.yml
 
           ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" \
             -o StrictHostKeyChecking=accept-new \
@@ -95,19 +126,31 @@ jobs:
             "${SSH_USER}@${SSH_HOST}" \
             "cd '${DEPLOY_PATH}' && tar xzf /tmp/portfolio-deploy.tar.gz && rm -f /tmp/portfolio-deploy.tar.gz"
 
-      - name: Run deploy script
+      - name: Pull images + deploy
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
-          command_timeout: 45m
+          command_timeout: 25m
+          envs: PORTFOLIO_IMAGE_TAG,PORTFOLIO_IMAGE_PREFIX,GHCR_TOKEN,GHCR_USER
           script: |
             set -euo pipefail
             cd ${{ secrets.DEPLOY_PATH }}
-            chmod +x deploy/deploy.sh
+            chmod +x deploy/*.sh deploy/lib/*.sh 2>/dev/null || chmod +x deploy/*.sh
+            if [[ -n "${GHCR_TOKEN:-}" ]]; then
+              echo "$GHCR_TOKEN" | docker login ghcr.io -u "${GHCR_USER:-adorratm}" --password-stdin
+            fi
+            export PORTFOLIO_IMAGE_TAG="${PORTFOLIO_IMAGE_TAG}"
+            export PORTFOLIO_IMAGE_PREFIX="${PORTFOLIO_IMAGE_PREFIX}"
+            export PORTFOLIO_USE_REGISTRY=1
             ./deploy/deploy.sh
+        env:
+          PORTFOLIO_IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
+          PORTFOLIO_IMAGE_PREFIX: ${{ needs.build.outputs.image_prefix }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
 
       - name: Health check
         uses: appleboy/ssh-action@v1.2.0
