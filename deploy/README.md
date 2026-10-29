@@ -40,8 +40,19 @@ sudo bash deploy/ttengames/install-nginx.sh
 | `SSH_PRIVATE_KEY` | Deploy SSH private key              |
 | `SSH_PORT`        | SSH portu (varsayılan 22)         |
 | `DEPLOY_PATH`     | Örn. `/opt/portfolio`             |
+| `GHCR_TOKEN`      | **Önerilen.** Classic PAT (`read:packages`). VPS’te private GHCR pull için; yoksa `GITHUB_TOKEN` denenir ve sıkça `denied` alır |
 
 `main` branch'e push yapıldığında otomatik build ve deploy çalışır.
+
+### GHCR `denied` (docker pull)
+
+Login Succeeded görünüp pull’ın `denied` vermesi genelde private pakete VPS erişimi olmamasıdır.
+
+1. GitHub → Settings → Developer settings → Personal access tokens (classic) → `read:packages` (gerekirse `write:packages`) ile token oluştur  
+2. Repo → Settings → Secrets → Actions → `GHCR_TOKEN` olarak kaydet  
+3. İlk paketler için: GitHub Packages → `portfolio/backend` (ve frontend/admin) → Package settings → **Manage Actions access** → bu repo’yu **Write** ile ekle  
+
+Workflow image’lere `org.opencontainers.image.source` label’ı basar; yeni push’larda paket–repo bağlanması kolaylaşır.
 
 Deploy artık sunucuda `git pull` yapmaz — dosyalar GitHub Actions runner'dan SCP ile kopyalanır. Böylece sunucunun `github.com` DNS erişimi gerekmez.
 
