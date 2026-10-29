@@ -44,6 +44,10 @@ sudo bash deploy/ttengames/install-nginx.sh
 
 `main` branch'e push yapıldığında otomatik build ve deploy çalışır.
 
+### `host not found in upstream "hydrorage-nginx-1:80"` (nginx -t)
+
+Paylaşılan TTEN nginx’te başka sitelerin ölü upstream’i `nginx -t`’yi kırıp portfolio reload’unu engelleyebilir. `sync-tten-nginx.sh` artık bu conf.d dosyalarını `.disabled-unresolved-*` olarak kenara alır (portfolio conf’una dokunmaz). Hydrorage’ı geri getirmek için ilgili container’ı ayağa kaldırıp conf’u yeniden etkinleştirin.
+
 ### GHCR `denied` (docker pull)
 
 Login Succeeded görünüp pull’ın `denied` vermesi genelde private pakete VPS erişimi olmamasıdır.

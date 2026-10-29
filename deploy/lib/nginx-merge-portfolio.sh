@@ -126,16 +126,64 @@ install_portfolio_conf_d() {
   return 1
 }
 
+# Shared TTEN nginx hosts many sites. A dead upstream in an unrelated
+# conf.d/*.conf (e.g. hydrorage-nginx-1) makes `nginx -t` fail and blocks
+# portfolio reload. Quarantine only configs that fail host resolution.
+quarantine_unresolvable_upstreams() {
+  local container="${1:?nginx container adı gerekli}"
+  local max_rounds="${2:-8}"
+  local round test_out conf_file host_ref rc
+
+  for round in $(seq 1 "${max_rounds}"); do
+    test_out="$(docker exec "${container}" nginx -t 2>&1)" && rc=0 || rc=$?
+    if [[ "${rc}" -eq 0 ]]; then
+      echo "${test_out}"
+      return 0
+    fi
+
+    # emerg: host not found in upstream "foo:80" in /etc/nginx/conf.d/bar.conf:2
+    conf_file="$(echo "${test_out}" | sed -n 's/.*host not found in upstream .* in \(\/etc\/nginx\/conf\.d\/[^:[:space:]]*\).*/\1/p' | head -1)"
+    host_ref="$(echo "${test_out}" | sed -n 's/.*host not found in upstream "\([^"]*\)".*/\1/p' | head -1)"
+
+    if [[ -z "${conf_file}" ]]; then
+      echo "${test_out}" >&2
+      return 1
+    fi
+
+    # Never disable portfolio's own conf
+    base="$(basename "${conf_file}")"
+    if [[ "${base}" == "${PORTFOLIO_CONF_D_BASENAME}" ]] \
+      || [[ "${base}" == portfolio* ]]; then
+      echo "HATA: portfolio conf upstream çözülemiyor: ${host_ref} (${conf_file})" >&2
+      echo "${test_out}" >&2
+      return 1
+    fi
+
+    echo "  UYARI: ölü upstream → ${host_ref:-?} (${conf_file}); conf disable ediliyor"
+    docker exec "${container}" sh -c "
+      set -e
+      src='${conf_file}'
+      [ -f \"\$src\" ] || exit 0
+      dest=\"\${src}.disabled-unresolved-\$(date +%Y%m%d%H%M%S)\"
+      mv \"\$src\" \"\$dest\"
+      echo \"  disabled → \$dest\"
+    "
+  done
+
+  docker exec "${container}" nginx -t 2>&1
+}
+
 reload_nginx_if_valid() {
   local container="${1:?nginx container adı gerekli}"
 
   wait_for_nginx_running "${container}" 30 || return 1
 
-  if docker exec "${container}" nginx -t 2>&1; then
-    docker exec "${container}" nginx -s reload
-    return 0
+  if ! quarantine_unresolvable_upstreams "${container}"; then
+    return 1
   fi
-  return 1
+
+  docker exec "${container}" nginx -s reload
+  return 0
 }
 
 restore_nginx_default_conf() {
