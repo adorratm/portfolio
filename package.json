@@ -33,6 +33,7 @@
     "brace-expansion@npm:^5.0.0": "5.0.12",
     "brace-expansion": "5.0.12",
     "body-parser": "2.4.0",
+    "deepmerge": "4.1.2",
     "engine.io": "6.6.11",
     "fast-uri": "3.1.9",
     "js-yaml@npm:^3.13.1": "4.3.2",
